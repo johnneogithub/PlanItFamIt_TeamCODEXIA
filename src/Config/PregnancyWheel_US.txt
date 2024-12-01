@@ -1,0 +1,11 @@
+This is a notes for Ultrasound Pregnancy Wheel..
+
+Code number 1.1:
+In this code, I added a separate state USDate for the ultrasound date and a separate calendar for it. 
+I also added separate states showLmpCalendar and showUsCalendar to control the visibility of the LMP and ultrasound calendars, 
+respectively. When you click on “Ultrasound Date”, it will show the ultrasound calendar and hide the LMP calendar, and vice versa. 
+The useEffect that listens to changes in USweeks and USdays now also listens to changes in USDate and LMP. 
+It calculates the ultrasound date based on the selected ultrasound date (USDate) and checks if the difference between the 
+ultrasound date and the LMP date is more than 5 days. If it is, it updates the LMP state. This will trigger the first 
+useEffect to recalculate the dates for the 2nd and 3rd trimesters and the estimated due date. 
+Please replace your existing code with this updated code. Let me know if you need further assistance.

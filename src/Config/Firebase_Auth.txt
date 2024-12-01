@@ -1,0 +1,19 @@
+Project name:
+PlanItFamIt
+
+Project ID:
+planitfamit
+Project number: 
+753618482551
+
+Default GCP resource location:
+Not yet selected
+
+Parent org/folder in GCP
+gordoncollege.edu.ph
+
+Web API Key:
+AIzaSyBgtC9JuKZU1AJVS5c3idsrqY2ZXVv-XEA
+
+IMPORTANT NOTE: It should be deleted to the PUBLIC REPOSITORY, these notes should be only used in PRIVATE REPOSITORIES.
+                SHOULD NOT BE SEEN BY THE PUBLIC EYE, SINCE THIS IS A CONFIDENTIAL FILE OF AUTHENTICATION.

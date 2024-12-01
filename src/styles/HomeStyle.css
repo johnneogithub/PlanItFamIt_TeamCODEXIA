@@ -1,0 +1,86 @@
+/* Basic navbar styling */
+.navbar_master {
+  width: 100%;
+  height: 80px;
+  background: #fff;
+  padding: 0 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.page_name label {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.page_name span {
+  color: #007bff;
+}
+
+/* Navigation links */
+.navbar_master ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar_master ul li {
+  margin: 0 15px;
+}
+
+.navbar_master ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar_master ul li a:hover {
+  color: #007bff;
+}
+
+/* Profile section */
+.profile-pic-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dropdown1 {
+  position: absolute;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  border-radius: 4px;
+  padding: 10px 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .navbar_master {
+    padding: 0 20px;
+  }
+  
+  .hamburger-icon {
+    display: block;
+  }
+  
+  .navbar_master ul {
+    display: none;
+  }
+  
+  .navbar_master ul.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 20px;
+  }
+} 

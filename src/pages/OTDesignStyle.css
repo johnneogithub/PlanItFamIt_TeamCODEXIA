@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+}
+
+.app-container {
+  padding: 2rem 0;
+}
+
+.content-wrapper-OT {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1rem 0;
+  width: 100%;
+}
+
+.nav-ot-menu {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  color: #4a4a4a;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #FB28CD;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #FB28CD;
+}
+
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #FB28CD;
+  margin-bottom: 1rem;
+}
+
+.app-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tracker-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.form-control-lg {
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background-color: #FB28CD;
+  border-color: #FB28CD;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #FB28CD;
+  border-color: #FB28CD;
+}
+
+.output-card {
+  background: linear-gradient(135deg, #FB28CD 0%, #FB28CD 100%);
+  color: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.result-text {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.source-text {
+  font-size: 1rem;
+  opacity: 0.8;
+  color: #000000; 
+}
+
+.text-black {
+  color: black;
+  font-size: 0.9rem;
+}
+.disclaimer-card {
+  background-color: #000000;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 2rem;
+  }
+
+  .app-subtitle {
+    font-size: 1rem;
+  }
+
+  .tracker-content {
+    padding: 2rem !important;
+  }
+
+  .output-card {
+    margin-top: 2rem;
+  }
+}

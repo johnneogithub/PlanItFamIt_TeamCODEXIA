@@ -1,0 +1,529 @@
+.preg-calc-dashboard-container {
+    min-height: calc(100vh - 60px);
+    background: linear-gradient(135deg, #f6f9fc 0%, #e9f2f9 100%);
+    /* margin-top: 60px; */
+    padding: 0;
+    width: 100%;
+    position: relative;
+}
+
+.preg-calc-main-content {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 2rem;
+}
+
+.preg-calc-content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.preg-calc-content-wrapper h1 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.preg-calc-pregnancy-wheel-content {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(300px, 1.2fr);
+    gap: 1.5rem;
+}
+
+.preg-calc-input-column {
+    background: #f8fafc;
+    padding: 1.2rem;
+    border-radius: 12px;
+    height: fit-content;
+}
+
+.preg-calc-input-section {
+    background: white;
+    padding: 1.2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.preg-calc-input-section:hover {
+    transform: translateY(-2px);
+}
+
+.preg-calc-input-section h2 {
+    color: #334155;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.preg-calc-input-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.preg-calc-date-picker-btn {
+    background: linear-gradient(135deg, rgb(197, 87, 219) 0%, rgb(159, 70, 176) 100%);
+    color: white;
+    padding: 0.8rem 1.4rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(197, 87, 219, 0.25);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.preg-calc-date-picker-btn:hover {
+    background: linear-gradient(135deg, rgb(207, 97, 229) 0%, rgb(169, 80, 186) 100%);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(197, 87, 219, 0.35);
+}
+
+.preg-calc-date-picker-btn:active {
+    transform: translateY(1px);
+    background: linear-gradient(135deg, rgb(187, 77, 209) 0%, rgb(149, 60, 166) 100%);
+}
+
+.preg-calc-button-group {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.preg-calc-calculateBtn {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: white;
+    flex: 2;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.25);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.preg-calc-calculateBtn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.35);
+    background: linear-gradient(135deg, #3feb9e 0%, #06b77e 100%);
+}
+
+.preg-calc-calculateBtn:active {
+    transform: translateY(1px);
+}
+
+.preg-calc-resetBtn {
+    background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+    color: white;
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.25);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.preg-calc-resetBtn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.35);
+    background: linear-gradient(135deg, #ff8585 0%, #ef4444 100%);
+}
+
+.preg-calc-resetBtn:active {
+    transform: translateY(1px);
+}
+
+.preg-calc-results-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.preg-calc-calculation-card {
+    background: white;
+    padding: 1.2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.preg-calc-card-content p {
+    margin: 0.4rem 0;
+    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.preg-calc-card-content p:last-child {
+    border-bottom: none;
+}
+
+.preg-calc-show-saved-btn {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, rgb(197, 87, 219) 0%, rgb(159, 70, 176) 100%);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(197, 87, 219, 0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.preg-calc-show-saved-btn:hover {
+    background: linear-gradient(135deg, rgb(207, 97, 229) 0%, rgb(169, 80, 186) 100%);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 8px 25px rgba(197, 87, 219, 0.35);
+}
+
+.preg-calc-show-saved-btn:active {
+    transform: translateY(1px);
+    background: linear-gradient(135deg, rgb(187, 77, 209) 0%, rgb(149, 60, 166) 100%);
+}
+
+.preg-calc-saved-count {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    backdrop-filter: blur(4px);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pregnancy-modal-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 1.2rem 1.8rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.pregnancy-modal-header h2,
+.pregnancy-modal-header h3 {
+    color: #1e293b;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0;
+}
+
+.pregnancy-modal-close-btn {
+    background: white;
+    border: none;
+    color: #64748b;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pregnancy-modal-close-btn:hover {
+    background: #ef4444;
+    color: white;
+    transform: rotate(90deg);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.pregnancy-modal-content {
+    padding: 1.8rem;
+    background: white;
+    border-radius: 0 0 15px 15px;
+}
+
+.pregnancy-modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    justify-content: flex-end;
+}
+
+.pregnancy-modal-save-btn,
+.pregnancy-modal-cancel-btn {
+    padding: 0.9rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    cursor: pointer;
+}
+
+.pregnancy-modal-save-btn {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.25);
+}
+
+.pregnancy-modal-save-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.35);
+    background: linear-gradient(135deg, #3feb9e 0%, #06b77e 100%);
+}
+
+.pregnancy-modal-cancel-btn {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(100, 116, 139, 0.25);
+}
+
+.pregnancy-modal-cancel-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(100, 116, 139, 0.35);
+    background: linear-gradient(135deg, #a8b9d1 0%, #7a8ba3 100%);
+}
+
+.preg-calc-date-item {
+    background: #f8fafc;
+    padding: 1.2rem;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.preg-calc-date-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.preg-calc-date-item h3 {
+    color: #334155;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.preg-calc-date-display {
+    color: #1e293b;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.ReactModal__Overlay {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.ReactModal__Overlay--after-open {
+    opacity: 1;
+}
+
+.ReactModal__Overlay--before-close {
+    opacity: 0;
+}
+
+.ReactModal__Content {
+    transform: scale(0.95) translate(-50%, -50%);
+    opacity: 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.ReactModal__Content--after-open {
+    transform: scale(1) translate(-50%, -50%);
+    opacity: 1;
+}
+
+.ReactModal__Content--before-close {
+    transform: scale(0.95) translate(-50%, -50%);
+    opacity: 0;
+}
+
+@media (max-width: 1024px) {
+    .preg-calc-pregnancy-wheel-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .preg-calc-input-column {
+        order: 1;
+    }
+    
+    .preg-calc-results-column {
+        order: 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .preg-calc-content-wrapper {
+        padding: 1rem;
+    }
+    
+    .preg-calc-input-row {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .preg-calc-date-picker-btn {
+        width: 100%;
+    }
+    
+    .pregnancy-modal-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.preg-calc-calculation-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.preg-calc-slider-container {
+    padding: 10px 0;
+}
+
+.preg-calc-slider-container input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 10px;
+    outline: none;
+    transition: background 0.3s ease-in-out;
+}
+
+.preg-calc-slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgb(197, 87, 219);
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 0 10px rgba(197, 87, 219, 0.3);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    z-index: 2;
+}
+
+.preg-calc-slider-container input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgb(197, 87, 219);
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 0 10px rgba(197, 87, 219, 0.3);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    z-index: 2;
+}
+.preg-calc-slider-container input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(197, 87, 219, 0.4);
+}
+
+.preg-calc-slider-container input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(197, 87, 219, 0.4);
+}
+
+/* Active state */
+.preg-calc-slider-container input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(0.95);
+    background: rgb(177, 77, 199);
+}
+
+.preg-calc-slider-container input[type="range"]:active::-moz-range-thumb {
+    transform: scale(0.95);
+    background: rgb(177, 77, 199);
+}
+
+.preg-calc-slider-container input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.preg-calc-slider-container input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.preg-calc-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.preg-calc-slider-labels span {
+    position: relative;
+    padding-top: 8px;
+} 

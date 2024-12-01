@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+.footer  {
+  background-color: #fff;
+  border-top: 1px solid #810088;
+  color: #520057;
+}
+
+.footer-heading {
+  color: #520057;
+  margin-bottom: 1rem;
+}
+
+.footer-text {
+  text-align: justify;
+}
+
+.footer-links {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+  color: #810088;
+}
+
+.footer-links a  {
+  color: #810088;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.footer-table {
+  color: #520057;
+  width: 100%;
+}
+
+.footer-table td {
+  padding: 0.25rem 0;
+}
+
+.footer-bottom {
+  background-color: #c557db;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 1rem;
+}
+
+.footer-bottom a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.3s ease;
+}
+
+.footer-bottom a:hover {
+  opacity: 0.8;
+}
+
+.social-icons {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-icons a {
+  color: #810088;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #ff69b4;
+}
+
+.footer-section h3 {
+  font-size: 1.2rem;
+  color: #810088;
+  margin-bottom: 1rem;
+}
+
+.footer-section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+  color: #810088;
+}
+
+.footer-section.contact p {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.footer-section.contact p svg {
+  margin-right: 0.5rem;
+  color: #810088;
+}
+
+.footer-copyright {
+  background-color: rgb(197, 87, 219);
+  color: white;
+  font-size: 1.25rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.footer-copyright a {
+  color: white;
+  margin-left: 0.5rem;
+  text-decoration: none;
+}
+
+.footer-copyright a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+  }
+
+  .footer-section {
+    margin-bottom: 2rem;
+  }
+}

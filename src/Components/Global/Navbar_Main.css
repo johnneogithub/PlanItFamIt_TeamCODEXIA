@@ -1,0 +1,39 @@
+.navbar_master {
+  /* ... existing styles ... */
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+
+  .navbar_master ul {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background-color: #f8f8f8;
+    padding: 20px 0;
+  }
+
+  .navbar_master ul.open {
+    display: flex;
+  }
+
+  .navbar_master ul li {
+    margin: 10px 0;
+  }
+}

@@ -1,0 +1,159 @@
+.modal-backdrop-warning {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+.modal-backdrop-warning.show {
+  display: block;
+}
+
+.profile-warning-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1050;
+  width: 100%;
+  max-width: 500px;
+}
+
+.profile-warning-modal.show {
+  display: block;
+}
+
+.modal-dialog-warning {
+  width: 100%;
+  max-width: 500px;
+  margin: 1.75rem auto;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content-warning {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header-warning {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title-warning {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.warning-icon {
+  color: #f1c40f;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #95a5a6;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #2c3e50;
+}
+
+.modal-body-warning {
+  padding: 2rem;
+}
+
+.warning-message {
+  text-align: center;
+}
+
+.days-counter {
+  margin-bottom: 1.5rem;
+}
+
+.days-number {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+.days-text {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-left: 8px;
+}
+
+.message-text {
+  color: #34495e;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.modal-footer-warning {
+  border-top: 1px solid #f0f0f0;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-complete-profile {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-complete-profile:hover {
+  background-color: #2980b9;
+}
+
+.btn-remind-later {
+  background-color: transparent;
+  color: #7f8c8d;
+  border: 1px solid #bdc3c7;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-remind-later:hover {
+  background-color: #f8f9fa;
+  color: #2c3e50;
+} 

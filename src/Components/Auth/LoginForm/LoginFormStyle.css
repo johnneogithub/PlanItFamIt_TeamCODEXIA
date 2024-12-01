@@ -1,0 +1,160 @@
+.divider:after,
+.divider:before {
+content: "";
+flex: 1;
+height: 1px;
+background: #eee;
+}
+
+/* CSS */
+.btn-login {
+  align-items: center;
+  appearance: none;
+  background-color: #680074;
+  background-image: linear-gradient(1deg,  rgb(132, 52, 137), #b34bd6 99%);
+  background-size: calc(100% + 20px) calc(100% + 20px);
+  border-radius: 10px;
+  border-width: 0;
+  box-shadow: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: 'Poppins';
+  height: auto;
+  justify-content: center;
+  line-height: 1.5;
+  padding: 8px 20px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color .2s,background-position .2s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.btn-login:active,
+.btn-login:focus {
+  outline: none;
+}
+
+.btn-login:hover {
+  background-position: -20px -20px;
+}
+
+.btn-login:focus:not(:active) {
+  box-shadow: rgba(40, 170, 255, 0.25) 0 0 0 .125em;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.login-content {
+  flex: 1 0 auto;
+}
+
+.footer-login {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.footer-content-login {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .footer-content {
+    flex-direction: row;
+    padding: 1rem 2rem;
+  }
+}
+
+/* Remove or comment out these styles as they're no longer needed */
+/*
+.bg-fotlogin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.bg-fotlogin > div {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.bg-fotlogin > div:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .bg-fotlogin {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+  }
+
+  .bg-fotlogin > div {
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  .bg-fotlogin > div:first-child {
+    text-align: left;
+  }
+
+  .bg-fotlogin > div:last-child {
+    text-align: right;
+  }
+}
+*/
+
+.h-custom {
+height: calc(100% - 73px);
+}
+@media (max-width: 450px) {
+.h-custom {
+height: 100%;
+}
+}
+
+@media (max-width: 991.98px) {
+  .h-custom {
+    height: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .btn-login {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+.btn-login {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+.bg-fotlogin {
+  background-color: #8b1a98;
+}

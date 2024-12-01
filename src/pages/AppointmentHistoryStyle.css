@@ -1,0 +1,406 @@
+.appointment-history-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.filter-section {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 20px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:first-child {
+  border: 1px solid rgb(197, 87, 219);
+  color: rgb(197, 87, 219);
+}
+
+.filter-btn:first-child:hover,
+.filter-btn:first-child.active {
+  background-color: rgb(197, 87, 219);
+  color: white;
+}
+
+.filter-btn:nth-child(2) {
+  border: 1px solid #ffc107;
+  color: #ffc107;
+}
+
+.filter-btn:nth-child(2):hover,
+.filter-btn:nth-child(2).active {
+  background-color: #ffc107;
+  color: white;
+}
+
+.filter-btn:nth-child(3) {
+  border: 1px solid #28a745;
+  color: #28a745;
+}
+
+.filter-btn:nth-child(3):hover,
+.filter-btn:nth-child(3).active {
+  background-color: #28a745;
+  color: white;
+}
+
+.filter-btn:nth-child(4) {
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.filter-btn:nth-child(4):hover,
+.filter-btn:nth-child(4).active {
+  background-color: #007bff;
+  color: white;
+}
+
+.filter-btn:nth-child(5) {
+  border: 1px solid #dc3545;
+  color: #dc3545;
+}
+
+.filter-btn:nth-child(5):hover,
+.filter-btn:nth-child(5).active {
+  background-color: #dc3545;
+  color: white;
+}
+
+.appointments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.appointment-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  border: 1px solid #eee;
+}
+
+.appointment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  padding: 1rem;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.appointment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.message-section, .file-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.no-appointments {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.appointment-card.pending .status-badge {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.appointment-card.pending .status-badge span,
+.appointment-card.pending .status-badge svg {
+  color: #ffc107 !important; 
+}
+
+.appointment-card.approved .status-badge {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745; 
+}
+
+.appointment-card.approved .status-badge span,
+.appointment-card.approved .status-badge svg {
+  color: #28a745 !important; 
+}
+
+.appointment-card.completed .status-badge {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+}
+
+.appointment-card.completed .status-badge span,
+.appointment-card.completed .status-badge svg {
+  color: #007bff !important; 
+}
+
+.appointment-card.rejected .status-badge {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.appointment-card.rejected .status-badge span,
+.appointment-card.rejected .status-badge svg {
+  color: #dc3545 !important;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.total-count {
+  background-color: rgb(197, 87, 219);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.controls-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 20px;
+  background-color: transparent;
+  border: 1px solid rgb(197, 87, 219);
+  color: rgb(197, 87, 219);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sort-btn:hover {
+  background-color: rgb(197, 87, 219);
+  color: white;
+}
+
+.services-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.services-section h4 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.services-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.services-section li {
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.remark-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.remark-section strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.remark-section p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.card-header h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.info-item span {
+  color: #666;
+}
+
+.file-section {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.file-preview-card {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+
+.file-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  color: #520057;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-preview,
+.btn-download {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 4px;
+}
+
+.btn-preview {
+  background-color: #520057;
+  color: white;
+  border: none;
+}
+
+.btn-preview:hover {
+  background-color: #3d0041;
+}
+
+.btn-download {
+  background-color: #f8f9fa;
+  color: #520057;
+  border: 1px solid #520057;
+}
+
+.btn-download:hover {
+  background-color: #520057;
+  color: white;
+}
+
+.historical-btn {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #4a90e2;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.historical-btn:hover {
+  background-color: #357abd;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.imported-file-notification {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 3px solid #0d6efd;
+}
+
+.imported-file-notification .file-icon {
+  color: #0d6efd;
+  font-size: 1.2em;
+}
+
+.view-file-btn {
+  margin-left: auto;
+  color: #0d6efd;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.view-file-btn:hover {
+  color: #0a58ca;
+} 

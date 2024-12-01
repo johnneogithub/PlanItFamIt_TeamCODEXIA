@@ -220,51 +220,80 @@ function UserProfile() {
     const unsubscribe = onSnapshot(userRef, async (docSnapshot) => {
       const data = docSnapshot.data();
       if (data) {
-        if (data.appointmentData) {
-          if (data.appointmentData.remark && data.appointmentData.remark !== remark) {
-            setHasNewRemark(true);
-          }
-
-          setAppointmentData(data.appointmentData);
-          setIsApproved(data.appointmentData.status === 'approved');
-          setRemark(data.appointmentData.remark || '');
-          setRemarkTimestamp(data.appointmentData.remarkTimestamp || null);
-          setMessage(data.appointmentData.message || '');
-
-          if (['completed', 'rejected', 'remarked'].includes(data.appointmentData.status)) {
-            await updateAppointmentHistory(userId, data.appointmentData);
-          }
-        }
-
-        let allAppointments = [];
-        
-        if (data.appointmentData && !['completed', 'rejected'].includes(data.appointmentData.status)) {
-          allAppointments.push({
-            ...data.appointmentData,
-            isCurrent: true
-          });
-        }
-
-        if (data.appointmentHistory) {
-          const previousLength = appointmentHistory.length;
-          allAppointments = [...allAppointments, ...data.appointmentHistory];
+        try {
+          // Handle appointments array
+          const appointments = Array.isArray(data.appointments) ? data.appointments : [];
+          const latestAppointment = appointments[appointments.length - 1];
           
-          if (data.appointmentHistory.length > previousLength) {
-            setNewAppointments(data.appointmentHistory.length - previousLength);
+          if (latestAppointment) {
+            setAppointmentData({
+              ...latestAppointment,
+              name: latestAppointment.name || 'N/A',
+              date: latestAppointment.date || 'N/A',
+              time: latestAppointment.time || 'N/A',
+              status: latestAppointment.status || 'pending',
+              selectedPricingType: latestAppointment.selectedPricingType || '',
+              selectedServices: latestAppointment.selectedServices || []
+            });
+            setIsApproved(latestAppointment.status === 'approved');
+            setRemark(latestAppointment.remark || '');
+            setRemarkTimestamp(latestAppointment.remarkTimestamp || null);
+            setMessage(latestAppointment.message || '');
           }
+
+          // Process all appointments
+          let allAppointments = [];
+          if (appointments.length > 0) {
+            allAppointments = appointments.map(appointment => ({
+              id: appointment.id || '',
+              name: appointment.name || 'N/A',
+              date: appointment.date || 'N/A',
+              time: appointment.time || 'N/A',
+              status: appointment.status || 'pending',
+              message: appointment.message || '',
+              remark: appointment.remark || '',
+              selectedPricingType: appointment.selectedPricingType || '',
+              selectedServices: appointment.selectedServices || [],
+              totalAmount: appointment.totalAmount || 0,
+              completedAt: appointment.completedAt || null,
+              isCurrent: appointment === latestAppointment
+            }));
+          }
+
+          // Add appointment history
+          if (Array.isArray(data.appointmentHistory)) {
+            allAppointments = [...allAppointments, ...data.appointmentHistory.map(hist => ({
+              id: hist.id || '',
+              name: hist.name || 'N/A',
+              date: hist.date || 'N/A',
+              time: hist.time || 'N/A',
+              status: hist.status || 'completed',
+              message: hist.message || '',
+              remark: hist.remark || '',
+              selectedPricingType: hist.selectedPricingType || '',
+              selectedServices: hist.selectedServices || [],
+              totalAmount: hist.totalAmount || 0,
+              completedAt: hist.completedAt || null,
+              isCurrent: false
+            }))];
+          }
+
+          // Sort appointments
+          const sortedAppointments = allAppointments.sort((a, b) => {
+            if (a.status === 'completed' && b.status !== 'completed') return -1;
+            if (b.status === 'completed' && a.status !== 'completed') return 1;
+            if (a.isCurrent) return -1;
+            if (b.isCurrent) return 1;
+            const dateA = new Date(a.date + ' ' + a.time);
+            const dateB = new Date(b.date + ' ' + b.time);
+            return dateB - dateA;
+          });
+
+          setAppointmentHistory(sortedAppointments);
+        } catch (error) {
+          console.error("Error processing appointments:", error);
+          toast.error("Error loading appointments");
         }
-
-        const sortedAppointments = allAppointments.sort((a, b) => {
-          if (a.status === 'completed' && b.status !== 'completed') return -1;
-          if (b.status === 'completed' && a.status !== 'completed') return 1;
-          if (a.isCurrent) return -1;
-          if (b.isCurrent) return 1;
-          const dateA = new Date(a.date + ' ' + a.time);
-          const dateB = new Date(b.date + ' ' + b.time);
-          return dateB - dateA;
-        });
-
-        setAppointmentHistory(sortedAppointments);
       }
     });
     return unsubscribe;
@@ -327,11 +356,10 @@ function UserProfile() {
       return;
     }
   
-    const previewUrl = URL.createObjectURL(file);
-    setPreviewPic(previewUrl);
-    setIsUploading(true);
-  
     try {
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewPic(previewUrl);
+      setIsUploading(true);
       await uploadFile(file);
     } catch (error) {
       console.error("Error handling file:", error);
@@ -375,30 +403,19 @@ function UserProfile() {
     try {
       const userRef = doc(crud, `users/${user.uid}`);
       const docSnap = await getDoc(userRef);
-  
-      if (docSnap.exists()) {
-        await updateDoc(userRef, {
-          profilePicture: url
-        });
-  
-        setProfilePic(url);
-        setPreviewPic('');
-        console.log("Profile picture updated successfully:", url);
-      } else {
+      const currentData = docSnap.exists() ? docSnap.data() : {};
 
-        await setDoc(userRef, {
-          profilePicture: url,
-          appointmentData: appointmentData || null, 
-          isApproved: isApproved || false,
-          ...personalDetails 
-        });
-  
-        setProfilePic(url);
-        setPreviewPic('');
-        console.log("Document created and profile picture set successfully:", url);
-      }
+      await updateDoc(userRef, {
+        ...currentData,
+        profilePicture: url
+      });
+
+      setProfilePic(url);
+      setPreviewPic('');
+      toast.success("Profile picture updated successfully!");
     } catch (error) {
       console.error("Error updating profile picture URL:", error);
+      toast.error("Failed to update profile picture. Please try again.");
     }
   };
   
@@ -507,8 +524,11 @@ function UserProfile() {
 
     try {
       const userRef = doc(crud, `users/${user.uid}`);
+      const docSnap = await getDoc(userRef);
+      const currentData = docSnap.exists() ? docSnap.data() : {};
 
       const dataToSave = {
+        ...currentData,
         firstName: editedDetails.firstName,
         middleName: editedDetails.middleName,
         lastName: editedDetails.lastName,
@@ -517,6 +537,7 @@ function UserProfile() {
         email: editedDetails.email,
         gender: editedDetails.gender,
         age: editedDetails.age,
+        lastUpdated: new Date().toISOString()
       };
 
       await updateDoc(userRef, dataToSave);
@@ -527,21 +548,10 @@ function UserProfile() {
       });
       
       setIsEditing(false);
-
-      const isProfileComplete = Object.values(dataToSave).every(value => value && value.trim() !== '');
-      await updateDoc(userRef, { isProfileComplete });
-
-      toast.success("Profile updated successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating personal details: ", error);
-      toast.error("Failed to update profile. Please try again.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Failed to update profile. Please try again.");
     }
   };
 
@@ -688,17 +698,32 @@ function UserProfile() {
                       to={`/AppointmentHistory/${user?.uid}`}
                       className="btn btn-view-all position-relative"
                       state={{ 
-                        appointments: [...(appointmentData ? [appointmentData] : []), ...appointmentHistory],
+                        appointments: appointmentHistory.map(appointment => ({
+                          id: appointment.id || '',
+                          name: appointment.name || '',
+                          date: appointment.date || '',
+                          time: appointment.time || '',
+                          status: appointment.status || 'pending',
+                          message: appointment.message || '',
+                          remark: appointment.remark || '',
+                          selectedPricingType: appointment.selectedPricingType || '',
+                          selectedServices: Array.isArray(appointment.selectedServices) ? appointment.selectedServices : [],
+                          totalAmount: typeof appointment.totalAmount === 'number' ? appointment.totalAmount : 0,
+                          completedAt: appointment.completedAt || null,
+                          isCurrent: !!appointment.isCurrent
+                        })),
                         userInfo: {
-                          name: personalDetails.name,
-                          email: personalDetails.email,
-                          profilePic: profilePic,
-                          userId: user?.uid
+                          name: personalDetails.name || '',
+                          email: personalDetails.email || '',
+                          profilePic: profilePic || defaultProfilePic,
+                          userId: user?.uid || ''
                         }
                       }}
                       onClick={() => {
                         setNewAppointments(0);
-                        localStorage.setItem(`lastAppointmentCount_${user.uid}`, appointmentHistory.length.toString());
+                        if (user?.uid) {
+                          localStorage.setItem(`lastAppointmentCount_${user.uid}`, appointmentHistory.length.toString());
+                        }
                       }}
                     >
                       <FaThLarge className="me-2" />
@@ -715,44 +740,49 @@ function UserProfile() {
                 
                 {appointmentHistory.length > 0 ? (
                   <div className="appointment-history-list">
-                    {appointmentHistory.slice(0, 1).map((appointment, index) => (
-                      <div 
-                        key={index} 
-                        className={`appointment-history-item mb-3 p-3 border rounded ${appointment.isCurrent ? 'current-appointment' : ''}`}
-                      >
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <div>
-                            <span className="fw-bold">{appointment.appointmentType}</span>
-                            {appointment.isCurrent && (
-                              <span className="badge bg-info ms-2">Current</span>
-                            )}
-                          </div>
-                          <span className={`badge ${getStatusBadgeClass(appointment.status)}`}>
-                            {capitalizeFirstLetter(appointment.status || 'pending')}
-                          </span>
-                        </div>
-                        <div className="text-muted small">
-                          <div><strong>Date:</strong> {appointment.date}</div>
-                          <div><strong>Time:</strong> {appointment.time}</div>
-                          {appointment.message && (
-                            <div><strong>Message:</strong> {appointment.message}</div>
-                          )}
-                          {appointment.remark && (
-                            <div className="mt-2">
-                              <strong>Remark:</strong> {appointment.remark}
+                    {appointmentHistory.slice(0, 1).map((appointment, index) => {
+                      const appointmentDate = appointment.completedAt ? new Date(appointment.completedAt) : new Date();
+                      const formattedDate = appointmentDate.toLocaleDateString();
+                      const formattedTime = appointmentDate.toLocaleTimeString();
+
+                      return (
+                        <div 
+                          key={index} 
+                          className={`appointment-history-item mb-3 p-3 border rounded ${appointment.isCurrent ? 'current-appointment' : ''}`}
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                              <span className="fw-bold">{appointment.appointmentType || 'General Appointment'}</span>
+                              {appointment.isCurrent && (
+                                <span className="badge bg-info ms-2">Current</span>
+                              )}
                             </div>
-                          )}
-                          <div className="mt-1 text-end">
-                            <small className="text-muted">
-                              {appointment.isCurrent ? 'Current Appointment' : 
-                                `Updated: ${new Date(appointment.completedAt).toLocaleDateString()} at 
-                                ${new Date(appointment.completedAt).toLocaleTimeString()}`
-                              }
-                            </small>
+                            <span className={`badge ${getStatusBadgeClass(appointment.status)}`}>
+                              {capitalizeFirstLetter(appointment.status || 'pending')}
+                            </span>
+                          </div>
+                          <div className="text-muted small">
+                            <div><strong>Date:</strong> {appointment.date || 'N/A'}</div>
+                            <div><strong>Time:</strong> {appointment.time || 'N/A'}</div>
+                            {appointment.message && (
+                              <div><strong>Message:</strong> {appointment.message}</div>
+                            )}
+                            {appointment.remark && (
+                              <div className="mt-2">
+                                <strong>Remark:</strong> {appointment.remark}
+                              </div>
+                            )}
+                            <div className="mt-1 text-end">
+                              <small className="text-muted">
+                                {appointment.isCurrent ? 'Current Appointment' : 
+                                  `Updated: ${formattedDate} at ${formattedTime}`
+                                }
+                              </small>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center text-muted">
@@ -928,11 +958,11 @@ function UserProfile() {
                     <tbody>
                       {appointmentData ? (
                         <tr>
-                          <td>{appointmentData.name}</td>
-                          <td>{appointmentData.appointmentType}</td>
-                          <td>{appointmentData.date}</td>
-                          <td>{appointmentData.time}</td>
-                          <td>{formatPricingType(appointmentData.selectedPricingType)}</td>
+                          <td>{appointmentData.name || 'N/A'}</td>
+                          <td>{appointmentData.appointmentType || 'N/A'}</td>
+                          <td>{appointmentData.date || 'N/A'}</td>
+                          <td>{appointmentData.time || 'N/A'}</td>
+                          <td>{formatPricingType(appointmentData.selectedPricingType) || 'N/A'}</td>
                           <td>
                             <span className={`badge ${getStatusBadgeClass(appointmentData.status)}`}>
                               {capitalizeFirstLetter(appointmentData.status || 'pending')}
@@ -955,9 +985,9 @@ function UserProfile() {
                       {appointmentData.selectedServices.map((service, index) => (
                         <div key={index} className="service-item p-3 border rounded mb-2">
                           <div className="d-flex justify-content-between align-items-center">
-                            <h6 className="mb-0">{service.name}</h6>
+                            <h6 className="mb-0">{service.name || 'Unnamed Service'}</h6>
                             <span className="badge bg-primary">
-                              ₱{service[appointmentData.selectedPricingType]?.toLocaleString()}
+                              ₱{(service[appointmentData.selectedPricingType] || 0).toLocaleString()}
                             </span>
                           </div>
                           {service.isPackage && service.components && (
@@ -966,8 +996,8 @@ function UserProfile() {
                               <ul className="list-unstyled ms-3">
                                 {service.components.map((component, idx) => (
                                   <li key={idx} className="d-flex justify-content-between">
-                                    <span>{component.name}</span>
-                                    <span>₱{component[appointmentData.selectedPricingType]?.toLocaleString()}</span>
+                                    <span>{component.name || 'Unnamed Component'}</span>
+                                    <span>₱{(component[appointmentData.selectedPricingType] || 0).toLocaleString()}</span>
                                   </li>
                                 ))}
                               </ul>

@@ -1,0 +1,98 @@
+.sidebar-admin {
+    width: 260px;
+    height: 100vh;
+    background: #fff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
+    z-index: 1000;
+    padding-top: 70px;
+  }
+  
+  .sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #f1f1f1;
+  }
+  
+  .clinic-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar-header h3 {
+    color: #333;
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  
+  .nav-menu-admin {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+  
+  .nav-item {
+    margin-bottom: 5px;
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #6c757d;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    background-color: #f8f9fa;
+    color: #727cf5;
+  }
+  
+  .nav-item.active .nav-link {
+    background-color: #727cf5;
+    color: #fff;
+  }
+  
+  .menu-icon {
+    margin-right: 15px;
+    font-size: 1.2rem;
+  }
+  
+  .menu-title {
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 991px) {
+    .sidebar-admin {
+      left: -260px;
+    }
+  
+    .sidebar-admin.open {
+      left: 0;
+    }
+  
+    .sidebar-toggle {
+      display: block;
+    }
+  }
+  

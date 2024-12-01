@@ -1,0 +1,207 @@
+.section1 {
+	position: relative;
+	height: 87vh;
+}
+
+.section1 .section-center {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+
+#booking {
+	font-family: 'Montserrat', sans-serif;
+	background-image: url("../Components/Assets/FamilyPlanning_img2.jpg");
+	background-size: cover;
+	background-position: center;
+}
+
+#booking::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	top: 0;
+	background: rgba(255, 255, 255, 0.8);
+}
+
+.booking-cta {
+	margin-top: 45px;
+}
+
+.booking-cta h1 {
+	font-size: 52px;
+	text-transform: uppercase;
+	color: #000000;
+	font-weight: 900;
+}
+
+.booking-cta p {
+	font-size: 22px;
+	color: #000000;
+}
+
+.booking-form {
+	background: transparent;
+	-webkit-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 0.3);
+	box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 0.9);
+	max-width: 642px;
+	width: 100%;
+	margin: auto;
+	padding: 40px 30px;
+}
+
+.booking-form .form-group {
+	position: relative;
+	margin-bottom: 20px;
+}
+
+.booking-form .form-control {
+	background-color: transparent;
+	height: 55px;
+	padding: 0px;
+	padding-top: 15px;
+	color: #000000;
+	font-size: 16px;
+	font-weight: 700;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	border: none;
+	border-bottom: 2px solid rgba(0, 0, 0, 0.9);
+	border-radius: 0px;
+	-webkit-transition: 0.2s;
+	transition: 0.2s;
+}
+
+.booking-form .form-control::-webkit-input-placeholder {
+	color: #000000;
+}
+
+.booking-form .form-control:-ms-input-placeholder {
+	color: #000000;
+}
+
+.booking-form .form-control::placeholder {
+	color: #000000;
+}
+
+.booking-form input[type="date"].form-control:invalid {
+	color: #000000;
+}
+
+.booking-form .form-group:not(.input-not-empty) .form-control:not(:focus) {
+	color: #000000;
+}
+
+.booking-form select.form-control {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.booking-form select.form-control+.select-arrow {
+	position: absolute;
+	right: 0px;
+	bottom: 7px;
+	width: 32px;
+	line-height: 32px;
+	height: 32px;
+	text-align: center;
+	pointer-events: none;
+	color: #000000;
+	font-size: 14px;
+}
+
+.booking-form select.form-control+.select-arrow:after {
+	content: '\279C';
+	display: block;
+	-webkit-transform: rotate(90deg);
+	transform: rotate(90deg);
+}
+
+.booking-form .form-label {
+	color: #000000;
+	font-weight: 700;
+	position: absolute;
+	top: 20px;
+	left: 0px;
+	text-transform: uppercase;
+	line-height: 24px;
+	height: 23px;
+	font-size: 16px;
+	pointer-events: none;
+	-webkit-transition: 0.2s all;
+	transition: 0.2s all;
+}
+
+.booking-form .form-group .form-control:focus+.form-label {
+	top: 0px;
+	color: #2b9328;
+	font-size: 14px;
+}
+
+.booking-form .form-group.input-not-empty .form-label {
+	top: 0px;
+	color: #2b9328;
+	font-size: 14px;
+}
+
+.booking-form .submit-btn {
+	color: #fff;
+	background-color: #A024A3;
+	font-weight: 700;
+	height: 55px;
+	padding: 10px 35px;
+	font-size: 18px;
+	border: none;
+	display: block;
+	width: 100%;
+	text-transform: capitalize;
+}
+.popup{
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-top: 2%;
+}
+.popup-inner{
+  border: 2px solid rgba(83, 83, 83, 0.766);
+  padding: 2%;
+  border-radius:1rem;
+  z-index: 1;
+  /* height: 100% */
+}
+.popup-inner button{
+  background: #A024A3;
+  background-image: -webkit-linear-gradient(top, #A024A3, #5a1d5c);
+  background-image: -moz-linear-gradient(top, #A024A3, #5a1d5c);
+  background-image: -ms-linear-gradient(top, #A024A3, #5a1d5c);
+  background-image: -o-linear-gradient(top, #A024A3, #5a1d5c);
+  background-image: linear-gradient(to bottom, #A024A3, #5a1d5c);
+  -webkit-border-radius: 28;
+  -moz-border-radius: 28;
+  border-radius: 28px;
+  -webkit-box-shadow: 0px 5px 5px #666666;
+  -moz-box-shadow: 0px 5px 5px #666666;
+  box-shadow: 0px 5px 5px #666666;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 20px;
+  padding: 5px 20px 5px 20px;
+  text-decoration: none;
+}
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+  padding: 5px;
+  background-color: #ffe6e6;
+  border: 1px solid red;
+  border-radius: 5px;
+}

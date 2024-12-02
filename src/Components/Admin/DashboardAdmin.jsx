@@ -173,24 +173,48 @@ function DashboardAdmin() {
         
         const updatedAppointmentData = {
           ...appointmentData,
+          id: pendingApprovalId,
           status: 'approved',
           isApproved: true,
-          ...(includeRemark && approvalRemark ? { remark: approvalRemark } : {})
+          approvedAt: new Date().toISOString(),
+          ...(includeRemark && approvalRemark ? { 
+            remark: approvalRemark,
+            remarkTimestamp: new Date().toISOString()
+          } : {})
         };
+        
+        if (appointmentData.userId) {
+          const userRef = doc(firestore, 'users', appointmentData.userId);
+          
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          
+          const updatedAppointments = userData.appointments || [];
+          const appointmentIndex = updatedAppointments.findIndex(app => app.id === pendingApprovalId);
+          
+          if (appointmentIndex !== -1) {
+            updatedAppointments[appointmentIndex] = updatedAppointmentData;
+          } else {
+            updatedAppointments.push(updatedAppointmentData);
+          }
+
+          await updateDoc(userRef, {
+            appointmentData: updatedAppointmentData,
+            appointments: updatedAppointments,
+            lastUpdated: new Date().toISOString(),
+            currentAppointmentId: pendingApprovalId
+          });
+
+          const userAppointmentRef = doc(firestore, `users/${appointmentData.userId}/appointments`, pendingApprovalId);
+          await setDoc(userAppointmentRef, updatedAppointmentData);
+        }
         
         await setDoc(doc(firestore, 'approvedAppointments', pendingApprovalId), updatedAppointmentData);
         
         await deleteDoc(pendingDocRef);
         
-        if (appointmentData.userId) {
-          const userRef = doc(firestore, 'users', appointmentData.userId);
-          await updateDoc(userRef, {
-            'appointmentData': updatedAppointmentData
-          });
-        }
-        
         setPendingAppointments(prev => prev.filter(app => app.id !== pendingApprovalId));
-        setApprovedAppointments(prev => [...prev, { id: pendingApprovalId, ...updatedAppointmentData }]);
+        setApprovedAppointments(prev => [...prev, updatedAppointmentData]);
 
         setPendingAppointmentsCount(prev => prev - 1);
         setApprovedAppointmentsCount(prev => prev + 1);
@@ -228,25 +252,33 @@ function DashboardAdmin() {
       if (pendingDocSnap.exists()) {
         const appointmentData = pendingDocSnap.data();
         
-
         const updatedAppointmentData = {
           ...appointmentData,
+          id: pendingRejectId,
           status: 'rejected',
+          isApproved: false,
           remark: rejectRemark,
-          rejectedAt: new Date().toISOString()
+          rejectedAt: new Date().toISOString(),
+          remarkTimestamp: new Date().toISOString()
         };
 
         if (appointmentData.userId) {
           const userRef = doc(firestore, 'users', appointmentData.userId);
+          
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          
           await updateDoc(userRef, {
-            'appointmentData': updatedAppointmentData
+            appointmentData: updatedAppointmentData,
+            appointments: [...(userData.appointments || []), updatedAppointmentData],
+            appointmentHistory: [...(userData.appointmentHistory || []), updatedAppointmentData],
+            lastUpdated: new Date().toISOString()
           });
         }
 
         await deleteDoc(pendingDocRef);
 
         setPendingAppointments(prev => prev.filter(app => app.id !== pendingRejectId));
-
         setPendingAppointmentsCount(prev => prev - 1);
         setTotalAppointmentsCount(prev => prev - 1);
 
@@ -270,7 +302,7 @@ const handleDone = async (appointment) => {
     const user = auth.currentUser;
 
     if (!user) {
-      console.error("User is not authenticated");
+      console.error("User not authenticated");
       alert("You must be logged in to perform this action.");
       return;
     }
@@ -287,7 +319,8 @@ const handleDone = async (appointment) => {
     }
     const currentAppointmentData = appointmentDoc.data();
 
-    const appointmentWithFile = {
+    const completedAppointment = {
+      ...currentAppointmentData,
       id: appointment.id,
       name: appointment.name || currentAppointmentData.name,
       email: appointment.email || currentAppointmentData.email,
@@ -300,39 +333,52 @@ const handleDone = async (appointment) => {
       importedFile: currentAppointmentData.importedFile || null,
       userId: appointment.userId,
       completedAt: new Date().toISOString(),
-      status: 'completed',
+      status: 'completed',  // Set status to completed
+      isApproved: true,
       totalAmount: appointment.totalAmount || currentAppointmentData.totalAmount,
       remark: currentAppointmentData.remark || null
     };
 
+    // Update user's document first
+    if (appointment.userId) {
+      const userRef = doc(firestore, 'users', appointment.userId);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.exists() ? userDoc.data() : {};
 
-    Object.keys(appointmentWithFile).forEach(key => 
-      appointmentWithFile[key] === undefined && delete appointmentWithFile[key]
-    );
-
-    await Promise.all([
-      setDoc(doc(firestore, 'patientsRecords', appointment.id), appointmentWithFile),
+      // Update appointments array
+      const updatedAppointments = userData.appointments || [];
+      const appointmentIndex = updatedAppointments.findIndex(app => app.id === appointment.id);
       
-      updateDoc(doc(firestore, 'users', appointment.userId), {
-        'appointmentData': appointmentWithFile
-      })
-    ]);
+      if (appointmentIndex !== -1) {
+        updatedAppointments[appointmentIndex] = completedAppointment;
+      } else {
+        updatedAppointments.push(completedAppointment);
+      }
 
+      // Update user document
+      await updateDoc(userRef, {
+        appointmentData: completedAppointment,  // Update current appointment
+        appointments: updatedAppointments,      // Update appointments array
+        appointmentHistory: [...(userData.appointmentHistory || []), completedAppointment], // Add to history
+        lastUpdated: new Date().toISOString()
+      });
+
+      // Add to patients records
+      await setDoc(doc(firestore, 'patientsRecords', appointment.id), completedAppointment);
+    }
+
+    // Delete from approved appointments
     await deleteDoc(appointmentRef);
 
+    // Update local state
     setApprovedAppointments(prevAppointments => 
       prevAppointments.filter(app => app.id !== appointment.id)
     );
 
-    console.log('Appointment moved to Patient Records successfully');
-
     setApprovedAppointmentsCount(prev => prev - 1);
     setTotalAppointmentsCount(prev => prev - 1);
 
-    history.push({
-      // pathname: '/PatientsRecord',
-      state: { newRecord: appointmentWithFile }
-    });
+    alert('Appointment marked as completed successfully!');
 
   } catch (error) {
     console.error("Error handling done action: ", error);

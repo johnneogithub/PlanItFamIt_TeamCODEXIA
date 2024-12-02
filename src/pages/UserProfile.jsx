@@ -226,56 +226,61 @@ function UserProfile() {
           const latestAppointment = appointments[appointments.length - 1];
           
           if (latestAppointment) {
+            // Convert appointment data to string values where needed
             setAppointmentData({
               ...latestAppointment,
-              name: latestAppointment.name || 'N/A',
-              date: latestAppointment.date || 'N/A',
-              time: latestAppointment.time || 'N/A',
-              status: latestAppointment.status || 'pending',
-              selectedPricingType: latestAppointment.selectedPricingType || '',
-              selectedServices: latestAppointment.selectedServices || []
+              name: String(latestAppointment.name || 'N/A'),
+              date: String(latestAppointment.date || 'N/A'),
+              time: String(latestAppointment.time || 'N/A'),
+              status: String(latestAppointment.status || 'pending'),
+              selectedPricingType: String(latestAppointment.selectedPricingType || ''),
+              selectedServices: Array.isArray(latestAppointment.selectedServices) ? 
+                latestAppointment.selectedServices : []
             });
             setIsApproved(latestAppointment.status === 'approved');
-            setRemark(latestAppointment.remark || '');
+            setRemark(String(latestAppointment.remark || ''));
             setRemarkTimestamp(latestAppointment.remarkTimestamp || null);
-            setMessage(latestAppointment.message || '');
+            setMessage(String(latestAppointment.message || ''));
           }
 
           // Process all appointments
           let allAppointments = [];
           if (appointments.length > 0) {
             allAppointments = appointments.map(appointment => ({
-              id: appointment.id || '',
-              name: appointment.name || 'N/A',
-              date: appointment.date || 'N/A',
-              time: appointment.time || 'N/A',
-              status: appointment.status || 'pending',
-              message: appointment.message || '',
-              remark: appointment.remark || '',
-              selectedPricingType: appointment.selectedPricingType || '',
-              selectedServices: appointment.selectedServices || [],
-              totalAmount: appointment.totalAmount || 0,
+              id: String(appointment.id || ''),
+              name: String(appointment.name || 'N/A'),
+              date: String(appointment.date || 'N/A'),
+              time: String(appointment.time || 'N/A'),
+              status: String(appointment.status || 'pending'),
+              message: String(appointment.message || ''),
+              remark: String(appointment.remark || ''),
+              selectedPricingType: String(appointment.selectedPricingType || ''),
+              selectedServices: Array.isArray(appointment.selectedServices) ? 
+                appointment.selectedServices : [],
+              totalAmount: Number(appointment.totalAmount || 0),
               completedAt: appointment.completedAt || null,
               isCurrent: appointment === latestAppointment
             }));
           }
 
-          // Add appointment history
+          // Add appointment history with proper string conversion
           if (Array.isArray(data.appointmentHistory)) {
-            allAppointments = [...allAppointments, ...data.appointmentHistory.map(hist => ({
-              id: hist.id || '',
-              name: hist.name || 'N/A',
-              date: hist.date || 'N/A',
-              time: hist.time || 'N/A',
-              status: hist.status || 'completed',
-              message: hist.message || '',
-              remark: hist.remark || '',
-              selectedPricingType: hist.selectedPricingType || '',
-              selectedServices: hist.selectedServices || [],
-              totalAmount: hist.totalAmount || 0,
+            const historyAppointments = data.appointmentHistory.map(hist => ({
+              id: String(hist.id || ''),
+              name: String(hist.name || 'N/A'),
+              date: String(hist.date || 'N/A'),
+              time: String(hist.time || 'N/A'),
+              status: String(hist.status || 'completed'),
+              message: String(hist.message || ''),
+              remark: String(hist.remark || ''),
+              selectedPricingType: String(hist.selectedPricingType || ''),
+              selectedServices: Array.isArray(hist.selectedServices) ? 
+                hist.selectedServices : [],
+              totalAmount: Number(hist.totalAmount || 0),
               completedAt: hist.completedAt || null,
               isCurrent: false
-            }))];
+            }));
+            allAppointments = [...allAppointments, ...historyAppointments];
           }
 
           // Sort appointments
@@ -470,25 +475,23 @@ function UserProfile() {
         
         if (data.birthdate) {
           setBirthdate(data.birthdate);
+          const age = calculateAge(data.birthdate);
+          setPersonalDetails(prev => ({
+            ...prev,
+            age: age ? `${age} years old` : 'Not provided',
+            name: `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim(),
+            location: data.location || '',
+            phone: data.phone || '',
+            email: auth.currentUser?.email || prev.email || '',
+            gender: data.gender || '',
+          }));
+        } else {
+          setPersonalDetails(prev => ({
+            ...prev,
+            email: auth.currentUser?.email || '',
+            name: auth.currentUser?.displayName || ''
+          }));
         }
-
-        setPersonalDetails(prev => ({
-          ...prev,
-          name: `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim(),
-          firstName: data.firstName || '',
-          middleName: data.middleName || '',
-          lastName: data.lastName || '',
-          location: data.location || '',
-          phone: data.phone || '',
-          email: auth.currentUser?.email || prev.email || '',
-          gender: data.gender || '',
-        }));
-      } else {
-        setPersonalDetails(prev => ({
-          ...prev,
-          email: auth.currentUser?.email || '',
-          name: auth.currentUser?.displayName || ''
-        }));
       }
     } catch (error) {
       console.error("Error fetching personal details:", error);
@@ -500,14 +503,25 @@ function UserProfile() {
     }
   };
 
+  const calculateAge = (birthdate) => {
+    if (!birthdate) return null;
+    const birthDate = new Date(birthdate);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleEdit = () => {
     setIsEditing(true);
     setEditedDetails({
       ...personalDetails,
-      firstName: personalDetails.firstName || '',
-      middleName: personalDetails.middleName || '',
-      lastName: personalDetails.lastName || '',
-      age: personalDetails.age || '',
+      phone: personalDetails.phone || '',
+      location: personalDetails.location || '',
+      gender: personalDetails.gender || ''
     });
   };
 
@@ -529,23 +543,20 @@ function UserProfile() {
 
       const dataToSave = {
         ...currentData,
-        firstName: editedDetails.firstName,
-        middleName: editedDetails.middleName,
-        lastName: editedDetails.lastName,
-        location: editedDetails.location,
         phone: editedDetails.phone,
-        email: editedDetails.email,
+        location: editedDetails.location,
         gender: editedDetails.gender,
-        age: editedDetails.age,
         lastUpdated: new Date().toISOString()
       };
 
       await updateDoc(userRef, dataToSave);
 
-      setPersonalDetails({
-        ...dataToSave,
-        name: `${dataToSave.firstName} ${dataToSave.middleName} ${dataToSave.lastName}`.trim(),
-      });
+      setPersonalDetails(prev => ({
+        ...prev,
+        phone: editedDetails.phone,
+        location: editedDetails.location,
+        gender: editedDetails.gender
+      }));
       
       setIsEditing(false);
       toast.success("Profile updated successfully!");
@@ -825,109 +836,100 @@ function UserProfile() {
                     <div className="row">
                       {isEditing ? (
                         <>
-                          <div className="col-md-4 mb-3">
+                          <div className="col-md-6 mb-3">
                             <div className="detail-item">
                               <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
-                                <h6 className="mb-0 text-muted">First Name</h6>
+                                <h6 className="mb-0 text-muted">Name</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.name || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item">
+                              <FaEnvelope className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Email</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.email || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item">
+                              <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Age</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item">
+                              <FaPhone className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Phone</h6>
                                 <input
                                   type="text"
                                   className="form-control"
-                                  name="firstName"
-                                  value={editedDetails.firstName || ''}
+                                  name="phone"
+                                  value={editedDetails.phone || ''}
                                   onChange={handleChange}
-                                  placeholder="Enter first name"
+                                  placeholder="Enter phone number"
                                 />
                               </div>
                             </div>
                           </div>
-                          <div className="col-md-4 mb-3">
+                          <div className="col-md-6 mb-3">
                             <div className="detail-item">
-                              <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Middle Name</h6>
+                                <h6 className="mb-0 text-muted">Location</h6>
                                 <input
                                   type="text"
                                   className="form-control"
-                                  name="middleName"
-                                  value={editedDetails.middleName || ''}
+                                  name="location"
+                                  value={editedDetails.location || ''}
                                   onChange={handleChange}
-                                  placeholder="Enter middle name"
+                                  placeholder="Enter location"
                                 />
                               </div>
                             </div>
                           </div>
-                          <div className="col-md-4 mb-3">
+                          <div className="col-md-6 mb-3">
                             <div className="detail-item">
-                              <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <FaVenusMars className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Last Name</h6>
-                                <input
-                                  type="text"
+                                <h6 className="mb-0 text-muted">Gender</h6>
+                                <select
                                   className="form-control"
-                                  name="lastName"
-                                  value={editedDetails.lastName || ''}
+                                  name="gender"
+                                  value={editedDetails.gender || ''}
                                   onChange={handleChange}
-                                  placeholder="Enter last name"
-                                />
+                                >
+                                  <option value="">Select gender</option>
+                                  <option value="male">Male</option>
+                                  <option value="female">Female</option>
+                                  <option value="other">Other</option>
+                                </select>
                               </div>
                             </div>
                           </div>
                         </>
                       ) : (
-                        <div className="col-md-6 mb-3">
-                          <div className="detail-item d-flex align-items-center">
-                            <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                            <div className="ms-3">
-                              <h6 className="mb-0 text-muted">Name</h6>
-                              <p className="mb-0 fw-bold">{personalDetails.name || 'Not provided'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {Object.entries(isEditing ? editedDetails : personalDetails)
-                        .filter(([key]) => !['name', 'firstName', 'middleName', 'lastName', 'age'].includes(key))
-                        .map(([key, value]) => (
-                          <div className="col-md-6 mb-3" key={key}>
-                            <div className="detail-item d-flex align-items-center">
-                              {getIcon(key)}
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">{capitalizeFirstLetter(key)}</h6>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    name={key}
-                                    value={value}
-                                    onChange={handleChange}
-                                  />
-                                ) : (
+                        Object.entries(personalDetails)
+                          .filter(([key]) => !['firstName', 'middleName', 'lastName'].includes(key))
+                          .map(([key, value]) => (
+                            <div className="col-md-6 mb-3" key={key}>
+                              <div className="detail-item d-flex align-items-center">
+                                {getIcon(key)}
+                                <div className="ms-3">
+                                  <h6 className="mb-0 text-muted">{capitalizeFirstLetter(key)}</h6>
                                   <p className="mb-0 fw-bold">{value || 'Not provided'}</p>
-                                )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      <div className="col-md-6 mb-3">
-                        <div className="detail-item d-flex align-items-center">
-                          <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                          <div className="ms-3">
-                            <h6 className="mb-0 text-muted">Age</h6>
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="age"
-                                value={editedDetails.age || ''}
-                                onChange={handleChange}
-                                placeholder="Enter age"
-                              />
-                            ) : (
-                              <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                          ))
+                      )}
                     </div>
                     {isEditing && (
                       <div className="mt-3">

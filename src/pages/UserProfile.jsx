@@ -4,7 +4,7 @@ import Navbar from '../Components/Global/Navbar_Main';
 import { auth, storage, crud } from '../Config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt, FaEdit, FaCamera, FaUserCircle, FaFileDownload, FaHistory, FaCheckCircle, FaTimesCircle, FaCommentDots, FaClock, FaThLarge, FaList, FaFolder, FaComment, FaEye, FaImage, FaFile } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt, FaEdit, FaCamera, FaUserCircle, FaFileDownload, FaHistory, FaCheckCircle, FaTimesCircle, FaCommentDots, FaClock, FaThLarge, FaList, FaFolder, FaComment, FaEye, FaImage, FaFile, FaSync } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserProfileStyle.css';
 import defaultProfilePic from '.././Components/Assets/icon_you.png';
@@ -96,6 +96,29 @@ const ProfilePicture = ({ src, isLoading, isUploading, onFileChange }) => {
   );
 };
 
+const useLocalStorage = (key, initialValue) => {
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error("Error reading from localStorage:", error);
+      return initialValue;
+    }
+  });
+
+  const setValue = (value) => {
+    try {
+      setStoredValue(value);
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+    }
+  };
+
+  return [storedValue, setValue];
+};
+
 function UserProfile() {
   const location = useLocation();
   const [user, setUser] = useState(null);
@@ -125,6 +148,9 @@ function UserProfile() {
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
   const [newAppointments, setNewAppointments] = useState(0);
   const [hasNewRemark, setHasNewRemark] = useState(false);
+  const [localPersonalDetails, setLocalPersonalDetails] = useLocalStorage('userPersonalDetails', null);
+  const [lastFetchTime, setLastFetchTime] = useLocalStorage('lastPersonalDetailsFetch', 0);
+  const FETCH_COOLDOWN = 5 * 60 * 1000; // 5 minutes in milliseconds
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -463,42 +489,57 @@ function UserProfile() {
       return;
     }
 
-    try {
-      setIsLoadingDetails(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    const now = Date.now();
+    const shouldFetchFromFirebase = !localPersonalDetails || 
+                                  (now - lastFetchTime) > FETCH_COOLDOWN;
 
-      const userRef = doc(crud, `users/${userId}`);
-      const docSnap = await getDoc(userRef);
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+    if (shouldFetchFromFirebase) {
+      try {
+        setIsLoadingDetails(true);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const userRef = doc(crud, `users/${userId}`);
+        const docSnap = await getDoc(userRef);
         
-        if (data.birthdate) {
-          setBirthdate(data.birthdate);
-          const age = calculateAge(data.birthdate);
-          setPersonalDetails(prev => ({
-            ...prev,
-            age: age ? `${age} years old` : 'Not provided',
-            name: `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim(),
-            location: data.location || '',
-            phone: data.phone || '',
-            email: auth.currentUser?.email || prev.email || '',
-            gender: data.gender || '',
-          }));
-        } else {
-          setPersonalDetails(prev => ({
-            ...prev,
-            email: auth.currentUser?.email || '',
-            name: auth.currentUser?.displayName || ''
-          }));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          
+          if (data.birthdate) {
+            setBirthdate(data.birthdate);
+            const age = calculateAge(data.birthdate);
+            const newDetails = {
+              age: age ? `${age} years old` : 'Not provided',
+              name: `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim(),
+              location: data.location || '',
+              phone: data.phone || '',
+              email: auth.currentUser?.email || '',
+              gender: data.gender || '',
+            };
+            
+            setPersonalDetails(newDetails);
+            setLocalPersonalDetails(newDetails);
+            setLastFetchTime(now);
+          } else {
+            const basicDetails = {
+              email: auth.currentUser?.email || '',
+              name: auth.currentUser?.displayName || ''
+            };
+            setPersonalDetails(basicDetails);
+            setLocalPersonalDetails(basicDetails);
+            setLastFetchTime(now);
+          }
         }
+      } catch (error) {
+        console.error("Error fetching personal details:", error);
+        if (error.code === 'permission-denied') {
+          toast.error("Access denied. Please check if you're logged in.");
+        }
+      } finally {
+        setIsLoadingDetails(false);
       }
-    } catch (error) {
-      console.error("Error fetching personal details:", error);
-      if (error.code === 'permission-denied') {
-        toast.error("Access denied. Please check if you're logged in.");
-      }
-    } finally {
+    } else {
+      // Use cached data
+      setPersonalDetails(localPersonalDetails);
       setIsLoadingDetails(false);
     }
   };
@@ -551,12 +592,16 @@ function UserProfile() {
 
       await updateDoc(userRef, dataToSave);
 
-      setPersonalDetails(prev => ({
-        ...prev,
+      const updatedDetails = {
+        ...localPersonalDetails,
         phone: editedDetails.phone,
         location: editedDetails.location,
         gender: editedDetails.gender
-      }));
+      };
+
+      setPersonalDetails(updatedDetails);
+      setLocalPersonalDetails(updatedDetails);
+      setLastFetchTime(Date.now());
       
       setIsEditing(false);
       toast.success("Profile updated successfully!");
@@ -678,6 +723,13 @@ function UserProfile() {
       return () => unsubscribe();
     }
   }, [user]);
+
+  const forceRefreshDetails = async () => {
+    if (user) {
+      setLastFetchTime(0); // Reset the last fetch time
+      await fetchPersonalDetails(user.uid);
+    }
+  };
 
   return (
     <div className="user-profile-page">
@@ -847,21 +899,32 @@ function UserProfile() {
                   <>
                     <div className="d-flex justify-content-between align-items-center mb-4">
                       <h4 className="card-title m-0">Personal Details</h4>
-                      {!isEditing && (
-                        <button 
-                          className="btn btn-outline-primary btn-sm" 
-                          onClick={handleEdit} 
-                          style={{ 
-                            color: 'rgb(197, 87, 219)', 
-                            borderImage: 'linear-gradient(145deg, rgb(197, 87, 219), rgb(177, 77, 199))',
-                            borderImageSlice: 1,
-                            borderWidth: '1px',
-                            borderStyle: 'solid'
-                          }}
-                        >
-                          <FaEdit /> Edit
-                        </button>
-                      )}
+                      <div>
+                        {!isEditing && (
+                          <>
+                            <button 
+                              className="btn btn-outline-secondary btn-sm me-2" 
+                              onClick={forceRefreshDetails}
+                              title="Refresh data"
+                            >
+                              <FaSync /> Refresh
+                            </button>
+                            <button 
+                              className="btn btn-outline-primary btn-sm" 
+                              onClick={handleEdit} 
+                              style={{ 
+                                color: 'rgb(197, 87, 219)', 
+                                borderImage: 'linear-gradient(145deg, rgb(197, 87, 219), rgb(177, 77, 199))',
+                                borderImageSlice: 1,
+                                borderWidth: '1px',
+                                borderStyle: 'solid'
+                              }}
+                            >
+                              <FaEdit /> Edit
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div className="row">
                       {isEditing ? (

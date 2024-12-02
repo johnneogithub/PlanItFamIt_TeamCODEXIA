@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './OTDesignStyle.css';
-
+import Navbar from '../Components/Global/Navbar_Main';
 const OvulationTracker = () => {
   const [formData, setFormData] = useState({
     firstMenstrualPeriod: '',
@@ -81,70 +81,122 @@ const OvulationTracker = () => {
   };
 
   return (
-    <div className="app-container">
-      <div className="content-wrapper">
-        <form onSubmit={handleSubmit}>
-          <input
-            type="date"
-            name="firstMenstrualPeriod"
-            value={formData.firstMenstrualPeriod}
-            onChange={handleInputChange}
-          />
-          <input
-            type="date"
-            name="lastMenstrualPeriod"
-            value={formData.lastMenstrualPeriod}
-            onChange={handleInputChange}
-          />
-          <input
-            type="number"
-            name="height"
-            placeholder="Height (cm)"
-            value={formData.height}
-            onChange={handleInputChange}
-          />
-          <input
-            type="number"
-            name="weight"
-            placeholder="Weight (kg)"
-            value={formData.weight}
-            onChange={handleInputChange}
-          />
-          <select name="bleedingIntensity" value={formData.bleedingIntensity} onChange={handleInputChange}>
-            <option value="">Bleeding Intensity</option>
-            <option value="1">Light</option>
-            <option value="2">Normal</option>
-            <option value="3">Heavy</option>
-            <option value="4">Unusual</option>
-          </select>
-          <select name="dischargeType" value={formData.dischargeType} onChange={handleInputChange}>
-            <option value="">Discharge Type</option>
-            <option value="1">No Discharge</option>
-            <option value="2">Creamy Discharge</option>
-            <option value="3">Sticky Discharge</option>
-            <option value="4">Spotting</option>
-            <option value="5">Clumpy White Discharge</option>
-            <option value="6">Gray Discharge</option>
-            <option value="7">Egg White Color Discharge</option>
-            <option value="8">Unusual Discharge</option>
-          </select>
-          <button type="submit">Predict Ovulation Day</button>
-        </form>
+    <div className="ot-page-container">
+            <Navbar />
+      <div className="ot-background-wrapper">
+        <div className="ot-left-bg">
+          <img src="/images/smartOTpic.png" alt="" />
+        </div>
+        <div className="ot-right-bg">
+          <img src="/images/AskingOT.png" alt="" />
+        </div>
+      </div>
 
-        {error && <div className="error">{error}</div>}
-        {results && (
-          <div className="output-card bg-gradient rounded-lg p-4 mt-4">
-            <h3 className="text-white mb-3">Results</h3>
-            <p className="result-text mb-2">{`Ovulation Date: ${results.peakOvulationDay}`}</p>
-            <div className="d-flex justify-content-between">
-              <p className="result-text mb-2">{`First Day of Ovulation: ${results.firstDayOvulation}`}</p>
-              <p className="result-text mb-2">{`Last Day of Ovulation: ${results.lastDayOvulation}`}</p>
+      <div className="ot-container">
+        <h1 className="ot-main-title">Know your next Ovulation Day!</h1>
+        <p className="ot-subtitle">Be protected and secured, let us track your next ovulation date.</p>
+
+        <div className="ot-tracker-grid">
+          <div className="ot-date-card">
+            <h2>Your next ovulation date</h2>
+            <div className="ot-date-circle">
+              <div className="ot-date-content">
+                <span className="ot-day-text">Tues</span>
+                <span className="ot-date">Nov 17</span>
+                <span className="ot-year">2024</span>
+              </div>
             </div>
-            <p className="result-text mb-2">{`BMI: ${results.bmi} (${results.bmiCategory})`}</p>
-            <p className="result-text mb-2">{`Recommendation: ${results.recommendation}`}</p>
-            <p className="result-text mb-2">{`Menstrual Duration: ${menstrualDuration ? menstrualDuration : "N/A"} days`}</p>
+            <div className="ot-date-range">
+              <div className="ot-range-item">
+                <span>Starts</span>
+                <input type="date" name="firstMenstrualPeriod" value={formData.firstMenstrualPeriod} onChange={handleInputChange} />
+              </div>
+              <div className="ot-range-item">
+                <span>Ends</span>
+                <input type="date" name="lastMenstrualPeriod" value={formData.lastMenstrualPeriod} onChange={handleInputChange} />
+              </div>
+            </div>
           </div>
-        )}
+
+          <div className="ot-menstruation-details">
+            <div className="ot-input-field">
+              <label>Your first day of menstruation</label>
+              <input type="date" name="firstMenstrualPeriod" value={formData.firstMenstrualPeriod} onChange={handleInputChange} />
+            </div>
+            <div className="ot-input-field">
+              <label>Your last day of menstruation</label>
+              <input type="date" name="lastMenstrualPeriod" value={formData.lastMenstrualPeriod} onChange={handleInputChange} />
+            </div>
+            <div className="ot-input-field">
+              <label>Total Days of menstruation</label>
+              <input type="text" value={menstrualDuration || ''} disabled />
+            </div>
+          </div>
+          <div className="ot-health-indicators">
+            <div className="ot-indicators-row">
+              <div className="ot-indicator-card">
+                <h3>Vaginal Discharge</h3>
+                <select name="dischargeType" value={formData.dischargeType} onChange={handleInputChange} className="ot-pink-select">
+                  <option value="">Pick here</option>
+                  <option value="1">No Discharge</option>
+                  <option value="2">Creamy Discharge</option>
+                  <option value="3">Sticky Discharge</option>
+                  <option value="4">Spotting</option>
+                  <option value="5">Clumpy White Discharge</option>
+                  <option value="6">Gray Discharge</option>
+                  <option value="7">Egg White Color Discharge</option>
+                  <option value="8">Unusual Discharge</option>
+                </select>
+              </div>
+              <div className="ot-indicator-card">
+                <h3>Period Flow</h3>
+                <select name="bleedingIntensity" value={formData.bleedingIntensity} onChange={handleInputChange} className="ot-purple-select">
+                  <option value="">Pick here</option>
+                  <option value="1">Light</option>
+                  <option value="2">Normal</option>
+                  <option value="3">Heavy</option>
+                  <option value="4">Unusual</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="ot-measurements">
+            <div className="ot-measurements-wrapper">
+              <div className="ot-measurement-item">
+                <label>Weight</label>
+                <div className="ot-measurement-input">
+                  <input type="number" name="weight" value={formData.weight} onChange={handleInputChange} />
+                  <span>kg</span>
+                </div>
+              </div>
+              <div className="ot-measurement-item">
+                <label>Height</label>
+                <div className="ot-measurement-input">
+                  <input type="number" name="height" value={formData.height} onChange={handleInputChange} />
+                  <span>cm</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="ot-bmi-display">
+            <h3>Body Mass Index</h3>
+            <div className="ot-bmi-result">
+              {results && <div className="ot-bmi-value">{results.bmi} - {results.bmiCategory}</div>}
+              <p className="ot-bmi-recommendation">Your BMI is in the normal range<br/>Keep maintaining a healthy lifestyle!</p>
+            </div>
+          </div>
+
+          <button className="ot-predict-button" onClick={handleSubmit}>
+            Predict my next ovulation
+          </button>
+        </div>
+
+        <div className="ot-disclaimer">
+          Disclaimer: As per professional advice, this tracker is not recommended for women having irregular menstruation.
+          <span className="ot-credibility-link">See paper & tracker credibility.</span>
+        </div>
       </div>
     </div>
   );

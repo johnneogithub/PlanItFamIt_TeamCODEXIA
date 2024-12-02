@@ -205,6 +205,8 @@ const AppointmentFillUp = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
+  const [appointmentHistory, setAppointmentHistory] = useState([]);
+  const crud = firestore;
 
   const services = [
     { 
@@ -396,56 +398,40 @@ const AppointmentFillUp = () => {
       services: selectedServices.length > 0
     };
 
-    console.log('Form Field Values:', {
-      name: searchQuery.name,
-      email: searchQuery.email,
-      age: searchQuery.age,
-      date: searchQuery.date,
-      time: searchQuery.time,
-      message: searchQuery.message,
-      selectedPricingType,
-      servicesCount: selectedServices.length
+    if (!Object.values(validationResults).every(Boolean)) {
+      const missingFields = Object.entries(validationResults)
+        .filter(([_, value]) => !value)
+        .map(([key]) => key);
+      
+      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return false;
+    }
+
+    // Check for overlapping appointments
+    const selectedDateTime = new Date(`${searchQuery.date} ${searchQuery.time}`);
+    const hasOverlap = appointmentHistory.some(appointment => {
+      if (appointment.status === 'rejected' || appointment.status === 'completed') {
+        return false;
+      }
+      const appointmentDateTime = new Date(`${appointment.date} ${appointment.time}`);
+      const timeDiff = Math.abs(selectedDateTime - appointmentDateTime);
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+      return hoursDiff < 2;
     });
 
-    console.log('Validation Results:', validationResults);
-    
-    const isValid = Object.values(validationResults).every(value => value === true);
-    console.log('Is form valid?', isValid);
-    
-    return isValid;
+    if (hasOverlap) {
+      toast.error("You have another appointment scheduled close to this time. Please choose a different time.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Handle submit triggered');
-
     setSubmitted(true);
 
-    // Validate pricing type first
-    if (!selectedPricingType) {
-      toast.error("Please select a pricing type (Without PhilHealth, PhilHealth Benefit, or With PhilHealth)");
-      return;
-    }
-
-    // Validate services
-    if (selectedServices.length === 0) {
-      toast.error("Please select at least one service");
-      return;
-    }
-
-    // Other validations...
-    if (!searchQuery.date) {
-      toast.error("Please select a date");
-      return;
-    }
-
-    if (!searchQuery.time) {
-      toast.error("Please select a time");
-      return;
-    }
-
-    if (!searchQuery.message) {
-      toast.error("Please provide a reason for the appointment");
+    if (!validateForm()) {
       return;
     }
 
@@ -459,36 +445,32 @@ const AppointmentFillUp = () => {
         createdAt: new Date().toISOString()
       };
 
-      console.log("Submitting appointment data:", appointmentData);
       const userId = auth.currentUser.uid;
-      const userRef = doc(firestore, `users/${userId}`);
-
-      // Save to localStorage first
-      localStorage.setItem(`appointmentData_${userId}`, JSON.stringify(appointmentData));
-
+      const userRef = doc(crud, `users/${userId}`);
       const docSnap = await getDoc(userRef);
-      if (docSnap.exists()) {
-        await updateDoc(userRef, {
-          appointmentData: appointmentData,
-          isApproved: false
-        });
-      } else {
-        await setDoc(userRef, {
-          appointmentData: appointmentData,
-          isApproved: false,
-        });
-      }
+      const userData = docSnap.exists() ? docSnap.data() : {};
 
+      // Create or update appointments array
+      const currentAppointments = userData.appointments || [];
+      
+      // Add new appointment to the array
+      const updatedAppointments = [...currentAppointments, appointmentData];
+
+      // Update user document
+      await updateDoc(userRef, {
+        appointments: updatedAppointments,
+        latestAppointment: appointmentData
+      });
+
+      // Add to pending appointments collection
       const appointmentsRef = collection(firestore, 'pendingAppointments');
       await addDoc(appointmentsRef, {
         ...appointmentData,
-        isApproved: false,
         userId: userId
       });
 
       toast.success("Appointment scheduled successfully!");
       
-      // Use replace instead of push to prevent going back to form
       history.replace({
         pathname: '/UserProfile',
         state: { appointmentData: appointmentData, action: 'update' }
@@ -556,6 +538,38 @@ const AppointmentFillUp = () => {
 
     fetchUserData();
   }, [auth.currentUser, firestore]);
+
+  useEffect(() => {
+    const fetchAppointmentHistory = async () => {
+      if (!auth.currentUser) return;
+
+      try {
+        const userRef = doc(crud, `users/${auth.currentUser.uid}`);
+        const docSnap = await getDoc(userRef);
+        
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          let allAppointments = [];
+          
+          // Get current appointments
+          if (userData.appointments) {
+            allAppointments = [...userData.appointments];
+          }
+          
+          // Get appointment history
+          if (userData.appointmentHistory) {
+            allAppointments = [...allAppointments, ...userData.appointmentHistory];
+          }
+          
+          setAppointmentHistory(allAppointments);
+        }
+      } catch (error) {
+        console.error("Error fetching appointment history:", error);
+      }
+    };
+
+    fetchAppointmentHistory();
+  }, [auth.currentUser]);
 
   const fetchAvailableTimes = async (date) => {
     try {

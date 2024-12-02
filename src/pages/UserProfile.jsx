@@ -3,7 +3,7 @@ import { useLocation, Link } from 'react-router-dom';
 import Navbar from '../Components/Global/Navbar_Main';
 import { auth, storage, crud } from '../Config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, updateDoc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt, FaEdit, FaCamera, FaUserCircle, FaFileDownload, FaHistory, FaCheckCircle, FaTimesCircle, FaCommentDots, FaClock, FaThLarge, FaList, FaFolder, FaComment, FaEye, FaImage, FaFile } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserProfileStyle.css';
@@ -648,6 +648,36 @@ function UserProfile() {
   useEffect(() => {
     markNotificationsAsViewed();
   }, [user, appointmentHistory.length]);
+
+  useEffect(() => {
+    if (user?.uid) {
+      const firestore = getFirestore();
+      const userRef = doc(firestore, `users/${user.uid}`);
+      
+      const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          
+          // Update appointment data
+          if (userData.appointmentData) {
+            setAppointmentData({
+              ...userData.appointmentData,
+              status: userData.appointmentData.status || 'pending',
+              isApproved: !!userData.appointmentData.isApproved
+            });
+            setIsApproved(!!userData.appointmentData.isApproved);
+          }
+
+          // Update other appointment-related states
+          if (userData.appointments) {
+            setAppointmentHistory(userData.appointments);
+          }
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, [user]);
 
   return (
     <div className="user-profile-page">

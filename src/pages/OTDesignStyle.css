@@ -155,22 +155,28 @@
 }
 
 .ot-date-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
 .ot-day-text {
-  display: block;
+  font-size: 1rem;
   color: #666;
+  margin-bottom: 4px;
 }
 
 .ot-date {
   font-size: 1.5rem;
   font-weight: 600;
   color: #FB28CD;
+  margin-bottom: 4px;
 }
 
 .ot-year {
-  display: block;
+  font-size: 1rem;
   color: #666;
 }
 
@@ -673,4 +679,25 @@
   font-size: 1.2rem;
   color: #888;
   text-align: center;
+}
+
+.ot-date-display {
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #495057;
+  min-width: 150px;
+  text-align: center;
+}
+
+.ot-range-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ot-range-item span {
+  font-weight: 500;
+  color: #6c757d;
 }

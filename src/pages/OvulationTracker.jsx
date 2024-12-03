@@ -63,9 +63,7 @@ const OvulationTracker = () => {
     }
   
     try {
-      // Include menstrualDuration in formData before sending to backend
       const dataToSend = { ...formData, menstrualDuration };
-
       const response = await fetch('http://127.0.0.1:5000/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,14 +78,34 @@ const OvulationTracker = () => {
   
       const data = await response.json();
       setResults(data);
-      if (data.predicted_date) {
-        setPredictedDate(new Date(data.predicted_date));
+      
+      if (data.peakOvulationDay) {
+        setPredictedDate(new Date(data.peakOvulationDay));
       }
+      
+      if (data.firstDayOvulation && data.lastDayOvulation) {
+        setFormData(prev => ({
+          ...prev,
+          predictionStartDate: data.firstDayOvulation,
+          predictionEndDate: data.lastDayOvulation
+        }));
+      }
+      
       setError(null);
     } catch (err) {
       console.error('Request failed:', err);
       setError(`Error making prediction: ${err.message}`);
     }
+  };
+
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
@@ -111,19 +129,19 @@ const OvulationTracker = () => {
             <h2>Predicted Fertile Window</h2>
             <div className="ot-date-circle">
               <div className="ot-date-content">
-                {predictedDate ? (
+                {results?.peakOvulationDay ? (
                   <>
                     <span className="ot-day-text">
-                      {predictedDate.toLocaleDateString('en-US', { weekday: 'short' })}
+                      {new Date(results.peakOvulationDay).toLocaleDateString('en-US', { weekday: 'short' })}
                     </span>
                     <span className="ot-date">
-                      {predictedDate.toLocaleDateString('en-US', { 
+                      {new Date(results.peakOvulationDay).toLocaleDateString('en-US', { 
                         month: 'short',
                         day: 'numeric'
                       })}
                     </span>
                     <span className="ot-year">
-                      {predictedDate.getFullYear()}
+                      {new Date(results.peakOvulationDay).getFullYear()}
                     </span>
                   </>
                 ) : (
@@ -136,21 +154,15 @@ const OvulationTracker = () => {
             <div className="ot-date-range">
               <div className="ot-range-item">
                 <span>Starts</span>
-                <input 
-                  type="date" 
-                  name="predictionStartDate" 
-                  value={formData.predictionStartDate} 
-                  onChange={handleInputChange} 
-                />
+                <div className="ot-date-display">
+                  {formatDateForDisplay(formData.predictionStartDate) || 'Pending...'}
+                </div>
               </div>
               <div className="ot-range-item">
                 <span>Ends</span>
-                <input 
-                  type="date" 
-                  name="predictionEndDate" 
-                  value={formData.predictionEndDate} 
-                  onChange={handleInputChange} 
-                />
+                <div className="ot-date-display">
+                  {formatDateForDisplay(formData.predictionEndDate) || 'Pending...'}
+                </div>
               </div>
             </div>
           </div>
@@ -234,8 +246,21 @@ const OvulationTracker = () => {
           <div className="ot-bmi-display">
             <h3>Body Mass Index</h3>
             <div className="ot-bmi-result">
-              {results && <div className="ot-bmi-value">{results.bmi} - {results.bmiCategory}</div>}
-              <p className="ot-bmi-recommendation">Your BMI is in the normal range<br/>Keep maintaining a healthy lifestyle!</p>
+              {results?.bmi ? (
+                <>
+                  <div className="ot-bmi-value">{results.bmi} - {results.bmiCategory}</div>
+                  <p className="ot-bmi-recommendation">
+                    Your BMI is in the {results.bmiCategory.toLowerCase()} range<br/>
+                    {results.bmiCategory === 'Normal' 
+                      ? 'Keep maintaining a healthy lifestyle!'
+                      : 'Consider consulting with a healthcare professional for guidance.'}
+                  </p>
+                </>
+              ) : (
+                <p className="ot-bmi-placeholder">
+                  Fill in your height and weight to see your BMI
+                </p>
+              )}
             </div>
           </div>
 

@@ -155,22 +155,28 @@
 }
 
 .ot-date-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
 .ot-day-text {
-  display: block;
+  font-size: 1rem;
   color: #666;
+  margin-bottom: 4px;
 }
 
 .ot-date {
   font-size: 1.5rem;
   font-weight: 600;
   color: #FB28CD;
+  margin-bottom: 4px;
 }
 
 .ot-year {
-  display: block;
+  font-size: 1rem;
   color: #666;
 }
 

@@ -63,9 +63,7 @@ const OvulationTracker = () => {
     }
   
     try {
-      // Include menstrualDuration in formData before sending to backend
       const dataToSend = { ...formData, menstrualDuration };
-
       const response = await fetch('http://127.0.0.1:5000/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,6 +78,15 @@ const OvulationTracker = () => {
   
       const data = await response.json();
       setResults(data);
+      
+      if (data.firstDayOvulation && data.lastDayOvulation) {
+        setFormData(prev => ({
+          ...prev,
+          predictionStartDate: data.firstDayOvulation,
+          predictionEndDate: data.lastDayOvulation
+        }));
+      }
+      
       if (data.predicted_date) {
         setPredictedDate(new Date(data.predicted_date));
       }
@@ -88,6 +95,16 @@ const OvulationTracker = () => {
       console.error('Request failed:', err);
       setError(`Error making prediction: ${err.message}`);
     }
+  };
+
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
@@ -136,21 +153,15 @@ const OvulationTracker = () => {
             <div className="ot-date-range">
               <div className="ot-range-item">
                 <span>Starts</span>
-                <input 
-                  type="date" 
-                  name="predictionStartDate" 
-                  value={formData.predictionStartDate} 
-                  onChange={handleInputChange} 
-                />
+                <div className="ot-date-display">
+                  {formatDateForDisplay(formData.predictionStartDate) || 'Pending...'}
+                </div>
               </div>
               <div className="ot-range-item">
                 <span>Ends</span>
-                <input 
-                  type="date" 
-                  name="predictionEndDate" 
-                  value={formData.predictionEndDate} 
-                  onChange={handleInputChange} 
-                />
+                <div className="ot-date-display">
+                  {formatDateForDisplay(formData.predictionEndDate) || 'Pending...'}
+                </div>
               </div>
             </div>
           </div>

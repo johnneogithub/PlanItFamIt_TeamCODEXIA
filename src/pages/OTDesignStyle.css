@@ -674,3 +674,24 @@
   color: #888;
   text-align: center;
 }
+
+.ot-date-display {
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #495057;
+  min-width: 150px;
+  text-align: center;
+}
+
+.ot-range-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ot-range-item span {
+  font-weight: 500;
+  color: #6c757d;
+}

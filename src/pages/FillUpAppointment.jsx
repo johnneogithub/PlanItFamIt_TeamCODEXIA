@@ -407,20 +407,40 @@ const AppointmentFillUp = () => {
       return false;
     }
 
-    // Check for overlapping appointments
+    // Check for same-day overlapping appointments
     const selectedDateTime = new Date(`${searchQuery.date} ${searchQuery.time}`);
     const hasOverlap = appointmentHistory.some(appointment => {
       if (appointment.status === 'rejected' || appointment.status === 'completed') {
         return false;
       }
+      
       const appointmentDateTime = new Date(`${appointment.date} ${appointment.time}`);
-      const timeDiff = Math.abs(selectedDateTime - appointmentDateTime);
-      const hoursDiff = timeDiff / (1000 * 60 * 60);
-      return hoursDiff < 2;
+      
+      // Only check for overlap if it's the same day
+      if (appointmentDateTime.toDateString() === selectedDateTime.toDateString()) {
+        const timeDiff = Math.abs(selectedDateTime - appointmentDateTime);
+        const minutesDiff = timeDiff / (1000 * 60);
+        return minutesDiff < 90; // 90 minutes minimum gap between appointments
+      }
+      return false;
     });
 
     if (hasOverlap) {
-      toast.error("You have another appointment scheduled close to this time. Please choose a different time.");
+      toast.error("You have another appointment scheduled within 90 minutes of this time. Please choose a different time.");
+      return false;
+    }
+
+    // Check for maximum appointments per day
+    const appointmentsOnSelectedDate = appointmentHistory.filter(appointment => {
+      const appointmentDate = new Date(appointment.date).toDateString();
+      const selectedDate = new Date(searchQuery.date).toDateString();
+      return appointmentDate === selectedDate && 
+             appointment.status !== 'rejected' && 
+             appointment.status !== 'completed';
+    });
+
+    if (appointmentsOnSelectedDate.length >= 3) {
+      toast.error("You can only have up to 3 pending appointments per day. Please choose another date.");
       return false;
     }
 
@@ -575,9 +595,30 @@ const AppointmentFillUp = () => {
     try {
       const allTimes = generateTimeSlots();
       const booked = await getBookedTimes(date);
-      const available = allTimes.filter(time => !booked.includes(time));
-      console.log("Available times:", available);
-      console.log("Booked times:", booked);
+      
+      // Filter out times that are too close to user's existing appointments
+      const userBookedTimes = appointmentHistory
+        .filter(appointment => 
+          appointment.date === date && 
+          appointment.status !== 'rejected' && 
+          appointment.status !== 'completed'
+        )
+        .map(appointment => appointment.time);
+
+      const available = allTimes.filter(time => {
+        // Check if time is already booked
+        if (booked.includes(time)) return false;
+
+        // Check if time is too close to user's existing appointments
+        const timeToCheck = new Date(`${date} ${time}`);
+        return !userBookedTimes.some(bookedTime => {
+          const existingTime = new Date(`${date} ${bookedTime}`);
+          const timeDiff = Math.abs(timeToCheck - existingTime);
+          const minutesDiff = timeDiff / (1000 * 60);
+          return minutesDiff < 90;
+        });
+      });
+
       setAvailableTimes(available);
       setBookedTimes(booked);
     } catch (error) {

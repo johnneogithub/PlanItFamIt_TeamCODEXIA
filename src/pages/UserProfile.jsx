@@ -247,80 +247,59 @@ function UserProfile() {
       const data = docSnapshot.data();
       if (data) {
         try {
-          // Handle appointments array
-          const appointments = Array.isArray(data.appointments) ? data.appointments : [];
-          const latestAppointment = appointments[appointments.length - 1];
+          let allAppointments = [];
           
+          // Add current appointments
+          if (Array.isArray(data.appointments)) {
+            allAppointments = [...data.appointments];
+          }
+
+          // Add appointment history
+          if (Array.isArray(data.appointmentHistory)) {
+            allAppointments = [...allAppointments, ...data.appointmentHistory];
+          }
+
+          // Process and deduplicate appointments
+          const processedAppointments = allAppointments.map(appointment => ({
+            id: String(appointment.id || ''),
+            name: String(appointment.name || 'N/A'),
+            date: String(appointment.date || 'N/A'),
+            time: String(appointment.time || 'N/A'),
+            status: String(appointment.status || 'pending'),
+            message: String(appointment.message || ''),
+            remark: String(appointment.remark || ''),
+            selectedPricingType: String(appointment.selectedPricingType || ''),
+            selectedServices: Array.isArray(appointment.selectedServices) ? 
+              appointment.selectedServices : [],
+            totalAmount: Number(appointment.totalAmount || 0),
+            completedAt: appointment.completedAt || null,
+            isCurrent: false
+          }));
+
+          // Remove duplicates based on date and time
+          const uniqueAppointments = Array.from(new Map(
+            processedAppointments.map(item => [item.date + item.time, item])
+          ).values());
+
+          // Sort appointments by date
+          const sortedAppointments = uniqueAppointments.sort((a, b) => {
+            const dateA = new Date(`${a.date} ${a.time}`);
+            const dateB = new Date(`${b.date} ${b.time}`);
+            return dateB - dateA;
+          });
+
+          setAppointmentHistory(sortedAppointments);
+          
+          // Update latest appointment data if exists
+          const latestAppointment = sortedAppointments[0];
           if (latestAppointment) {
-            // Convert appointment data to string values where needed
-            setAppointmentData({
-              ...latestAppointment,
-              name: String(latestAppointment.name || 'N/A'),
-              date: String(latestAppointment.date || 'N/A'),
-              time: String(latestAppointment.time || 'N/A'),
-              status: String(latestAppointment.status || 'pending'),
-              selectedPricingType: String(latestAppointment.selectedPricingType || ''),
-              selectedServices: Array.isArray(latestAppointment.selectedServices) ? 
-                latestAppointment.selectedServices : []
-            });
+            setAppointmentData(latestAppointment);
             setIsApproved(latestAppointment.status === 'approved');
             setRemark(String(latestAppointment.remark || ''));
             setRemarkTimestamp(latestAppointment.remarkTimestamp || null);
             setMessage(String(latestAppointment.message || ''));
           }
 
-          // Process all appointments
-          let allAppointments = [];
-          if (appointments.length > 0) {
-            allAppointments = appointments.map(appointment => ({
-              id: String(appointment.id || ''),
-              name: String(appointment.name || 'N/A'),
-              date: String(appointment.date || 'N/A'),
-              time: String(appointment.time || 'N/A'),
-              status: String(appointment.status || 'pending'),
-              message: String(appointment.message || ''),
-              remark: String(appointment.remark || ''),
-              selectedPricingType: String(appointment.selectedPricingType || ''),
-              selectedServices: Array.isArray(appointment.selectedServices) ? 
-                appointment.selectedServices : [],
-              totalAmount: Number(appointment.totalAmount || 0),
-              completedAt: appointment.completedAt || null,
-              isCurrent: appointment === latestAppointment
-            }));
-          }
-
-          // Add appointment history with proper string conversion
-          if (Array.isArray(data.appointmentHistory)) {
-            const historyAppointments = data.appointmentHistory.map(hist => ({
-              id: String(hist.id || ''),
-              name: String(hist.name || 'N/A'),
-              date: String(hist.date || 'N/A'),
-              time: String(hist.time || 'N/A'),
-              status: String(hist.status || 'completed'),
-              message: String(hist.message || ''),
-              remark: String(hist.remark || ''),
-              selectedPricingType: String(hist.selectedPricingType || ''),
-              selectedServices: Array.isArray(hist.selectedServices) ? 
-                hist.selectedServices : [],
-              totalAmount: Number(hist.totalAmount || 0),
-              completedAt: hist.completedAt || null,
-              isCurrent: false
-            }));
-            allAppointments = [...allAppointments, ...historyAppointments];
-          }
-
-          // Sort appointments
-          const sortedAppointments = allAppointments.sort((a, b) => {
-            if (a.status === 'completed' && b.status !== 'completed') return -1;
-            if (b.status === 'completed' && a.status !== 'completed') return 1;
-            if (a.isCurrent) return -1;
-            if (b.isCurrent) return 1;
-            const dateA = new Date(a.date + ' ' + a.time);
-            const dateB = new Date(b.date + ' ' + b.time);
-            return dateB - dateA;
-          });
-
-          setAppointmentHistory(sortedAppointments);
         } catch (error) {
           console.error("Error processing appointments:", error);
           toast.error("Error loading appointments");
@@ -785,7 +764,9 @@ function UserProfile() {
                         color: 'white' 
                       }}
                     >
-                      Total: {appointmentHistory.length}
+                      Total: {appointmentHistory.filter(apt => 
+                        apt.status === 'completed' && !apt.isCurrent
+                      ).length}
                     </span>
                     <Link 
                       to={`/AppointmentHistory/${user?.uid}`}
@@ -1078,7 +1059,7 @@ function UserProfile() {
                     <h5>Selected Services</h5>
                     <div className="selected-services-list">
                       {appointmentData.selectedServices.map((service, index) => (
-                        <div key={index} className="service-item p-3 border rounded mb-2">
+                        <div key={index} className=" service-item-user p-3 border rounded mb-2">
                           <div className="d-flex justify-content-between align-items-center">
                             <h6 className="mb-0">{service.name || 'Unnamed Service'}</h6>
                             <span className="badge bg-primary">

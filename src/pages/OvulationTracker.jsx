@@ -2,10 +2,16 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './OTDesignStyle.css';
 import Navbar from '../Components/Global/Navbar_Main';
+
+import rightbgpic from '../Components/Assets/AskingOT.png';
+import leftbgpic from '../Components/Assets/smartOTpic.png';
+
 const OvulationTracker = () => {
   const [formData, setFormData] = useState({
     firstMenstrualPeriod: '',
     lastMenstrualPeriod: '',
+    predictionStartDate: '',
+    predictionEndDate: '',
     height: '',
     weight: '',
     bleedingIntensity: '',
@@ -14,6 +20,7 @@ const OvulationTracker = () => {
   const [menstrualDuration, setMenstrualDuration] = useState(null);  // Track the menstrual duration
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [predictedDate, setPredictedDate] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,6 +80,9 @@ const OvulationTracker = () => {
   
       const data = await response.json();
       setResults(data);
+      if (data.predicted_date) {
+        setPredictedDate(new Date(data.predicted_date));
+      }
       setError(null);
     } catch (err) {
       console.error('Request failed:', err);
@@ -82,13 +92,13 @@ const OvulationTracker = () => {
 
   return (
     <div className="ot-page-container">
-            <Navbar />
+      <Navbar />
       <div className="ot-background-wrapper">
         <div className="ot-left-bg">
-          <img src="/images/smartOTpic.png" alt="" />
+          <img src={leftbgpic} alt="Smart Ovulation Tracking" />
         </div>
         <div className="ot-right-bg">
-          <img src="/images/AskingOT.png" alt="" />
+          <img src={rightbgpic} alt="Ovulation Tracking Questions" />
         </div>
       </div>
 
@@ -98,38 +108,79 @@ const OvulationTracker = () => {
 
         <div className="ot-tracker-grid">
           <div className="ot-date-card">
-            <h2>Your next ovulation date</h2>
+            <h2>Predicted Fertile Window</h2>
             <div className="ot-date-circle">
               <div className="ot-date-content">
-                <span className="ot-day-text">Tues</span>
-                <span className="ot-date">Nov 17</span>
-                <span className="ot-year">2024</span>
+                {predictedDate ? (
+                  <>
+                    <span className="ot-day-text">
+                      {predictedDate.toLocaleDateString('en-US', { weekday: 'short' })}
+                    </span>
+                    <span className="ot-date">
+                      {predictedDate.toLocaleDateString('en-US', { 
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
+                    <span className="ot-year">
+                      {predictedDate.getFullYear()}
+                    </span>
+                  </>
+                ) : (
+                  <span className="ot-no-prediction">
+                    Awaiting Prediction
+                  </span>
+                )}
               </div>
             </div>
             <div className="ot-date-range">
               <div className="ot-range-item">
                 <span>Starts</span>
-                <input type="date" name="firstMenstrualPeriod" value={formData.firstMenstrualPeriod} onChange={handleInputChange} />
+                <input 
+                  type="date" 
+                  name="predictionStartDate" 
+                  value={formData.predictionStartDate} 
+                  onChange={handleInputChange} 
+                />
               </div>
               <div className="ot-range-item">
                 <span>Ends</span>
-                <input type="date" name="lastMenstrualPeriod" value={formData.lastMenstrualPeriod} onChange={handleInputChange} />
+                <input 
+                  type="date" 
+                  name="predictionEndDate" 
+                  value={formData.predictionEndDate} 
+                  onChange={handleInputChange} 
+                />
               </div>
             </div>
           </div>
 
           <div className="ot-menstruation-details">
-            <div className="ot-input-field">
+            <div className="menstrual-input-card first-period">
               <label>Your first day of menstruation</label>
-              <input type="date" name="firstMenstrualPeriod" value={formData.firstMenstrualPeriod} onChange={handleInputChange} />
+              <input 
+                type="date" 
+                name="firstMenstrualPeriod" 
+                value={formData.firstMenstrualPeriod} 
+                onChange={handleInputChange} 
+              />
             </div>
-            <div className="ot-input-field">
+            <div className="menstrual-input-card last-period">
               <label>Your last day of menstruation</label>
-              <input type="date" name="lastMenstrualPeriod" value={formData.lastMenstrualPeriod} onChange={handleInputChange} />
+              <input 
+                type="date" 
+                name="lastMenstrualPeriod" 
+                value={formData.lastMenstrualPeriod} 
+                onChange={handleInputChange} 
+              />
             </div>
-            <div className="ot-input-field">
+            <div className="menstrual-input-card period-duration">
               <label>Total Days of menstruation</label>
-              <input type="text" value={menstrualDuration || ''} disabled />
+              <input 
+                type="text" 
+                value={menstrualDuration || ''} 
+                disabled 
+              />
             </div>
           </div>
           <div className="ot-health-indicators">

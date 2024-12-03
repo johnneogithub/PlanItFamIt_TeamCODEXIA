@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams, useHistory } from 'react-router-dom';
-import { FaCalendarAlt, FaClock, FaCommentDots, FaCheckCircle, FaTimesCircle, FaList, FaFileAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaCommentDots, FaCheckCircle, FaTimesCircle, FaList, FaFileAlt, FaArrowLeft } from 'react-icons/fa';
 import Navbar from '../Components/Global/Navbar_Main';
 import { doc, getDoc } from 'firebase/firestore';
 import { crud } from '../Config/firebase';
 import './AppointmentHistoryStyle.css';
+
+const formatPricingType = (type) => {
+  switch (type) {
+    case 'withoutPH':
+      return 'Without PhilHealth';
+    case 'PHBenefit':
+      return 'PhilHealth Benefit';
+    case 'withPH':
+      return 'With PhilHealth';
+    default:
+      return type;
+  }
+};
 
 const AppointmentHistory = () => {
   const history = useHistory();
@@ -17,6 +30,7 @@ const AppointmentHistory = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [isLoading, setIsLoading] = useState(true);
   const [isDataLoading, setIsDataLoading] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   useEffect(() => {
     const initializeData = async () => {
@@ -105,12 +119,12 @@ const AppointmentHistory = () => {
 
   const getStatusIcon = (status) => {
     switch(status) {
-      case 'completed': return <FaCheckCircle color="#007bff" />;
+      case 'completed': return <FaCheckCircle color="#1976d2" />;
       case 'rejected': return <FaTimesCircle color="#dc3545" />;
       case 'remarked': return <FaCommentDots color="#17a2b8" />;
       case 'approved': return <FaCheckCircle color="#28a745" />;
-      case 'pending': return <FaClock color="#ffc107" />;
-      default: return <FaClock color="#ffc107" />;
+      case 'pending': return <FaClock color="#f57c00" />;
+      default: return <FaClock color="#f57c00" />;
     }
   };
 
@@ -142,26 +156,47 @@ const AppointmentHistory = () => {
     history.push('/HistoricalAppointment');
   };
 
+  const handleGoBack = () => {
+    history.goBack();
+  };
+
+  const handleCardClick = (appointment) => {
+    setSelectedAppointment(appointment);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedAppointment(null);
+  };
+
   return (
     <>
       <Navbar />
       <div className="appointment-history-container">
         {isLoading ? (
           <div className="loading-spinner-small">
-            <div className="spinner-border spinner-border-sm" role="status">
+            <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading...</span>
             </div>
           </div>
         ) : (
           <>
             <div className="history-header">
+              <button 
+                className="back-button"
+                onClick={handleGoBack}
+              >
+                <FaArrowLeft /> Back
+              </button>
               <div className="header-title">
                 <h2>Appointment History</h2>
-                <span className="total-count">Total: {appointments.length}</span>
+                <span className="total-count">
+                  Total Completed: {appointments.filter(apt => apt.status === 'completed').length} Appointments
+                </span>
                 <button 
-                  className="btn btn-primary historical-btn"
+                  className="historical-btn"
                   onClick={handleNavigateToHistorical}
                 >
+                  <FaFileAlt className="me-2" />
                   View Historical Records
                 </button>
               </div>
@@ -224,7 +259,12 @@ const AppointmentHistory = () => {
                 </div>
               ) : (
                 filteredAppointments.map((appointment, index) => (
-                  <div key={index} className={`appointment-card ${appointment.status}`}>
+                  <div 
+                    key={index} 
+                    className={`appointment-card ${appointment.status}`}
+                    onClick={() => handleCardClick(appointment)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="card-header">
                       <h3>{appointment.appointmentType}</h3>
                       <div className="status-badge">
@@ -284,7 +324,126 @@ const AppointmentHistory = () => {
         
         {isDataLoading && (
           <div className="data-loading-indicator">
+            <div className="spinner-border spinner-border-sm me-2" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
             Updating...
+          </div>
+        )}
+      </div>
+
+      <div className={`appt-history-modal ${selectedAppointment ? 'show' : ''}`}>
+        <div className="appt-history-modal-backdrop" onClick={handleCloseModal}></div>
+        {selectedAppointment && (
+          <div className="appt-history-modal-content">
+            <div className="appt-history-modal-header">
+              <h3>{selectedAppointment.appointmentType}</h3>
+              <button className="appt-history-modal-close" onClick={handleCloseModal}>&times;</button>
+            </div>
+            <div className="appt-history-modal-body">
+              <div className="appointment-details">
+                <div className="appt-history-detail-row header-info">
+                  <div className="detail-item-history name-status">
+                    <div className="detail-item-history name-section">
+                      <strong>Name:</strong>
+                      <span className="name-value">{selectedAppointment.name || 'N/A'}</span>
+                    </div>
+                    <div className="detail-item-history status-section">
+                      <div className="status-badge">
+                        {getStatusIcon(selectedAppointment.status)}
+                        <span>{selectedAppointment.status || 'pending'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="appt-history-detail-row">
+                  <div className="datetime-info-row">
+                    <div className="datetime-info-item">
+                      <FaCalendarAlt />
+                      <strong>Date:</strong>
+                      <span>{formatDate(selectedAppointment.date)}</span>
+                    </div>
+                    <div className="datetime-info-item">
+                      <FaClock />
+                      <strong>Time:</strong>
+                      <span>{formatTime(selectedAppointment.time)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="appt-history-detail-row">
+                  <div className="detail-item-history">
+                    <strong>Pricing Type:</strong>
+                    <span>{formatPricingType(selectedAppointment.selectedPricingType)}</span>
+                  </div>
+                </div>
+
+                {selectedAppointment.selectedServices && selectedAppointment.selectedServices.length > 0 && (
+                  <div className="appt-history-detail-row">
+                    <div className="detail-item-history services-list">
+                      <strong>Selected Services</strong>
+                      <div className="services-container">
+                        {selectedAppointment.selectedServices.map((service, index) => (
+                          <div key={index} className="service-item">
+                            <span className="service-name">{service.name}</span>
+                            <div className="service-prices">
+                              {typeof service[selectedAppointment.selectedPricingType] === 'number' && (
+                                <div className="price-item">
+                                  <span className="price-value">
+                                    ₱{service[selectedAppointment.selectedPricingType].toLocaleString()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAppointment.message && (
+                  <div className="appt-history-detail-row">
+                    <div className="detail-item-history">
+                      <strong>Message:</strong>
+                      <p>{selectedAppointment.message}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAppointment.remark && (
+                  <div className="appt-history-detail-row">
+                    <div className="detail-item-history">
+                      <strong>Appointment Remark:</strong>
+                      <p>{selectedAppointment.remark}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAppointment.importedFile && (
+                  <div className="appt-history-detail-row">
+                    <div className="imported-file-section">
+                      <div className="imported-file-header">
+                        <FaFileAlt className="file-icon" />
+                        <strong>Imported File</strong>
+                      </div>
+                      <div className="imported-file-content">
+                        <span>This appointment has an imported file</span>
+                        <button 
+                          className="view-historical-btn"
+                          onClick={() => history.push('/HistoricalAppointment')}
+                        >
+                          <FaFileAlt />
+                          View in Historical Records
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
           </div>
         )}
       </div>

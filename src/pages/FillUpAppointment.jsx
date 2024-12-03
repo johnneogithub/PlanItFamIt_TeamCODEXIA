@@ -16,6 +16,8 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
   
   if (!isOpen) return null;
 
+  
+
   return (
     <div className="service-selection-modal">
       <div className="modal-content-selection">
@@ -77,13 +79,19 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
                   {services.filter(s => !s.isPackage).map((service, index) => (
                     <div 
                       key={index}
-                      className="service-card"
+                      className={`service-card ${selectedServices.some(s => s.name === service.name) ? 'selected' : ''}`}
                       onClick={() => onSelectService(service)}
                     >
                       <h3>{service.name}</h3>
                       <p>{service.description}</p>
                       <div className="service-price">
-                        ₱{service[selectedPricingType].toLocaleString()}
+                        <span className="price-label">Price:</span>
+                        <span className="price-amount">₱{service[selectedPricingType].toLocaleString()}</span>
+                      </div>
+                      <div className="pricing-type-badge">
+                        {selectedPricingType === 'withoutPH' && 'Without PhilHealth'}
+                        {selectedPricingType === 'PHBenefit' && 'PhilHealth Benefit'}
+                        {selectedPricingType === 'withPH' && 'With PhilHealth'}
                       </div>
                     </div>
                   ))}
@@ -165,7 +173,7 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
       </div>
     </div>
   );
-};
+};  
 
 const AppointmentFillUp = () => {
   const [searchQuery, setSearchQuery] = useState({
@@ -697,6 +705,9 @@ const AppointmentFillUp = () => {
 
   const renderServiceComponents = (service) => {
     if (!service.components) return null;
+
+
+
     
     return (
       <div className="service-components">

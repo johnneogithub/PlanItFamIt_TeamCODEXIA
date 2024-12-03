@@ -895,13 +895,6 @@ function UserProfile() {
                         {!isEditing && (
                           <>
                             <button 
-                              className="btn btn-outline-secondary btn-sm me-2" 
-                              onClick={forceRefreshDetails}
-                              title="Refresh data"
-                            >
-                              <FaSync /> Refresh
-                            </button>
-                            <button 
                               className="btn btn-outline-primary btn-sm" 
                               onClick={handleEdit} 
                               style={{ 

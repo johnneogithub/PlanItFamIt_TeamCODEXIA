@@ -15,93 +15,94 @@ const HistoricalAppointment = () => {
 
   useEffect(() => {
     if (auth.currentUser) {
-      fetchAppointmentsWithFiles(auth.currentUser.uid);
+      fetchAllUserData(auth.currentUser.uid);
     } else {
       setIsLoading(false);
     }
   }, []);
 
-  const fetchAppointmentsWithFiles = async (userId) => {
+  const fetchAllUserData = async (userId) => {
     try {
       setIsLoading(true);
       const userRef = doc(crud, `users/${userId}`);
       const docSnap = await getDoc(userRef);
       
+      if (!docSnap.exists()) {
+        setAppointments([]);
+        return;
+      }
+
+      const userData = docSnap.data();
       let allAppointments = [];
-      
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        if (userData.appointmentHistory) {
-          const appointmentsWithFiles = userData.appointmentHistory.filter(app => 
-            app.importedFile || app.importedFiles
-          ).map(app => ({
+
+      if (userData.appointmentHistory) {
+        const appointmentsWithFiles = userData.appointmentHistory
+          .filter(app => app.importedFile || app.importedFiles)
+          .map(app => ({
             ...app,
             importedFiles: app.importedFile ? [app.importedFile] : app.importedFiles
           }));
-          allAppointments.push(...appointmentsWithFiles);
-        }
-
-        if (userData.medicalRecords) {
-          const medicalRecords = userData.medicalRecords.map(record => ({
-            date: record.appointmentDate,
-            time: record.appointmentTime,
-            appointmentType: record.appointmentType,
-            importedFiles: [{
-              name: record.fileName,
-              url: record.fileUrl,
-              type: record.fileType,
-              uploadedAt: record.uploadedAt,
-              uploadedBy: record.uploadedBy
-            }],
-            source: 'medicalRecords'
-          }));
-          allAppointments.push(...medicalRecords);
-        }
-
-        const seenRecords = new Set();
-
-        const mergedRecords = allAppointments
-          .filter(record => {
-            if (!record.date || !record.time) return false;
-            
-            const key = `${record.date}_${record.time}`;
-            if (seenRecords.has(key)) {
-              const existingRecord = allAppointments.find(r => 
-                `${r.date}_${r.time}` === key
-              );
-              if (existingRecord && record.importedFiles) {
-                existingRecord.importedFiles = [
-                  ...(existingRecord.importedFiles || []),
-                  ...record.importedFiles
-                ];
-              }
-              return false;
-            }
-            seenRecords.add(key);
-            return true;
-          })
-          .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        const deduplicatedRecords = mergedRecords.map(record => {
-          if (record.importedFiles) {
-            const seenUrls = new Set();
-            record.importedFiles = record.importedFiles.filter(file => {
-              if (!file || !file.url || seenUrls.has(file.url)) return false;
-              seenUrls.add(file.url);
-              return true;
-            });
-          }
-          return record;
-        });
-
-        console.log('Final Merged Records:', deduplicatedRecords); 
-        setAppointments(deduplicatedRecords);
+        allAppointments.push(...appointmentsWithFiles);
       }
+
+      if (userData.medicalRecords) {
+        const medicalRecords = userData.medicalRecords.map(record => ({
+          date: record.appointmentDate,
+          time: record.appointmentTime,
+          appointmentType: record.appointmentType,
+          importedFiles: [{
+            name: record.fileName,
+            url: record.fileUrl,
+            type: record.fileType,
+            uploadedAt: record.uploadedAt,
+            uploadedBy: record.uploadedBy
+          }],
+          source: 'medicalRecords'
+        }));
+        allAppointments.push(...medicalRecords);
+      }
+
+      const processedRecords = mergeAndDeduplicateRecords(allAppointments);
+      setAppointments(processedRecords);
+
     } catch (error) {
-      console.error("Error fetching appointments:", error);
+      console.error("Error fetching user data:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const mergeAndDeduplicateRecords = (records) => {
+    const seenRecords = new Map();
+
+    records.forEach(record => {
+      if (!record.date || !record.time) return;
+      
+      const key = `${record.date}_${record.time}`;
+      if (seenRecords.has(key)) {
+        const existing = seenRecords.get(key);
+        existing.importedFiles = [
+          ...(existing.importedFiles || []),
+          ...(record.importedFiles || [])
+        ];
+      } else {
+        seenRecords.set(key, record);
+      }
+    });
+
+    const finalRecords = Array.from(seenRecords.values()).map(record => {
+      if (record.importedFiles) {
+        const seenUrls = new Set();
+        record.importedFiles = record.importedFiles.filter(file => {
+          if (!file || !file.url || seenUrls.has(file.url)) return false;
+          seenUrls.add(file.url);
+          return true;
+        });
+      }
+      return record;
+    });
+
+    return finalRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
   };
 
   const handleFilePreview = (file) => {

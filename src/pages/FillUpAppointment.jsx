@@ -27,13 +27,19 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
         <div className="modal-tabs-selection">
           <button 
             className={`tab-btn ${activeTab === 'packages' ? 'active' : ''}`}
-            onClick={() => setActiveTab('packages')}
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('packages');
+            }}
           >
             Packages
           </button>
           <button 
             className={`tab-btn ${activeTab === 'individual' ? 'active' : ''}`}
-            onClick={() => setActiveTab('individual')}
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('individual');
+            }}
           >
             Individual Services
           </button>
@@ -77,13 +83,44 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
                   {services.filter(s => !s.isPackage).map((service, index) => (
                     <div 
                       key={index}
-                      className="service-card"
+                      className={`service-card ${selectedServices.some(s => s.name === service.name) ? 'selected' : ''}`}
                       onClick={() => onSelectService(service)}
                     >
-                      <h3>{service.name}</h3>
-                      <p>{service.description}</p>
+                      <div className="service-card-header">
+                        <div className="service-title">
+                          <i className="fas fa-heartbeat service-icon"></i>
+                          <h3>{service.name}</h3>
+                        </div>
+                        {/* <div className="pricing-type-badge">
+                          <i className="fas fa-tag"></i>
+                          <span>
+                            {selectedPricingType === 'withoutPH' && 'Without PhilHealth'}
+                            {selectedPricingType === 'PHBenefit' && 'PhilHealth Benefit'}
+                            {selectedPricingType === 'withPH' && 'With PhilHealth'}
+                          </span>
+                        </div> */}
+                      </div>
+                      <div className="service-card-body">
+                        <p>{service.description}</p>
+                        <div className="service-features">
+                          <div className="feature-item">
+                            <i className="fas fa-check-circle"></i>
+                            <span>Professional Service</span>
+                          </div>
+                          <div className="feature-item">
+                            <i className="fas fa-clock"></i>
+                            <span>Flexible Schedule</span>
+                          </div>
+                        </div>
+                      </div>
                       <div className="service-price">
-                        ₱{service[selectedPricingType].toLocaleString()}
+                        <div className="price-info">
+                          <span className="price-label">Price</span>
+                          <span className="price-amount">₱{service[selectedPricingType].toLocaleString()}</span>
+                        </div>
+                        {/* <button className="select-service-btn">
+                          {selectedServices.some(s => s.name === service.name) ? 'Selected' : 'Select'}
+                        </button> */}
                       </div>
                     </div>
                   ))}
@@ -165,7 +202,7 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
       </div>
     </div>
   );
-};
+};  
 
 const AppointmentFillUp = () => {
   const [searchQuery, setSearchQuery] = useState({
@@ -697,7 +734,7 @@ const AppointmentFillUp = () => {
 
   const renderServiceComponents = (service) => {
     if (!service.components) return null;
-    
+
     return (
       <div className="service-components">
         <h6>Package Breakdown:</h6>
@@ -761,9 +798,9 @@ const AppointmentFillUp = () => {
   return (
     <>
       <Navbar />
-      <div className="appointment-container">
+      <div className="appointment-container-bg">
         <div className="appointment-content">
-          <div className="appointment-header">
+          <div className="appointment-header-fil-up">
             <h1>Make An Appointment</h1>
             <p>with St. Margaret Lying-in Clinic and take the first step towards a healthy and happy delivery.</p>
           </div>

@@ -9,7 +9,13 @@ import FP1 from '../Components/Assets/FamilyPlanning_img.jpg';
 import FP2 from '../Components/Assets/FamilyPlanning_img2.jpg';
 import SX1 from '../Components/Assets/Sex_img1.jpg';
 import SX2 from '../Components/Assets/Safesex_img.jpg';
-
+import SX3 from '../Components/Assets/couple_bed.png';
+import SX4 from '../Components/Assets/talking-about.jpg';
+import SX5 from '../Components/Assets/pic6.jpg';
+import SX6 from '../Components/Assets/pic7.jpg';
+import SX7 from '../Components/Assets/pic8.png';
+import SX8 from '../Components/Assets/pic9.jpg';
+import SX9 from '../Components/Assets/pic10.png';
 const Articles = () => {
   return (
     <div className="articles-page">
@@ -54,47 +60,46 @@ const Articles = () => {
             link="https://www.netdoctor.co.uk/healthy-living/sex-life/a2314/sexual-intercourse/"
           />
           <ArticleCard 
-            image={SX2}
+            image={SX7}
             category="Sex"
             title="Practicing Safe Sex"
             link="https://health.clevelandclinic.org/safe-sex"
           />
           <ArticleCard 
-            image={SX2}
+            image={SX3}
             category="UTIs "
             title="Why You Get UTIs After Sex — and How To Prevent Them"
             link="https://health.clevelandclinic.org/uti-after-sex"
           />
                <ArticleCard 
-            image={SX2}
+            image={SX8}
             category="Ovulate"
             title="When do I ovulate, how do I know, and what does it feel like?"
             link="https://www.medicalnewstoday.com/articles/150870#how-to-track-it"
           />
                <ArticleCard 
-            image={SX2}
-            category="Vaginal Discharge"
-            title="What do different types of vaginal discharge mean?"
-            link="https://www.medicalnewstoday.com/articles/150870"
+            image={SX9}
+            category="Infertility in males and females"
+            title="What is infertility?"
+            link="https://www.medicalnewstoday.com/articles/165748"
           />
                <ArticleCard 
-            image={SX2}
+            image={SX4}
             category="Periods"
             title="Talking about periods at home"
             link="https://www.unicef.org/parenting/health/talking-about-periods-at-home?gad_source=1&gclid=CjwKCAjwg-24BhB_EiwA1ZOx8tWARSUDDBfu3MrGl--dXQWhpmZz_Tt12cukNSofLRdzYgE163ONkhoCZQIQAvD_BwE"
           />
                <ArticleCard 
-            image={SX2}
-            category="Late Ovulation And Pregnancy"
-            title="Monthly calendar with date circled and the word ovulation
-Late Ovulation And Pregnancy"
-            link="https://triofertility.com/late-ovulation-and-pregnancy/#:~:text=Late%20ovulation%20is%20ovulation%20that,in%20your%20baby%2Dmaking%20plans"
+            image={SX5}
+            category="Contraceptive Implant"
+            title="What is a contraceptive implant?"
+            link="https://my.clevelandclinic.org/health/articles/24564-contraceptive-implant"
           />
                <ArticleCard 
-            image={SX2}
-            category="Birth Control"
-            title="Birth control and family planning"
-            link="https://medlineplus.gov/ency/article/001946.htm"
+            image={SX6}
+            category="Birth Control Options"
+            title="What is birth control?"
+            link="https://my.clevelandclinic.org/health/articles/11427-birth-control-options"
           />  
         </div>
       </main>

@@ -1,0 +1,44 @@
+.image-preview-container-unique {
+    background-color: #ffffff; /* Change to white for a cleaner look */
+    padding: 30px; /* Increased padding for better spacing */
+    border-radius: 12px; /* Slightly larger border radius */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Deeper shadow for a more elevated look */
+    max-width: 700px; /* Increased max width */
+    margin: 40px auto; /* Added margin for spacing from top */
+    text-align: center; /* Center text alignment */
+}
+
+.image-preview-title-unique {
+    font-size: 28px; /* Increased font size */
+    margin-bottom: 25px; /* Increased margin for spacing */
+    color: #333; /* Darker color for better contrast */
+    font-family: 'Arial', sans-serif; /* Changed font for a cleaner look */
+}
+
+.image-preview-img-unique {
+    max-width: 100%;
+    max-height: 70vh; /* Reduced max height for better layout */
+    border-radius: 12px; /* Match border radius with container */
+    border: 2px solid #ddd; /* Added border for image */
+    margin-bottom: 20px; /* Added margin for spacing */
+}
+
+.image-preview-button-unique {
+    padding: 12px 24px; /* Increased padding for a larger button */
+    font-size: 18px; /* Increased font size */
+    color: white;
+    background-color: #007bff; /* Bootstrap primary color */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Added transition for smooth effects */
+}
+
+.image-preview-button-unique:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+    transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+.image-preview-button-unique:active {
+    transform: translateY(0); /* Reset lift effect on click */
+} 

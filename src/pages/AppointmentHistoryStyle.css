@@ -781,4 +781,73 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Add responsive styles for smaller screens */
+@media (max-width: 768px) {
+  .appointment-history-container {
+    padding: 1rem; /* Reduce padding on smaller screens */
+  }
+
+  .history-header {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: flex-start; /* Align items to the start */
+  }
+
+  .header-title {
+    flex-direction: column; /* Stack title and total count */
+    align-items: flex-start; /* Align items to the start */
+  }
+
+  .controls-section {
+    flex-direction: column; /* Stack controls vertically */
+    align-items: flex-start; /* Align items to the start */
+  }
+
+  .filter-section {
+    flex-wrap: wrap; /* Allow filters to wrap */
+  }
+
+  .appointments-grid {
+    grid-template-columns: 1fr; /* Single column layout */
+  }
+
+  .appointment-card {
+    margin: 0.5rem 0; /* Add margin between cards */
+  }
+
+  .appt-history-modal-content {
+    width: calc(100% - 2rem); /* Full width with margin */
+    margin: 1rem; /* Add margin */
+  }
+
+  .appt-history-modal-body {
+    padding: 1rem; /* Reduce padding */
+  }
+
+  .datetime-info-row {
+    flex-direction: column; /* Stack datetime info vertically */
+  }
+
+  .datetime-info-item {
+    width: 100%; /* Full width for datetime items */
+  }
+
+  .imported-file-content {
+    flex-direction: column; /* Stack imported file content */
+    text-align: center; /* Center text */
+  }
+}
+
+.enhanced-design {
+    border: 1px solid #ccc; /* Add a border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 16px; /* Padding inside the card */
+    margin: 10px; /* Margin between cards */
+    transition: transform 0.2s; /* Smooth hover effect */
+}
+
+.enhanced-design:hover {
+    transform: scale(1.02); /* Slightly enlarge on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
 } 

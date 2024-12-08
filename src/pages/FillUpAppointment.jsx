@@ -488,8 +488,18 @@ const AppointmentFillUp = () => {
     e.preventDefault();
     setSubmitted(true);
 
+    // Check if the selected date is in the past
+    const selectedDate = new Date(searchQuery.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+
+    if (selectedDate < today) {
+        toast.error("You cannot select a past date for the appointment.");
+        return;
+    }
+
     if (!validateForm()) {
-      return;
+        return;
     }
 
     try {
@@ -953,6 +963,7 @@ const AppointmentFillUp = () => {
                       value={searchQuery.date}
                       onChange={handleChange}
                       autoComplete="off"
+                      min={new Date().toISOString().split("T")[0]}
                     />
                   </div>
                   {shouldShowError('date', searchQuery.date) && 
@@ -1033,7 +1044,7 @@ const AppointmentFillUp = () => {
                 </button>
               </div>
               {/* New section to display booked times */}
-              {bookedTimes.length > 0 && (
+              {/* {bookedTimes.length > 0 && (
                 <div className="booked-times">
                   <h3>Already Booked Times</h3>
                   <ul className="booked-times-list">
@@ -1047,7 +1058,7 @@ const AppointmentFillUp = () => {
                     ))}
                   </ul>
                 </div>
-              )}
+              )} */}
               {showTotals && (
                 <div className="totals-popup">
                   <div className="totals-popup-content">

@@ -4,11 +4,12 @@ import { db as crud, storage } from '../../Config/firebase';
 import Sidebar from '../Global/Sidebar';
 import './PatientsRecordStyle.css';
 import { useLocation } from 'react-router-dom';
-import { FaTrash, FaSearch, FaSort, FaFile, FaEye, FaFolder, FaTrashAlt, FaUser, FaUserCircle, FaEnvelope, FaCalendarAlt, FaPhone, FaMapMarkerAlt, FaVenusMars, FaClock, FaCloudUploadAlt, FaSpinner, FaTimes, FaImage, FaFileWord, FaFileImport, FaFileDownload } from 'react-icons/fa';
+import { FaTrash, FaSearch, FaSort, FaFile, FaEye, FaFolder, FaTrashAlt, FaUserCircle, FaEnvelope, FaCalendarAlt, FaPhone, FaMapMarkerAlt, FaVenusMars, FaClock, FaCloudUploadAlt, FaSpinner, FaTimes, FaImage, FaFileWord, FaFileImport, FaFileDownload, FaUser } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getAuth } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import UserProfilePopup from './AdminLogin/UserProfilePopup';
 
 function formatPricingType(type) {
   switch (type) {
@@ -57,6 +58,8 @@ function PatientsRecord() {
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
   const [selectedRecordForImport, setSelectedRecordForImport] = useState(null);
   const [importedFiles, setImportedFiles] = useState({});
+  const [showUserProfilePopup, setShowUserProfilePopup] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     fetchRecords();
@@ -270,58 +273,6 @@ function PatientsRecord() {
         console.error("Error deleting record: ", error);
         toast.error('Failed to delete record');
       }
-    }
-  };
-
-  const fetchUserProfile = async (record) => {
-    const firestore = getFirestore();
-    try {
-      const userQuery = query(
-        collection(firestore, 'users'),
-        where('email', '==', record.email),
-        limit(1)
-      );
-      const userSnapshot = await getDocs(userQuery);
-      
-      if (!userSnapshot.empty) {
-        const userData = userSnapshot.docs[0].data();
-        setSelectedProfile({
-          ...record,
-          profilePicture: userData.profilePicture || null,
-          phone: userData.phone || record.phone,
-          location: userData.location || record.location,
-          gender: userData.gender || record.gender
-        });
-      } else {
-        setSelectedProfile(record);
-      }
-      setShowProfileModal(true);
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      setSelectedProfile(record);
-      setShowProfileModal(true);
-    }
-  };
-
-  const handleViewProfile = (record) => {
-    fetchUserProfile(record);
-  };
-
-  const handleViewUserProfile = async (record) => {
-    try {
-      const userDoc = await getDoc(doc(crud, 'users', record.userId));
-      if (userDoc.exists()) {
-        setSelectedUserProfile({
-          ...userDoc.data(),
-          id: record.userId
-        });
-        setShowUserProfileModal(true);
-      } else {
-        toast.error("User profile not found");
-      }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      toast.error("Failed to load user profile");
     }
   };
 
@@ -635,6 +586,48 @@ function PatientsRecord() {
     }
   };
 
+  const handleViewProfile = async (event, appointment) => {
+    try {
+        const firestore = getFirestore();
+        const userRef = doc(firestore, 'users', appointment.userId);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            const userLocation = userData.location || 'N/A';
+            const userPhone = userData.phone || 'N/A';
+            const userProfilePicture = userData.profilePicture || 'defaultProfilePicUrl';
+            const appointmentRemark = appointment.remark || 'No remark available';
+            
+            setSelectedUser({
+                id: userSnap.id,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                email: userData.email,
+                age: userData.age,
+                gender: userData.gender,
+                phone: userPhone,
+                location: userLocation,
+                profilePicture: userProfilePicture,
+                appointment: {
+                    remark: appointmentRemark,
+                    status: appointment.status,
+                    appointmentType: appointment.appointmentType ,
+                    date: appointment.date,
+                    time: appointment.time,
+                    selectedPricingType: appointment.selectedPricingType,
+                    selectedServices: appointment.selectedServices,
+                }
+            });
+            setShowUserProfilePopup(true);
+        } else {
+            console.error('User not found');
+        }
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="dashboard-container">
@@ -645,7 +638,9 @@ function PatientsRecord() {
       </div>
     );
   }
-
+  const closeUserProfilePopup = () => {
+    setSelectedUser(null);
+  };
   return (
     <div className="dashboard-container">
       <Sidebar />
@@ -712,6 +707,16 @@ function PatientsRecord() {
                           <FaFolder className="folder-icon" />
                           <div className="folder-label">{name || 'N/A'}</div>
                           <div className="record-count">{records.length} records</div>
+                          <button 
+                            className="btn btn-icon" 
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent folder click
+                              handleViewProfile(e, records[0]); // Pass the event and the first record
+                            }}
+                            title="View Profile"
+                          >
+                            <FaUserCircle />
+                          </button>
                         </div>
                       );
                     })}
@@ -777,7 +782,7 @@ function PatientsRecord() {
                                   {record.email}
                                 </span>
                                 <span className="age-info">
-                                  <FaUser className="icon" />
+                                  <FaUserCircle className="icon" />
                                   Age: {record.age}
                                 </span>
                               </div>
@@ -823,26 +828,6 @@ function PatientsRecord() {
                           </div>
                           <div className="file-actions">
                             <button 
-                              className="action-btn profile-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewUserProfile(record);
-                              }}
-                              title="View profile"
-                            >
-                              <FaUserCircle />
-                            </button>
-                            <button 
-                              className="action-btn view-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleFileClick(record);
-                              }}
-                              title="View details"
-                            >
-                              <FaEye />
-                            </button>
-                            <button 
                               className="action-btn import-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -878,213 +863,6 @@ function PatientsRecord() {
         </div>
       </div>
 
-      {showProfileModal && selectedProfile && (
-        <div className="folder-popup" onClick={(e) => {
-          if (e.target.className === 'folder-popup') {
-            setShowProfileModal(false);
-          }
-        }}>
-          <div className="folder-popup-content user-profile-style">
-            <div className="row">
-              <div className="col-lg-4">
-                <div className="card profile-card shadow">
-                  <div className="card-body text-center">
-                    <div className="profile-image-container mb-4">
-                      {selectedProfile.profilePicture ? (
-                        <img
-                          src={selectedProfile.profilePicture}
-                          alt="Profile"
-                          className="profile-image rounded-circle"
-                        />
-                      ) : (
-                        <div className="profile-image-placeholder rounded-circle">
-                          <FaUserCircle className="profile-icon" size={150} />
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="mb-2">{selectedProfile.name || 'User'}</h3>
-                    <p className="text-muted">{selectedProfile.email}</p>
-                  </div>
-                </div>
-
-                <div className="card mt-4 stats-card shadow">
-                  <div className="card-body">
-                    <h4 className="card-title mb-4">Appointment Stats</h4>
-                    <div className="stats-grid">
-                      <div className="stat-item">
-                        <div className="stat-icon pending">
-                          <FaCalendarAlt />
-                        </div>
-                        <div className="stat-label">Status</div>
-                        <div className={`stat-value ${selectedProfile.status || 'pending'}`}>
-                          {capitalizeFirstLetter(selectedProfile.status || 'pending')}
-                        </div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-icon type">
-                          <FaFile />
-                        </div>
-                        <div className="stat-label">Type</div>
-                        <div className="stat-value">
-                          {selectedProfile.appointmentType || 'N/A'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card mt-4 remark-card shadow">
-                  <div className="card-body">
-                    <h4 className="card-title mb-4">Appointment Remark</h4>
-                    {selectedProfile.remark ? (
-                      <>
-                        <p>{selectedProfile.remark}</p>
-                        {selectedProfile.remarkTimestamp && (
-                          <small className="text-muted">
-                            Added on: {new Date(selectedProfile.remarkTimestamp).toLocaleString()}
-                          </small>
-                        )}
-                      </>
-                    ) : (
-                      <p>No remark available</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="card mt-4 files-card shadow">
-                  <div className="card-body">
-                    <h4 className="card-title mb-4">Attached Files</h4>
-                    {selectedProfile.importedFile ? (
-                      <div className="file-link-container">
-                        <a 
-                          href={selectedProfile.importedFile.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="file-link"
-                        >
-                          <FaFile /> {selectedProfile.importedFile.name}
-                        </a>
-                      </div>
-                    ) : (
-                      <p>No files attached</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-8">
-                <div className="card details-card shadow">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h4 className="card-title m-0">Personal Details</h4>
-                    </div>
-                    <div className="row">
-                      <div className="col-md-6 mb-3">
-                        <div className="detail-item d-flex align-items-center">
-                          <FaUser className="detail-icon" />
-                          <div className="ms-3">
-                            <h6 className="mb-0 text-muted">Full Name</h6>
-                            <p className="mb-0 fw-bold">{selectedProfile.name || 'Not provided'}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 mb-3">
-                        <div className="detail-item d-flex align-items-center">
-                          <FaEnvelope className="detail-icon" />
-                          <div className="ms-3">
-                            <h6 className="mb-0 text-muted">Email</h6>
-                            <p className="mb-0 fw-bold">{selectedProfile.email || 'Not provided'}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 mb-3">
-                        <div className="detail-item d-flex align-items-center">
-                          <FaCalendarAlt className="detail-icon" />
-                          <div className="ms-3">
-                            <h6 className="mb-0 text-muted">Age</h6>
-                            <p className="mb-0 fw-bold">{selectedProfile.age || 'Not provided'}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 mb-3">
-                        <div className="detail-item d-flex align-items-center">
-                          <FaPhone className="detail-icon" />
-                          <div className="ms-3">
-                            <h6 className="mb-0 text-muted">Phone</h6>
-                            <p className="mb-0 fw-bold">{selectedProfile.phone || 'Not provided'}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 mb-3">
-                        <div className="detail-item d-flex align-items-center">
-                          <FaMapMarkerAlt className="detail-icon" />
-                          <div className="ms-3">
-                            <h6 className="mb-0 text-muted">Location</h6>
-                            <p className="mb-0 fw-bold">{selectedProfile.location || 'Not provided'}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 mb-3">
-                        <div className="detail-item d-flex align-items-center">
-                          <FaVenusMars className="detail-icon" />
-                          <div className="ms-3">
-                            <h6 className="mb-0 text-muted">Gender</h6>
-                            <p className="mb-0 fw-bold">{selectedProfile.gender || 'Not provided'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="card mt-4 appointment-card shadow">
-                  <div className="card-body">
-                    <h4 className="card-title mb-4">Appointment Status</h4>
-                    <div className="table-responsive">
-                      <table className="table table-hover">
-                        <thead>
-                          <tr>
-                            <th>Type</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>{selectedProfile.appointmentType}</td>
-                            <td>{new Date(selectedProfile.date).toLocaleDateString()}</td>
-                            <td>{selectedProfile.time}</td>
-                            <td>
-                              <span className={`badge ${getStatusBadgeClass(selectedProfile.status)}`}>
-                                {capitalizeFirstLetter(selectedProfile.status || 'pending')}
-                              </span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    {selectedProfile.message && (
-                      <div className="mt-3">
-                        <h5>Additional Message:</h5>
-                        <p>{selectedProfile.message}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="folder-popup-actions">
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setShowProfileModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {selectedFile && showAppointmentModal && (
         <div className="folder-popup" onClick={(e) => {
           if (e.target.className === 'folder-popup') {
@@ -1092,31 +870,20 @@ function PatientsRecord() {
           }
         }}>
           <div className="folder-popup-content appointment-modal">
-            <div className="modal-header glass-header">
-              <div className="d-flex align-items-center">
-                <div className="header-icon">
-                  <FaFileDownload size={24} />
-                </div>
-                <div className="ms-3">
-                  <h4 className="modal-title mb-0" id="filePreviewTitle">
-                    Medical Record
-                  </h4>
-                  <small className="text-muted">
-                    {selectedFile?.importedFile?.name || 'No file name available'}
-                  </small>
-                </div>
-              </div>
+            <div className="modal-header">
+              <h4 className="modal-title">{selectedFile?.importedFile?.name || 'Medical Record'}</h4>
               <button 
-                className="btn-close"
+                className="close-modal-btn"
                 onClick={() => setShowAppointmentModal(false)}
                 aria-label="Close modal"
-              ></button>
+              >
+                &times;
+              </button>
             </div>
 
-            <div className="appointment-modal-body">
+            <div className="modal-body">
               <div className="info-card full-width">
                 <div className="info-card-header">
-                  <FaUser className="info-icon" />
                   <h4>Basic Information</h4>
                 </div>
                 <div className="info-card-content info-grid">
@@ -1141,7 +908,6 @@ function PatientsRecord() {
 
               <div className="info-card full-width">
                 <div className="info-card-header">
-                  <FaFile className="info-icon" />
                   <h4>Appointment Details</h4>
                 </div>
                 <div className="info-card-content">
@@ -1181,7 +947,6 @@ function PatientsRecord() {
               {selectedFile.importedFiles && selectedFile.importedFiles.length > 0 && (
                 <div className="info-card full-width">
                   <div className="info-card-header">
-                    <FaFile className="info-icon" />
                     <h4>Attached Files ({selectedFile.importedFiles.length})</h4>
                   </div>
                   <div className="info-card-content">
@@ -1208,7 +973,7 @@ function PatientsRecord() {
               )}
             </div>
 
-            <div className="appointment-modal-footer">
+            <div className="modal-footer">
               <button 
                 className="btn btn-secondary"
                 onClick={() => setShowAppointmentModal(false)}
@@ -1219,93 +984,11 @@ function PatientsRecord() {
           </div>
         </div>
       )}
-      {showUserProfileModal && selectedUserProfile && (
-        <div className="folder-popup" onClick={(e) => {
-          if (e.target.className === 'folder-popup') {
-            setShowUserProfileModal(false);
-          }
-        }}>
-          <div className="folder-popup-content user-profile-modal">
-            <div className="modal-header">
-              <h3>User Profile</h3>
-              <button 
-                className="close-modal-btn"
-                onClick={() => setShowUserProfileModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="profile-header">
-                <div className="profile-image-container">
-                  {selectedUserProfile.profilePicture ? (
-                    <img
-                      src={selectedUserProfile.profilePicture}
-                      alt="Profile"
-                      className="profile-image"
-                    />
-                  ) : (
-                    <div className="profile-image-placeholder">
-                      <FaUserCircle size={80} />
-                    </div>
-                  )}
-                </div>
-                <div className="profile-name">
-                  <h4>{selectedUserProfile.name || 'N/A'}</h4>
-                  <p className="email">{selectedUserProfile.email}</p>
-                </div>
-              </div>
-
-              <div className="profile-details">
-                <div className="detail-section-user">
-                  <h5>Personal Information</h5>
-                  <div className="details-grid">
-                    <div className="detail-item">
-                      <label>Phone</label>
-                      <span>{selectedUserProfile.phone || 'N/A'}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Age</label>
-                      <span>{selectedUserProfile.age || 'N/A'}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Gender</label>
-                      <span>{selectedUserProfile.gender || 'N/A'}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Location</label>
-                      <span>{selectedUserProfile.location || 'N/A'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedUserProfile.appointmentHistoryCount && (
-                  <div className="detail-section-user">
-                    <h5>Appointment Statistics</h5>
-                    <div className="stats-grid">
-                      <div className="stat-item">
-                        <div className="stat-value">{selectedUserProfile.appointmentHistoryCount.total || 0}</div>
-                        <div className="stat-label">Total Appointments</div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-value completed">{selectedUserProfile.appointmentHistoryCount.completed || 0}</div>
-                        <div className="stat-label">Completed</div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-value pending">{selectedUserProfile.appointmentHistoryCount.pending || 0}</div>
-                        <div className="stat-label">Pending</div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-value remarked">{selectedUserProfile.appointmentHistoryCount.remarked || 0}</div>
-                        <div className="stat-label">Remarked</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      {showUserProfilePopup && selectedUser && (
+        <UserProfilePopup
+          user={selectedUser}
+          onClose={closeUserProfilePopup}
+        />
       )}
       {selectedRecordForImport && (
         <div className="folder-popup" onClick={(e) => {

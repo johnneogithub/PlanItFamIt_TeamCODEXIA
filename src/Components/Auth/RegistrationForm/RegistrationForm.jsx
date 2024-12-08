@@ -109,75 +109,80 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
     };
 
     const SignUp = async (e) => {
-        e.preventDefault();
-
-        if (!birthdate) {
-            alert("Please select your birthdate.");
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            alert("Passwords don't match!");
-            return;
-        }
-
-        if (!agreedToTerms || !agreedToPrivacy) {
-            alert("You must agree to both Terms and Conditions and Data Privacy Act to register.");
-            return;
-        }
-
-        const auth = getAuth();
-        const firestore = getFirestore();
-
-        try {
-            const existingUser = await fetchSignInMethodsForEmail(auth, email);
-            if (existingUser.length > 0) {
-                alert("This email is already registered. Please use a different email.");
-                return;
-            }
-
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // Calculate age before saving to Firestore
-            const age = calculateAge(birthdate);
-
-            // Save user details to Firestore
-            const userRef = doc(firestore, 'users', user.uid);
-            await setDoc(userRef, {
-                firstName: firstName,
-                middleInitial: middleInitial,
-                lastName: lastName,
-                email: email,
-                birthdate: birthdate.toISOString(),
-                age: age, // Add the calculated age
-                createdAt: new Date().toISOString(),
-                // Add any other relevant fields
-            });
-
-            await sendEmailVerification(user);
-            alert("A verification email has been sent. Please verify your email before logging in.");
-
-            const userCountRef = doc(firestore, 'statistics', 'userCount');
-            await runTransaction(firestore, async (transaction) => {
-                const userCountDoc = await transaction.get(userCountRef);
-                if (!userCountDoc.exists()) {
-                    transaction.set(userCountRef, { count: 1 });
-                } else {
-                    const newCount = userCountDoc.data().count + 1;
-                    transaction.update(userCountRef, { count: newCount });
-                }
-            });
-
-            setRegistrationSuccess(true);
-            setTimeout(() => {
-                history.push("/Login");
-            }, 2000);
-        } catch (error) {
-            console.error("Error registering user:", error.message);
-            alert("Error during registration: " + error.message);
-        }
-    };
+      e.preventDefault();
+  
+      if (!birthdate) {
+          alert("Please select your birthdate.");
+          return;
+      }
+  
+      // Calculate age before proceeding
+      const age = calculateAge(birthdate);
+  
+      if (age < 20) {
+          alert("You must be 20 years old or older to register.");
+          return;
+      }
+  
+      if (password !== confirmPassword) {
+          alert("Passwords don't match!");
+          return;
+      }
+  
+      if (!agreedToTerms || !agreedToPrivacy) {
+          alert("You must agree to both Terms and Conditions and Data Privacy Act to register.");
+          return;
+      }
+  
+      const auth = getAuth();
+      const firestore = getFirestore();
+  
+      try {
+          const existingUser = await fetchSignInMethodsForEmail(auth, email);
+          if (existingUser.length > 0) {
+              alert("This email is already registered. Please use a different email.");
+              return;
+          }
+  
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+  
+          // Save user details to Firestore
+          const userRef = doc(firestore, 'users', user.uid);
+          await setDoc(userRef, {
+              firstName: firstName,
+              middleInitial: middleInitial,
+              lastName: lastName,
+              email: email,
+              birthdate: birthdate.toISOString(),
+              age: age,
+              createdAt: new Date().toISOString(),
+          });
+  
+          await sendEmailVerification(user);
+          alert("A verification email has been sent. Please verify your email before logging in.");
+  
+          const userCountRef = doc(firestore, 'statistics', 'userCount');
+          await runTransaction(firestore, async (transaction) => {
+              const userCountDoc = await transaction.get(userCountRef);
+              if (!userCountDoc.exists()) {
+                  transaction.set(userCountRef, { count: 1 });
+              } else {
+                  const newCount = userCountDoc.data().count + 1;
+                  transaction.update(userCountRef, { count: newCount });
+              }
+          });
+  
+          setRegistrationSuccess(true);
+          setTimeout(() => {
+              history.push("/Login");
+          }, 2000);
+      } catch (error) {
+          console.error("Error registering user:", error.message);
+          alert("Error during registration: " + error.message);
+      }
+  };
+  
 
   return (
     <>

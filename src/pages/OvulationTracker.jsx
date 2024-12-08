@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './OTDesignStyle.css';
 import Navbar from '../Components/Global/Navbar_Main';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarAlt, faWeight, faRulerVertical } from '@fortawesome/free-solid-svg-icons';
 
 import rightbgpic from '../Components/Assets/AskingOT.png';
 import leftbgpic from '../Components/Assets/smartOTpic.png';
+import btnpre from '../Components/Assets/Magicpen.png';
 
-const OvulationTracker = () => {
+const OvulationTracker = ({ height, weight }) => {
   const [formData, setFormData] = useState({
     firstMenstrualPeriod: '',
     lastMenstrualPeriod: '',
     predictionStartDate: '',
     predictionEndDate: '',
-    height: '',
-    weight: '',
+    height: height || '',
+    weight: weight || '',
     bleedingIntensity: '',
     dischargeType: '',
   });
@@ -21,6 +24,8 @@ const OvulationTracker = () => {
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [predictedDate, setPredictedDate] = useState(null);
+
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,17 +55,84 @@ const OvulationTracker = () => {
     calculateMenstrualDuration();
   }, [formData.firstMenstrualPeriod, formData.lastMenstrualPeriod]);
 
+  const validateDates = () => {
+    const { firstMenstrualPeriod, lastMenstrualPeriod } = formData;
+  
+    if (!firstMenstrualPeriod || !lastMenstrualPeriod) return false;
+  
+    const firstDate = new Date(firstMenstrualPeriod);
+    const lastDate = new Date(lastMenstrualPeriod);
+    const today = new Date();
+    const fourMonthsAgo = new Date(today.setMonth(today.getMonth() - 4));
+  
+    // Reset error before validation
+    setError(null);
+  
+    // Check if dates are too far in the past
+    if (firstDate < fourMonthsAgo || lastDate < fourMonthsAgo) {
+      setError('Menstruation dates cannot be from more than four months ago.');
+      return false;
+    }
+  
+    // Check if the first date is today and the last date is in the future
+    if (
+      firstDate.toDateString() === new Date().toDateString() &&
+      lastDate > new Date()
+    ) {
+      setError(
+        'The first day of menstruation cannot be today with the last day in the future.'
+      );
+      return false;
+    }
+  
+    // Check if the last date is before the first date
+    if (lastDate < firstDate) {
+      setError('The last day of menstruation cannot be before the first day.');
+      return false;
+    }
+  
+    return true;
+  };  
+
   const validateForm = () => {
-    const { firstMenstrualPeriod, lastMenstrualPeriod, height, weight, bleedingIntensity, dischargeType } = formData;
-    return firstMenstrualPeriod && lastMenstrualPeriod && height && weight && bleedingIntensity && dischargeType;
+    const {
+      firstMenstrualPeriod,
+      lastMenstrualPeriod,
+      height,
+      weight,
+      bleedingIntensity,
+      dischargeType,
+    } = formData;
+  
+    // Check if all fields are filled
+    if (
+      !firstMenstrualPeriod ||
+      !lastMenstrualPeriod ||
+      !height ||
+      !weight ||
+      !bleedingIntensity ||
+      !dischargeType
+    ) {
+      setError('Please fill out all required fields.');
+      return false;
+    }
+  
+    // Check date-specific validations
+    return validateDates();
   };
+  
+  const formatDateForDisplay = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) {
-      setError('Please fill out all the required inputs.');
-      return;
-    }
+    setError(null); // Clear previous errors
+  
+    if (!validateForm()) return; // Stop submission if validation fails
   
     try {
       const dataToSend = { ...formData, menstrualDuration };
@@ -78,35 +150,26 @@ const OvulationTracker = () => {
   
       const data = await response.json();
       setResults(data);
-      
+  
       if (data.peakOvulationDay) {
         setPredictedDate(new Date(data.peakOvulationDay));
       }
-      
+  
       if (data.firstDayOvulation && data.lastDayOvulation) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           predictionStartDate: data.firstDayOvulation,
-          predictionEndDate: data.lastDayOvulation
+          predictionEndDate: data.lastDayOvulation,
         }));
       }
-      
+  
       setError(null);
     } catch (err) {
       console.error('Request failed:', err);
       setError(`Error making prediction: ${err.message}`);
     }
   };
-
-  const formatDateForDisplay = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
+  
 
   return (
     <div className="ot-page-container">
@@ -126,8 +189,8 @@ const OvulationTracker = () => {
 
         <div className="ot-tracker-grid">
           <div className="ot-date-card">
-            <h2>Predicted Fertile Window</h2>
-            <div className="ot-date-circle">
+            <h2>Your next ovulation date</h2>
+            <div className={`ot-date-circle ${results?.peakOvulationDay ? 'animate' : ''}`}>
               <div className="ot-date-content">
                 {results?.peakOvulationDay ? (
                   <>
@@ -153,15 +216,15 @@ const OvulationTracker = () => {
             </div>
             <div className="ot-date-range">
               <div className="ot-range-item">
-                <span>Starts</span>
-                <div className="ot-date-display">
-                  {formatDateForDisplay(formData.predictionStartDate) || 'Pending...'}
+                <span className="ot-range-label">Starts</span>
+                <div className={`ot-date-display ot-date-start ${formData.predictionStartDate ? 'animate' : ''}`}>
+                  {formatDateForDisplay(formData.predictionStartDate) || <span className="ot-pending-text">Pending...</span>}
                 </div>
               </div>
               <div className="ot-range-item">
-                <span>Ends</span>
-                <div className="ot-date-display">
-                  {formatDateForDisplay(formData.predictionEndDate) || 'Pending...'}
+                <span className="ot-range-label">Ends</span>
+                <div className={`ot-date-display ot-date-end ${formData.predictionEndDate ? 'animate' : ''}`}>
+                  {formatDateForDisplay(formData.predictionEndDate) || <span className="ot-pending-text">Pending...</span>}
                 </div>
               </div>
             </div>
@@ -198,7 +261,10 @@ const OvulationTracker = () => {
           <div className="ot-health-indicators">
             <div className="ot-indicators-row">
               <div className="ot-indicator-card">
-                <h3>Vaginal Discharge</h3>
+                <h3 className="indicator-title">
+                  <FontAwesomeIcon icon={faCalendarAlt} className="indicator-icon" />
+                  <span className="indicator-text">Vaginal Discharge</span>
+                </h3>
                 <select name="dischargeType" value={formData.dischargeType} onChange={handleInputChange} className="ot-pink-select">
                   <option value="">Pick here</option>
                   <option value="1">No Discharge</option>
@@ -212,7 +278,10 @@ const OvulationTracker = () => {
                 </select>
               </div>
               <div className="ot-indicator-card">
-                <h3>Period Flow</h3>
+                <h3 className="indicator-title">
+                  <FontAwesomeIcon icon={faWeight} className="indicator-icon" /> 
+                  <span className="indicator-text">Period Flow</span>
+                </h3>
                 <select name="bleedingIntensity" value={formData.bleedingIntensity} onChange={handleInputChange} className="ot-purple-select">
                   <option value="">Pick here</option>
                   <option value="1">Light</option>
@@ -227,17 +296,23 @@ const OvulationTracker = () => {
           <div className="ot-measurements">
             <div className="ot-measurements-wrapper">
               <div className="ot-measurement-item">
-                <label>Weight</label>
+                <label className="measurement-label">
+                  <FontAwesomeIcon icon={faWeight} className="measurement-icon" /> 
+                  <span className="measurement-text">Weight</span>
+                </label>
                 <div className="ot-measurement-input">
-                  <input type="number" name="weight" value={formData.weight} onChange={handleInputChange} />
-                  <span>kg</span>
+                  <input type="number" name="weight" value={formData.weight} onChange={handleInputChange} className="ot-input" />
+                  <span className="ot-unit">kg</span>
                 </div>
               </div>
               <div className="ot-measurement-item">
-                <label>Height</label>
+                <label className="measurement-label">
+                  <FontAwesomeIcon icon={faRulerVertical} className="measurement-icon" /> 
+                  <span className="measurement-text">Height</span>
+                </label>
                 <div className="ot-measurement-input">
-                  <input type="number" name="height" value={formData.height} onChange={handleInputChange} />
-                  <span>cm</span>
+                  <input type="number" name="height" value={formData.height} onChange={handleInputChange} className="ot-input" />
+                  <span className="ot-unit">cm</span>
                 </div>
               </div>
             </div>
@@ -264,16 +339,16 @@ const OvulationTracker = () => {
             </div>
           </div>
 
-          <button className="ot-predict-button" onClick={handleSubmit}>
-            Predict my next ovulation
+          <button className="ot-predict-button " onClick={handleSubmit}>
+            <img src={btnpre} alt="Predict Icon" className="icon" />
+            <span>Predict my next ovulation</span>
           </button>
         </div>
-
-        <div className="ot-disclaimer">
+      </div>
+      <div className="ot-disclaimer">
           Disclaimer: As per professional advice, this tracker is not recommended for women having irregular menstruation.
           <span className="ot-credibility-link">See paper & tracker credibility.</span>
         </div>
-      </div>
     </div>
   );
 };

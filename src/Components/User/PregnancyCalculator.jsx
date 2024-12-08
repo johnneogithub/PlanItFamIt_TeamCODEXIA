@@ -320,9 +320,7 @@ function PregnancyCalculator() {
                             
                             <div className="preg-calc-current-calculation">
                                 <h2><FaHeartbeat className="preg-calc-icon" /> Current Calculation</h2>
-                                <div className="preg-calc-calculation-card" style={{
-                                    animation: 'fadeIn 0.5s ease-out'
-                                }}>
+                                <div className="preg-calc-calculation-card card-hover-effect">
                                     <div className="preg-calc-card-content">
                                         <p><strong>LMP Date:</strong> {LMP.toDateString()}</p>
                                         <p><strong>Conception Date:</strong> {conceptionDate?.toDateString()}</p>
@@ -357,7 +355,7 @@ function PregnancyCalculator() {
                                             width: '90%',
                                             maxWidth: '1200px',
                                             height: '80vh',
-                                            padding: '0',
+                                            padding: '20px',
                                             border: 'none',
                                             borderRadius: '20px',
                                             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
@@ -381,8 +379,8 @@ function PregnancyCalculator() {
                                     <div className="pregnancy-modal-content">
                                         <div className="pregnancy-modal-grid">
                                             {savedCalculations.map(calc => (
-                                                <div key={calc.id} className="preg-calc-calculation-card saved-card">
-                                                    <div className="preg-calc-card-header">
+                                                <div key={calc.id} className="saved-card card-hover-effect">
+                                                    {/* <div className="preg-calc-card-header">
                                                         <span className="preg-calc-calc-date">Saved on: {calc.date}</span>
                                                         <button 
                                                             className="preg-calc-delete-btn"
@@ -390,7 +388,7 @@ function PregnancyCalculator() {
                                                         >
                                                             <FaTrash />
                                                         </button>
-                                                    </div>
+                                                    </div> */}
                                                     <div className="preg-calc-card-content">
                                                         <div className="preg-calc-saved-info">
                                                             <div className="preg-calc-saved-item">
@@ -433,6 +431,18 @@ function PregnancyCalculator() {
                                                                 <div>
                                                                     <label>EGA at Save:</label>
                                                                     <span>{calc.currentEGA}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="preg-calc-saved-item">
+                                                                {/* <FaTrash className="preg-calc-icon" /> */}
+                                                                <div>
+                                                                    <button 
+                                                                        className="preg-calc-delete-btn"
+                                                                        onClick={() => deleteCalculation(calc.id)}
+                                                                        aria-label="Delete Calculation"
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>

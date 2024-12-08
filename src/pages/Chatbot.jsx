@@ -17,6 +17,7 @@ const Chatbot = () => {
   const chatContainerRef = useRef(null);
   const chatInputRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   // Initialize genAI and model inside the component
   const genAI = new GoogleGenerativeAI(API_KEY);
@@ -52,6 +53,9 @@ const Chatbot = () => {
 
     // Update chatHistory state
     setChatHistory(newChatHistory);
+
+    // Set isTyping to true when the assistant is generating a response
+    setIsTyping(true);
 
     try {
       // Start a new chat session with the updated history
@@ -96,6 +100,9 @@ const Chatbot = () => {
         ...prevList.slice(0, -1),
         { message: "Error fetching response. Please try again.", className: "incoming" },
       ]);
+    } finally {
+      // Set isTyping to false after the response is received
+      setIsTyping(false);
     }
   };
 
@@ -145,6 +152,16 @@ const Chatbot = () => {
       }
     });
   }, [chatList]);
+
+  // Update chatList to include typing indicator
+  useEffect(() => {
+    if (isTyping) {
+      setChatList((prevList) => [
+        ...prevList,
+        { message: "Assistant is typing...", className: "incoming typing" }, // Typing indicator
+      ]);
+    }
+  }, [isTyping]);
 
   return (
     <div className={`chatbot-container ${isFullscreen ? 'fullscreen' : ''}`}>

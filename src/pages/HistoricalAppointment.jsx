@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaFileDownload, FaEye, FaCommentDots } from 'react-icons/fa';
+import { FaFileDownload, FaEye, FaCommentDots, FaArrowLeft } from 'react-icons/fa';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { crud } from '../Config/firebase';
 import { getAuth } from 'firebase/auth';
 import Navbar from '../Components/Global/Navbar_Main';
 import './HistoricalAppointmentStyle.css';
+import { useHistory } from 'react-router-dom';
 
 const HistoricalAppointment = () => {
   const [showFileModal, setShowFileModal] = useState(false);
@@ -12,6 +13,7 @@ const HistoricalAppointment = () => {
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const auth = getAuth();
+  const history = useHistory();
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -106,8 +108,10 @@ const HistoricalAppointment = () => {
   };
 
   const handleFilePreview = (file) => {
-    setSelectedFile(file);
-    setShowFileModal(true);
+    history.push({
+      pathname: '/image-preview',
+      state: { imageUrl: file.url }
+    });
   };
 
   const handleDownload = async (fileUrl, fileName) => {
@@ -139,159 +143,89 @@ const HistoricalAppointment = () => {
 
   return (
     <>
-      <Navbar/>
-    <div className="historical-appointment-container">
-      <h2>Historical Records</h2>
-      {isLoading ? (
-        <div className="loading-spinner">Loading...</div>
-      ) : (
-        <div className="appointment-list">
-          {appointments.length === 0 ? (
-            <div className="no-records">No historical records found.</div>
-          ) : (
-            appointments.map((appointment, index) => (
-              <div key={index} className="appointment-item">
-                <div className="appointment-header">
-                  <h3>{appointment.appointmentType || 'General Checkup'}</h3>
-                  <span className="appointment-date">
-                    Date: {formatDate(appointment.date)}
-                  </span>
-                </div>
-                
-                <div className="file-section">
-                  {appointment.importedFile && (
-                    <div className="file-preview-card">
-                      <FaFileDownload className="file-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                      <div className="file-info">
-                        <span>{appointment.importedFile.name}</span>
-                        <div className="file-actions">
-                          <button 
-                            className="btn btn-preview"
-                            onClick={() => handleFilePreview(appointment.importedFile)}
-                            style={{ 
-                              backgroundColor: 'rgb(197, 87, 219)',
-                              borderColor: 'rgb(197, 87, 219)',
-                              color: 'white'
-                            }}
-                          >
-                            <FaEye style={{ color: 'white' }} /> Preview
-                          </button>
-                          <button 
-                            className="btn btn-download"
-                            onClick={() => handleDownload(
-                              appointment.importedFile.url, 
-                              appointment.importedFile.name
-                            )}
-                            style={{ 
-                              backgroundColor: 'rgb(197, 87, 219)',
-                              borderColor: 'rgb(197, 87, 219)',
-                              color: 'white'
-                            }}
-                          >
-                            <FaFileDownload style={{ color: 'white' }} /> Download
-                          </button>
+      <Navbar />
+      <div className="historical-appointment-container">
+        <button 
+          className="btn btn-back" 
+          onClick={() => history.goBack()}
+        >
+          <FaArrowLeft /> Back
+        </button>
+        <h2 className="title">Historical Records</h2>
+        {isLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading your records...</p>
+          </div>
+        ) : (
+          <div className="appointment-list">
+            {appointments.length === 0 ? (
+              <div className="no-records">No historical records found.</div>
+            ) : (
+              appointments.map((appointment, index) => (
+                <div key={index} className="appointment-card">
+                  <div className="appointment-header">
+                    <h3>{appointment.appointmentType || 'General Checkup'}</h3>
+                    <span className="appointment-date">
+                      {formatDate(appointment.date)}
+                    </span>
+                  </div>
+                  <div className="file-section">
+                    {appointment.importedFile && (
+                      <div className="file-preview-card">
+                        <FaFileDownload className="file-icon" />
+                        <div className="file-info">
+                          <span className="file-name">{appointment.importedFile.name}</span>
+                          <div className="file-actions">
+                            <button 
+                              className="btn btn-preview"
+                              onClick={() => handleFilePreview(appointment.importedFile)}
+                            >
+                              <FaEye /> Preview
+                            </button>
+                          </div>
                         </div>
+                      </div>
+                    )}
+                    {appointment.importedFiles && appointment.importedFiles.length > 0 && (
+                      <div className="multiple-files-section">
+                        {appointment.importedFiles.map((file, fileIndex) => (
+                          <div key={fileIndex} className="file-preview-card">
+                            <FaFileDownload className="file-icon" />
+                            <div className="file-info">
+                              <span className="file-name">{file.name}</span>
+                              <small className="file-date">
+                                Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
+                              </small>
+                              <div className="file-actions">
+                                <button 
+                                  className="btn btn-preview"
+                                  onClick={() => handleFilePreview(file)}
+                                >
+                                  <FaEye /> Preview
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {appointment.remark && (
+                    <div className="remark-section">
+                      <FaCommentDots />
+                      <div>
+                        <strong>Remark:</strong>
+                        <p>{appointment.remark}</p>
                       </div>
                     </div>
                   )}
-
-                  {appointment.importedFiles && appointment.importedFiles.length > 0 && (
-                    <div className="multiple-files-section">
-                      {appointment.importedFiles.map((file, fileIndex) => (
-                        <div key={fileIndex} className="file-preview-card">
-                          <FaFileDownload className="file-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                          <div className="file-info">
-                            <span>{file.name}</span>
-                            <small className="file-date">
-                              Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
-                            </small>
-                            <div className="file-actions">
-                              <button 
-                                className="btn btn-preview"
-                                onClick={() => handleFilePreview(file)}
-                                style={{ 
-                                  backgroundColor: 'rgb(197, 87, 219)',
-                                  borderColor: 'rgb(197, 87, 219)',
-                                  color: 'white'
-                                }}
-                              >
-                                <FaEye style={{ color: 'white' }} /> Preview
-                              </button>
-                              <button 
-                                className="btn btn-download"
-                                onClick={() => handleDownload(file.url, file.name)}
-                                style={{ 
-                                  backgroundColor: 'rgb(197, 87, 219)',
-                                  borderColor: 'rgb(197, 87, 219)',
-                                  color: 'white'
-                                }}
-                              >
-                                <FaFileDownload style={{ color: 'white' }} /> Download
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-
-                {appointment.remark && (
-                  <div className="remark-section">
-                    <FaCommentDots />
-                    <div>
-                      <strong>Remark:</strong>
-                      <p>{appointment.remark}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {showFileModal && (
-        <>
-          <div className="modal fade show" style={{ display: 'block' }} role="dialog" aria-modal="true">
-            <div className="modal-dialog modal-dialog-centered modal-lg">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">{selectedFile?.name}</h5>
-                  <button 
-                    type="button" 
-                    className="btn-close" 
-                    onClick={() => setShowFileModal(false)}
-                  ></button>
-                </div>
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-primary"
-                    onClick={() => handleDownload(selectedFile?.url, selectedFile?.name)}
-                    style={{ 
-                      backgroundColor: 'rgb(197, 87, 219)', 
-                      borderColor: 'rgb(197, 87, 219)',
-                      color: 'white'
-                    }}
-                  >
-                    Download
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={() => setShowFileModal(false)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
-          <div className="modal-backdrop fade show" />
-        </>
-      )}
-    </div>
+        )}
+      </div>
     </>
   );
 };

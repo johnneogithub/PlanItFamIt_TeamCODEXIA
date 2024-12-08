@@ -96,6 +96,49 @@ const AppointmentHistory = () => {
     }
   };
 
+  const fetchAppointments = async () => {
+    try {
+      setIsDataLoading(true);
+      const userId = userInfo.userId;
+      const userRef = doc(crud, `users/${userId}`);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const userAppointments = userData.appointments || [];
+
+        // Filter out pending appointments that are now approved or completed
+        const filteredAppointments = userAppointments.filter(appointment => {
+          if (appointment.status === 'pending') {
+            const existsWithNewStatus = userAppointments.some(other =>
+              other.date === appointment.date &&
+              other.time === appointment.time &&
+              other.appointmentType === appointment.appointmentType &&
+              (other.status === 'approved' || other.status === 'completed')
+            );
+            return !existsWithNewStatus;
+          }
+          return true;
+        });
+
+        const allAppointments = [...filteredAppointments];
+
+        console.log("Filtered appointments:", allAppointments);
+        setAppointments(allAppointments);
+      }
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoading) {
+      fetchAppointments();
+    }
+  }, [userInfo.userId, isLoading]);
+
   useEffect(() => {
     if (appointments.length > 0) {
       console.log("Processing appointments:", appointments);

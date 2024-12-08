@@ -29,6 +29,7 @@ import Aboutus from './pages/Aboutus';
 import AppointmentHistory from './pages/AppointmentHistory';
 import HistoricalAppointment from './pages/HistoricalAppointment';
 import PregnancyCalculator from './Components/User/PregnancyCalculator.jsx';
+import ImagePreview from './pages/ImagePreview';
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
           <UserProtectedRoute path='/FillUpAppointment' component={FillUpAppointment} exact />
           <UserProtectedRoute path='/OvulationTracker' component={OvulationTracker} exact />
           <UserProtectedRoute path='/PregnancyCalculator' component={PregnancyCalculator} exact />
+          <Route path="/image-preview" component={ImagePreview} />
 
           {/* Admin-protected routes */}
           <ProtectedRoute path='/PregnancyWheel' component={PregnancyWheel} exact />

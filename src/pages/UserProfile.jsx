@@ -825,7 +825,7 @@ function UserProfile() {
                 
                 {appointmentHistory.length > 0 ? (
                   <div className="appointment-history-list">
-                    {appointmentHistory.slice(0, 1).map((appointment, index) => {
+                    {appointmentHistory.filter(appointment => appointment.status !== 'pending').slice(0, 1).map((appointment, index) => {
                       const appointmentDate = appointment.completedAt ? new Date(appointment.completedAt) : new Date();
                       const formattedDate = appointmentDate.toLocaleDateString();
                       const formattedTime = appointmentDate.toLocaleTimeString();
@@ -934,10 +934,17 @@ function UserProfile() {
                           </div>
                           <div className="col-md-6 mb-3">
                             <div className="detail-item">
-                              <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Age</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
+                                <h6 className="mb-0 text-muted">Location</h6>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  name="location"
+                                  value={editedDetails.location || ''}
+                                  onChange={handleChange}
+                                  placeholder="Enter location"
+                                />
                               </div>
                             </div>
                           </div>
@@ -959,17 +966,10 @@ function UserProfile() {
                           </div>
                           <div className="col-md-6 mb-3">
                             <div className="detail-item">
-                              <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Location</h6>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  name="location"
-                                  value={editedDetails.location || ''}
-                                  onChange={handleChange}
-                                  placeholder="Enter location"
-                                />
+                                <h6 className="mb-0 text-muted">Age</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
                               </div>
                             </div>
                           </div>
@@ -994,19 +994,62 @@ function UserProfile() {
                           </div>
                         </>
                       ) : (
-                        Object.entries(personalDetails)
-                          .filter(([key]) => !['firstName', 'middleName', 'lastName'].includes(key))
-                          .map(([key, value]) => (
-                            <div className="col-md-6 mb-3" key={key}>
-                              <div className="detail-item d-flex align-items-center">
-                                {getIcon(key)}
-                                <div className="ms-3">
-                                  <h6 className="mb-0 text-muted">{capitalizeFirstLetter(key)}</h6>
-                                  <p className="mb-0 fw-bold">{value || 'Not provided'}</p>
-                                </div>
+                        <>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item d-flex align-items-center">
+                              <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Name</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.name || 'Not provided'}</p>
                               </div>
                             </div>
-                          ))
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item d-flex align-items-center">
+                              <FaEnvelope className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Email</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.email || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item d-flex align-items-center">
+                              <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Location</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.location || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item d-flex align-items-center">
+                              <FaPhone className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Phone</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.phone || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item d-flex align-items-center">
+                              <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Age</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6 mb-3">
+                            <div className="detail-item d-flex align-items-center">
+                              <FaVenusMars className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
+                              <div className="ms-3">
+                                <h6 className="mb-0 text-muted">Gender</h6>
+                                <p className="mb-0 fw-bold">{personalDetails.gender || 'Not provided'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                     {isEditing && (

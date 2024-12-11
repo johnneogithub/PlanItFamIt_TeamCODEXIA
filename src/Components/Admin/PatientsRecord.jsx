@@ -279,7 +279,6 @@ function PatientsRecord() {
   const LoadingSpinner = () => (
     <div className="loading-spinner">
       <div className="spinner"></div>
-      <p>Loading patient records...</p>
     </div>
   );
 
@@ -631,7 +630,7 @@ function PatientsRecord() {
   if (isLoading) {
     return (
       <div className="dashboard-container">
-        <Sidebar />
+           <Sidebar isAdmin={true} />
         <div className="main-content loading-container">
           <LoadingSpinner />
         </div>
@@ -643,7 +642,7 @@ function PatientsRecord() {
   };
   return (
     <div className="dashboard-container">
-      <Sidebar />
+         <Sidebar isAdmin={true} />
       <div className="main-content">
         <div className="content-wrapper">
           <div className="patients-record-header">

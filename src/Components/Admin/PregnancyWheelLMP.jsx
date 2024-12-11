@@ -112,7 +112,7 @@ function PregnancyWheelLMP() {
 
     return (
         <div className="dashboard-container">
-            <Sidebar />
+            <Sidebar isAdmin={true} />
             <div className="main-content">
                 <div className="content-wrapper">
                     <h1><FaBaby className="icon" /> Pregnancy Wheel</h1>
@@ -133,7 +133,7 @@ function PregnancyWheelLMP() {
                                         </div>
                                         <DatePicker
                                             selected={USDate}
-                                            onChange={(date) => {setUSDate(date); setShowUsCalendar(false);}}
+                                            onChange={(date) => {setUSDate(date); setShowUsCalendar(false);} }
                                             inline
                                             monthsShown={1}
                                             showYearDropdown
@@ -168,7 +168,7 @@ function PregnancyWheelLMP() {
                                         </div>
                                         <DatePicker
                                             selected={LMP}
-                                            onChange={(date) => {setLMP(date); setShowLmpCalendar(false);}}
+                                            onChange={(date) => {setLMP(date); setShowLmpCalendar(false);} }
                                             inline
                                             monthsShown={1}
                                             showYearDropdown

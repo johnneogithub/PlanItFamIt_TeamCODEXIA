@@ -17,6 +17,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 import UserProfilePopup from './AdminLogin/UserProfilePopup';
+import Articles from '../../pages/Articles';
 
 const tableStyles = {
   card: {
@@ -99,6 +100,8 @@ function DashboardAdmin() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [pendingRejectId, setPendingRejectId] = useState(null);
   const [rejectRemark, setRejectRemark] = useState('');
+
+  const isAdmin = true;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -512,7 +515,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
 
   return (
     <div className="dashboard-container">
-      <Sidebar />
+          <Sidebar isAdmin={true} />
       <div className="main-content">
         <div className="content-wrapper">
           <div className="page-header">

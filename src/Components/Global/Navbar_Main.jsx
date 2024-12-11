@@ -8,7 +8,7 @@ import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { FaUser, FaSignOutAlt, FaBell, FaHistory, FaFolder } from 'react-icons/fa';
 import { useAuth } from '../../AuthContext';
 
-function Nav() {
+function Nav({ isAdmin = false }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userProfilePic, setUserProfilePic] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -115,6 +115,8 @@ function Nav() {
     setAppointmentHistory([]);
     setMedicalRecords([]);
   };
+
+  if (isAdmin) return null;
 
   return (
     <div className='navbar_master'>

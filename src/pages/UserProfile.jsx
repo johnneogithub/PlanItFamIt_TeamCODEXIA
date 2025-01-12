@@ -119,6 +119,14 @@ const useLocalStorage = (key, initialValue) => {
   return [storedValue, setValue];
 };
 
+const getLastViewedRemark = (userId) => {
+  return localStorage.getItem(`lastViewedRemark_${userId}`);
+};
+
+const getLastViewedStatus = (userId) => {
+  return localStorage.getItem(`lastViewedStatus_${userId}`);
+};
+
 function UserProfile() {
   const location = useLocation();
   const [user, setUser] = useState(null);
@@ -147,10 +155,13 @@ function UserProfile() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
   const [newAppointments, setNewAppointments] = useState(0);
+  const [hasNewStatus, setHasNewStatus] = useState(false);
   const [hasNewRemark, setHasNewRemark] = useState(false);
   const [localPersonalDetails, setLocalPersonalDetails] = useLocalStorage('userPersonalDetails', null);
   const [lastFetchTime, setLastFetchTime] = useLocalStorage('lastPersonalDetailsFetch', 0);
   const FETCH_COOLDOWN = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const [lastViewedRemark, setLastViewedRemark] = useState('');
+  const [lastViewedStatus, setLastViewedStatus] = useState('');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -252,7 +263,6 @@ function UserProfile() {
           const latestAppointment = appointments[appointments.length - 1];
           
           if (latestAppointment) {
-            // Convert appointment data to string values where needed
             setAppointmentData({
               ...latestAppointment,
               name: String(latestAppointment.name || 'N/A'),
@@ -263,6 +273,7 @@ function UserProfile() {
               selectedServices: Array.isArray(latestAppointment.selectedServices) ? 
                 latestAppointment.selectedServices : []
             });
+            
             setIsApproved(latestAppointment.status === 'approved');
             setRemark(String(latestAppointment.remark || ''));
             setRemarkTimestamp(latestAppointment.remarkTimestamp || null);
@@ -587,7 +598,8 @@ function UserProfile() {
         phone: editedDetails.phone,
         location: editedDetails.location,
         gender: editedDetails.gender,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        lastProfileUpdate: new Date().toISOString()
       };
 
       await updateDoc(userRef, dataToSave);
@@ -603,11 +615,11 @@ function UserProfile() {
       setLocalPersonalDetails(updatedDetails);
       setLastFetchTime(Date.now());
       
+      localStorage.removeItem(`lastViewedProfile_${user.uid}`);
+      
       setIsEditing(false);
-      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating personal details: ", error);
-      toast.error("Failed to update profile. Please try again.");
     }
   };
 
@@ -681,53 +693,19 @@ function UserProfile() {
     }
   }, [user]);
 
-  const markNotificationsAsViewed = () => {
-    if (user) {
-      localStorage.setItem(`lastChecked_${user.uid}`, new Date().toISOString());
-      localStorage.setItem(`lastAppointmentCount_${user.uid}`, appointmentHistory.length.toString());
+  const handleRemarkClick = () => {
+    if (user && remark) {
+      localStorage.setItem(`lastViewedRemark_${user.uid}`, remark);
       setHasNewRemark(false);
-      setNewAppointments(0);
+      setLastViewedRemark(remark);
     }
   };
 
-  useEffect(() => {
-    markNotificationsAsViewed();
-  }, [user, appointmentHistory.length]);
-
-  useEffect(() => {
-    if (user?.uid) {
-      const firestore = getFirestore();
-      const userRef = doc(firestore, `users/${user.uid}`);
-      
-      const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const userData = docSnapshot.data();
-          
-          // Update appointment data
-          if (userData.appointmentData) {
-            setAppointmentData({
-              ...userData.appointmentData,
-              status: userData.appointmentData.status || 'pending',
-              isApproved: !!userData.appointmentData.isApproved
-            });
-            setIsApproved(!!userData.appointmentData.isApproved);
-          }
-
-          // Update other appointment-related states
-          if (userData.appointments) {
-            setAppointmentHistory(userData.appointments);
-          }
-        }
-      });
-
-      return () => unsubscribe();
-    }
-  }, [user]);
-
-  const forceRefreshDetails = async () => {
-    if (user) {
-      setLastFetchTime(0); // Reset the last fetch time
-      await fetchPersonalDetails(user.uid);
+  const handleStatusClick = () => {
+    if (user && appointmentData?.status) {
+      localStorage.setItem(`lastViewedStatus_${user.uid}`, appointmentData.status);
+      setHasNewStatus(false);
+      setLastViewedStatus(appointmentData.status);
     }
   };
 
@@ -755,19 +733,16 @@ function UserProfile() {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <h4 className="card-title m-0">Appointment Remark</h4>
-                  {hasNewRemark && (
-                    <span className="badge bg-danger">New!</span>
-                  )}
                 </div>
                 {remark ? (
-                  <>
-                    <p onClick={() => setHasNewRemark(false)}>{remark}</p>
+                  <div>
+                    <p>{remark}</p>
                     {remarkTimestamp && (
                       <small className="text-muted">
                         Added on: {new Date(remarkTimestamp).toLocaleString()}
                       </small>
                     )}
-                  </>
+                  </div>
                 ) : (
                   <p>No remark available</p>
                 )}
@@ -781,7 +756,7 @@ function UserProfile() {
                   <div className="d-flex align-items-center">
                     <Link 
                       to={`/AppointmentHistory/${user?.uid}`}
-                      className="btn btn-view-all position-relative"
+                      className="btn btn-view-all"
                       state={{ 
                         appointments: appointmentHistory.map(appointment => ({
                           id: appointment.id || '',
@@ -804,21 +779,9 @@ function UserProfile() {
                           userId: user?.uid || ''
                         }
                       }}
-                      onClick={() => {
-                        setNewAppointments(0);
-                        if (user?.uid) {
-                          localStorage.setItem(`lastAppointmentCount_${user.uid}`, appointmentHistory.length.toString());
-                        }
-                      }}
                     >
                       <FaThLarge className="me-2" />
                       <span>View All</span>
-                      {newAppointments > 0 && (
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                          {newAppointments}
-                          <span className="visually-hidden">new appointments</span>
-                        </span>
-                      )}
                     </Link>
                   </div>
                 </div>
@@ -1065,7 +1028,9 @@ function UserProfile() {
             
             <div className="card mt-4 appointment-card shadow">
               <div className="card-body">
-                <h4 className="card-title mb-4">Appointment Status</h4>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h4 className="card-title">Appointment Status</h4>
+                </div>
                 <div className="table-responsive">
                   <table className="table table-hover">
                     <thead>

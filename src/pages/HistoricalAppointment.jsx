@@ -1,23 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaFileDownload, FaEye, FaCommentDots, FaArrowLeft } from 'react-icons/fa';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { crud } from '../Config/firebase';
 import { getAuth } from 'firebase/auth';
 import Navbar from '../Components/Global/Navbar_Main';
 import './HistoricalAppointmentStyle.css';
 import { useHistory } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const HistoricalAppointment = () => {
   const [showFileModal, setShowFileModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasNewUpdates, setHasNewUpdates] = useState(false);
   const auth = getAuth();
   const history = useHistory();
 
+  const checkForNewUpdates = useCallback(async (userId, currentAppointments) => {
+    try {
+      const lastVisitRef = doc(crud, `users/${userId}/metadata/lastVisit`);
+      const lastVisitDoc = await getDoc(lastVisitRef);
+      const lastVisitData = lastVisitDoc.data();
+      const lastVisitTime = lastVisitData?.timestamp || 0;
+
+      const hasUpdates = currentAppointments.some(appointment => {
+        const appointmentTime = new Date(appointment.date).getTime();
+        return appointmentTime > lastVisitTime;
+      });
+
+      if (hasUpdates) {
+        setHasNewUpdates(true);
+      }
+
+      await setDoc(lastVisitRef, {
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error("Error checking for updates:", error);
+    }
+  }, []);
+
   useEffect(() => {
     if (auth.currentUser) {
-      fetchAllUserData(auth.currentUser.uid);
+      const userId = auth.currentUser.uid;
+      localStorage.setItem(`lastViewedRecords_${userId}`, Date.now().toString());
+      fetchAllUserData(userId);
     } else {
       setIsLoading(false);
     }
@@ -67,6 +96,8 @@ const HistoricalAppointment = () => {
       const processedRecords = mergeAndDeduplicateRecords(allAppointments);
       setAppointments(processedRecords);
 
+      await checkForNewUpdates(userId, processedRecords);
+
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -108,15 +139,25 @@ const HistoricalAppointment = () => {
   };
 
   const handleFilePreview = (file) => {
-    history.push({
-      pathname: '/image-preview',
-      state: { imageUrl: file.url }
-    });
+    const fileUrl = file.url || file.fileUrl;
+    if (fileUrl) {
+      history.push({
+        pathname: '/image-preview',
+        state: { imageUrl: fileUrl }
+      });
+    }
   };
 
   const handleDownload = async (fileUrl, fileName) => {
+    if (!fileUrl || !fileName) {
+      console.error('File information is incomplete');
+      return;
+    }
+
     try {
       const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to fetch file');
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -128,7 +169,6 @@ const HistoricalAppointment = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading file:', error);
-      alert('Failed to download file. Please try again.');
     }
   };
 
@@ -140,6 +180,12 @@ const HistoricalAppointment = () => {
       day: 'numeric'
     });
   };
+
+  useEffect(() => {
+    return () => {
+      setHasNewUpdates(false);
+    };
+  }, []);
 
   return (
     <>
@@ -171,7 +217,28 @@ const HistoricalAppointment = () => {
                     </span>
                   </div>
                   <div className="file-section">
-                    {appointment.importedFile && (
+                    {appointment.importedFiles && appointment.importedFiles.map((file, fileIndex) => (
+                      <div key={fileIndex} className="file-preview-card">
+                        <FaFileDownload className="file-icon" />
+                        <div className="file-info">
+                          <span className="file-name">{file.name || file.fileName}</span>
+                          <div className="file-actions">
+                            <button 
+                              className="btn btn-preview"
+                              onClick={() => handleFilePreview(file)}
+                            >
+                              <FaEye /> Preview
+                            </button>
+                          </div>
+                          {file.uploadedAt && (
+                            <small className="upload-date">
+                              Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {appointment.importedFile && !appointment.importedFiles?.some(f => f.url === appointment.importedFile.url) && (
                       <div className="file-preview-card">
                         <FaFileDownload className="file-icon" />
                         <div className="file-info">
@@ -184,30 +251,12 @@ const HistoricalAppointment = () => {
                               <FaEye /> Preview
                             </button>
                           </div>
+                          {appointment.importedFile.uploadedAt && (
+                            <small className="upload-date">
+                              Uploaded: {new Date(appointment.importedFile.uploadedAt).toLocaleDateString()}
+                            </small>
+                          )}
                         </div>
-                      </div>
-                    )}
-                    {appointment.importedFiles && appointment.importedFiles.length > 0 && (
-                      <div className="multiple-files-section">
-                        {appointment.importedFiles.map((file, fileIndex) => (
-                          <div key={fileIndex} className="file-preview-card">
-                            <FaFileDownload className="file-icon" />
-                            <div className="file-info">
-                              <span className="file-name">{file.name}</span>
-                              <small className="file-date">
-                                Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
-                              </small>
-                              <div className="file-actions">
-                                <button 
-                                  className="btn btn-preview"
-                                  onClick={() => handleFilePreview(file)}
-                                >
-                                  <FaEye /> Preview
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
                       </div>
                     )}
                   </div>
@@ -226,6 +275,7 @@ const HistoricalAppointment = () => {
           </div>
         )}
       </div>
+      <ToastContainer position="bottom-right" />
     </>
   );
 };

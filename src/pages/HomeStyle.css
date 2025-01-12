@@ -478,3 +478,18 @@
 .dropdown-content1 a.records-link:hover {
   background-color: rgba(82, 0, 87, 0.05);
 }
+
+/* Toast notification customization */
+.Toastify__toast {
+  border-radius: 8px;
+  font-family: 'Your-Font-Family', sans-serif;
+}
+
+.Toastify__toast--info {
+  background: #3498db;
+}
+
+.Toastify__toast-body {
+  font-size: 14px;
+  padding: 12px;
+}

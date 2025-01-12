@@ -4,27 +4,26 @@ import humber from '../Assets/hamburger.png';
 import iconyou from '../Assets/icon_you.png';
 import React, { useState, useEffect } from 'react';
 import { auth, crud } from '../../Config/firebase';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { FaUser, FaSignOutAlt, FaBell, FaHistory, FaFolder } from 'react-icons/fa';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { FaUser, FaSignOutAlt, FaHistory, FaFolder } from 'react-icons/fa';
 import { useAuth } from '../../AuthContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Nav({ isAdmin = false }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userProfilePic, setUserProfilePic] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState(0);
   const [appointmentHistory, setAppointmentHistory] = useState([]);
-  const [historyNotifications, setHistoryNotifications] = useState(0);
-  const [recordsNotifications, setRecordsNotifications] = useState(0);
   const [medicalRecords, setMedicalRecords] = useState([]);
+  const [hasProfileUpdates, setHasProfileUpdates] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const { logout } = useAuth();
   const history = useHistory();
 
-  const toggleDropdown = () => {
+  const toggleDropdown = async () => {
     setDropdownOpen(!dropdownOpen);
-    if (!dropdownOpen && notifications > 0) {
-      setNotifications(0);
-    }
   };
 
   const handleLogout = async () => {
@@ -42,12 +41,91 @@ function Nav({ isAdmin = false }) {
     setMenuOpen(!menuOpen);
   };
 
-  const handleViewNotifications = () => {
-    const user = auth.currentUser;
-    if (user) {
-      localStorage.setItem(`lastChecked_${user.uid}`, new Date().toISOString());
-      localStorage.setItem(`lastAppointmentCount_${user.uid}`, appointmentHistory.length.toString());
-      setNotifications(0);
+  const handleProfileClick = async () => {
+    try {
+      if (auth.currentUser) {
+        const userRef = doc(crud, `users/${auth.currentUser.uid}`);
+        
+        const updatedNotifications = notifications.map(notif => ({
+          ...notif,
+          read: notif.notificationType !== 'appointment_approval' && 
+                notif.notificationType !== 'appointment_rejection' &&
+                notif.notificationType !== 'appointment_completion' &&
+                notif.notificationType !== 'medical_records_update' ? true : notif.read
+        }));
+        
+        await updateDoc(userRef, {
+          notifications: updatedNotifications
+        });
+        
+        setNotifications(updatedNotifications);
+        
+        if (hasProfileUpdates) {
+          setHasProfileUpdates(false);
+          localStorage.setItem(`lastViewedProfile_${auth.currentUser.uid}`, new Date().toISOString());
+        }
+      }
+    } catch (error) {
+      console.error('Error updating profile notifications:', error);
+      toast.error("Could not update profile notifications", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+        hideProgressBar: true
+      });
+    }
+  };
+
+  const handleAppointmentHistoryClick = async () => {
+    try {
+      if (auth.currentUser) {
+        const userRef = doc(crud, `users/${auth.currentUser.uid}`);
+        
+        const updatedNotifications = notifications.map(notif => ({
+          ...notif,
+          read: (notif.notificationType === 'appointment_approval' || 
+                 notif.notificationType === 'appointment_rejection' ||
+                 notif.notificationType === 'appointment_completion') ? true : notif.read
+        }));
+        
+        await updateDoc(userRef, {
+          notifications: updatedNotifications
+        });
+        
+        setNotifications(updatedNotifications);
+      }
+    } catch (error) {
+      console.error('Error updating appointment notifications:', error);
+      toast.error("Could not update appointment notifications", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+        hideProgressBar: true
+      });
+    }
+  };
+
+  const handleMedicalRecordsClick = async () => {
+    try {
+      if (auth.currentUser) {
+        const userRef = doc(crud, `users/${auth.currentUser.uid}`);
+        
+        const updatedNotifications = notifications.map(notif => ({
+          ...notif,
+          read: notif.notificationType === 'medical_records_update' ? true : notif.read
+        }));
+        
+        await updateDoc(userRef, {
+          notifications: updatedNotifications
+        });
+        
+        setNotifications(updatedNotifications);
+      }
+    } catch (error) {
+      console.error('Error updating medical records notifications:', error);
+      toast.error("Could not update medical records notifications", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+        hideProgressBar: true
+      });
     }
   };
 
@@ -56,45 +134,43 @@ function Nav({ isAdmin = false }) {
       if (user) {
         const userRef = doc(crud, `users/${user.uid}`);
         
-        const unsubscribeDoc = onSnapshot(userRef, (doc) => {
-          if (doc.exists()) {
-            const data = doc.data();
+        const unsubscribeDoc = onSnapshot(userRef, (docSnapshot) => {
+          if (docSnapshot.exists()) {
+            const data = docSnapshot.data();
             setUserProfilePic(data.profilePicture || '');
             
-            const appointmentData = data.appointmentData;
-            const currentAppointmentHistory = data.appointmentHistory || [];
-            const currentMedicalRecords = data.medicalRecords || [];
-            setAppointmentHistory(currentAppointmentHistory);
-            setMedicalRecords(currentMedicalRecords);
+            const userNotifications = data.notifications || [];
+            setNotifications(userNotifications);
             
-            const lastCheckedTimestamp = localStorage.getItem(`lastChecked_${user.uid}`);
-            const lastCheckedAppointments = parseInt(localStorage.getItem(`lastAppointmentCount_${user.uid}`) || '0');
-            const lastCheckedRecords = parseInt(localStorage.getItem(`lastRecordsCount_${user.uid}`) || '0');
-            
-            let newNotifications = 0;
-            let newHistoryNotifs = 0;
-            let newRecordsNotifs = 0;
-            
-            if (appointmentData?.remark && appointmentData?.remarkTimestamp && 
-                (!lastCheckedTimestamp || new Date(appointmentData.remarkTimestamp) > new Date(lastCheckedTimestamp))) {
-              newNotifications++;
-            }
-            
-            if (currentAppointmentHistory.length > lastCheckedAppointments) {
-              const newAppts = currentAppointmentHistory.length - lastCheckedAppointments;
-              newNotifications += newAppts;
-              newHistoryNotifs += newAppts;
-            }
+            const hasUnreadProfile = userNotifications.some(notif => 
+              !notif.read && 
+              notif.notificationType !== 'appointment_approval' && 
+              notif.notificationType !== 'appointment_rejection' &&
+              notif.notificationType !== 'appointment_completion' &&
+              notif.notificationType !== 'medical_records_update'
+            );
 
-            if (currentMedicalRecords.length > lastCheckedRecords) {
-              const newRecords = currentMedicalRecords.length - lastCheckedRecords;
-              newNotifications += newRecords;
-              newRecordsNotifs += newRecords;
-            }
+            const hasUnreadAppointments = userNotifications.some(notif => 
+              !notif.read && 
+              (notif.notificationType === 'appointment_approval' || 
+               notif.notificationType === 'appointment_rejection' ||
+               notif.notificationType === 'appointment_completion')
+            );
+
+            const hasUnreadMedicalRecords = userNotifications.some(notif =>
+              !notif.read && notif.notificationType === 'medical_records_update'
+            );
             
-            setNotifications(newNotifications);
-            setHistoryNotifications(newHistoryNotifs);
-            setRecordsNotifications(newRecordsNotifs);
+            setHasUnreadNotifications(hasUnreadProfile || hasUnreadAppointments || hasUnreadMedicalRecords);
+            
+            const lastProfileUpdate = data.lastProfileUpdate;
+            const lastViewed = localStorage.getItem(`lastViewedProfile_${user.uid}`);
+            
+            if (lastProfileUpdate && (!lastViewed || new Date(lastProfileUpdate) > new Date(lastViewed))) {
+              setHasProfileUpdates(true);
+            } else {
+              setHasProfileUpdates(false);
+            }
           }
         });
 
@@ -109,9 +185,6 @@ function Nav({ isAdmin = false }) {
 
   const resetState = () => {
     setUserProfilePic('');
-    setNotifications(0);
-    setHistoryNotifications(0);
-    setRecordsNotifications(0);
     setAppointmentHistory([]);
     setMedicalRecords([]);
   };
@@ -119,97 +192,130 @@ function Nav({ isAdmin = false }) {
   if (isAdmin) return null;
 
   return (
-    <div className='navbar_master'>
-      <input type="checkbox" id="check" checked={menuOpen} onChange={toggleMenu} />
-      <label htmlFor="check" className="checkbtn">
-        <div className="hamburger-icon">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      </label>
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <div className='navbar_master'>
+        <input type="checkbox" id="check" checked={menuOpen} onChange={toggleMenu} />
+        <label htmlFor="check" className="checkbtn">
+          <div className="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </label>
 
-      <Link className="page_name" to="/Home">
-        <label>PlanIt<span>FamIt</span></label>
-      </Link>
+        <Link className="page_name" to="/Home">
+          <label>PlanIt<span>FamIt</span></label>
+        </Link>
 
-      <ul className={menuOpen ? 'open' : ''}>
-        <li>
-          <Link to="/OvulationTracker" className="OvulationTracker">
-            <a className="active">Ovulation Tracker</a>
-          </Link>
-        </li>
-        <li>
-          <Link to="/StMargaretLyingInClinic" className="st-mar-style-font">
-            <a>St. Margaret Lying In Clinic</a>
-          </Link>
-        </li>
-        <li>
-          <Link to="/PregnancyCalculator" className="pregnancy-calculator-style-font">
-            <a>Pregnancy Calculator</a>
-          </Link>
-        </li>
-        <li>
-          <Link to="/Aboutus" className="aboutus-style-font">
-            <a>About Us</a>
-          </Link>
-        </li>
+        <ul className={menuOpen ? 'open' : ''}>
+          <li>
+            <Link to="/OvulationTracker" className="OvulationTracker">
+              <a className="active">Ovulation Tracker</a>
+            </Link>
+          </li>
+          <li>
+            <Link to="/StMargaretLyingInClinic" className="st-mar-style-font">
+              <a>St. Margaret Lying In Clinic</a>
+            </Link>
+          </li>
+          <li>
+            <Link to="/PregnancyCalculator" className="pregnancy-calculator-style-font">
+              <a>Pregnancy Calculator</a>
+            </Link>
+          </li>
+          <li>
+            <Link to="/Aboutus" className="aboutus-style-font">
+              <a>About Us</a>
+            </Link>
+          </li>
  
-        <li>
-          <a className="dropdown-toggle1 position-relative" onClick={toggleDropdown}>
-            <img src={userProfilePic || iconyou} alt="Profile" className="profile-pic-small" />
-            {notifications > 0 && (
-              <span className="notification-badge">
-                {notifications}
-              </span>
-            )}
-            {dropdownOpen && (
-              <div className="dropdown1">
-                <div className="dropdown-content1">
-                  <Link to="/UserProfile" onClick={handleViewNotifications}>
-                    <FaUser /> Profile
-                    {notifications > 0 && (
-                      <span className="notification-indicator">
-                        {notifications} new
-                      </span>
-                    )}
-                  </Link>
-                  <Link to={`/AppointmentHistory/${auth.currentUser?.uid}`} onClick={() => {
-                    const user = auth.currentUser;
-                    if (user) {
-                      localStorage.setItem(`lastAppointmentCount_${user.uid}`, appointmentHistory.length.toString());
-                      setHistoryNotifications(0);
-                    }
-                  }}>
-                    <FaHistory /> Appointment History
-                    {historyNotifications > 0 && (
-                      <span className="notification-indicator">
-                        {historyNotifications} new
-                      </span>
-                    )}
-                  </Link>
-                  <Link to="/HistoricalAppointment" onClick={() => {
-                    const user = auth.currentUser;
-                    if (user) {
-                      localStorage.setItem(`lastRecordsCount_${user.uid}`, medicalRecords.length.toString());
-                      setRecordsNotifications(0);
-                    }
-                  }}>
-                    <FaFolder /> Medical Records
-                    {recordsNotifications > 0 && (
-                      <span className="notification-indicator">
-                        {recordsNotifications} new
-                      </span>
-                    )}
-                  </Link>
-                  <a onClick={handleLogout}><FaSignOutAlt /> Logout</a>
+          <li>
+            <a className="dropdown-toggle1 position-relative" onClick={toggleDropdown}>
+              <img src={userProfilePic || iconyou} alt="Profile" className="profile-pic-small" />
+              {(hasProfileUpdates || hasUnreadNotifications) && (
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {notifications.filter(n => !n.read).length || '!'}
+                </span>
+              )}
+              {dropdownOpen && (
+                <div className="dropdown1">
+                  <div className="dropdown-content1">
+                    <Link to="/UserProfile" onClick={handleProfileClick}>
+                      <div className="d-flex align-items-center justify-content-between">
+                        <div>
+                          <FaUser /> Profile
+                        </div>
+                        {(hasProfileUpdates || hasUnreadNotifications) && (
+                          <span className="badge bg-danger ms-2">
+                            {notifications.filter(n => 
+                              !n.read && 
+                              n.notificationType !== 'appointment_approval' && 
+                              n.notificationType !== 'appointment_rejection' &&
+                              n.notificationType !== 'appointment_completion'
+                            ).length || '!'}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                    <Link 
+                      to={`/AppointmentHistory/${auth.currentUser?.uid}`}
+                      onClick={handleAppointmentHistoryClick}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <div>
+                          <FaHistory />History
+                        </div>
+                        {hasUnreadNotifications && (
+                          <span className="badge bg-danger ms-2">
+                            {notifications.filter(n => 
+                              !n.read && 
+                              (n.notificationType === 'appointment_approval' || 
+                               n.notificationType === 'appointment_rejection' ||
+                               n.notificationType === 'appointment_completion')
+                            ).length || ''}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                    <Link 
+                      to="/HistoricalAppointment"
+                      onClick={handleMedicalRecordsClick}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <div>
+                          <FaFolder /> Medical Records
+                        </div>
+                        {hasUnreadNotifications && (
+                          <span className="badge bg-danger ms-2">
+                            {notifications.filter(n => 
+                              !n.read && 
+                              n.notificationType === 'medical_records_update'
+                            ).length || ''}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                    <a onClick={handleLogout}><FaSignOutAlt /> Logout</a>
+                  </div>
                 </div>
-              </div>
-            )}
-          </a>
-        </li>
-      </ul>
-    </div>
+              )}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </>
   );
 }
 

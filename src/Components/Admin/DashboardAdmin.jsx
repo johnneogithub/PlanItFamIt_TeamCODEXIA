@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc, onSnapshot, getDoc as fetchDoc  } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc, onSnapshot, getDoc as fetchDoc, arrayUnion } from 'firebase/firestore';
 import Sidebar from '../Global/Sidebar';
 import { Link } from 'react-router-dom';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import ReactPaginate from 'react-paginate';
 import { getAuth } from 'firebase/auth';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Clinic from '../Assets/stmargaretlogo.png'
 import logomini from '../Assets/logo-mini.svg'
@@ -201,11 +203,27 @@ function DashboardAdmin() {
             updatedAppointments.push(updatedAppointmentData);
           }
 
+          const notification = {
+            type: 'approval',
+            message: `Your appointment for ${appointmentData.date} at ${appointmentData.time} has been approved`,
+            timestamp: new Date().toISOString(),
+            read: false,
+            notificationType: 'appointment_approval',
+            appointmentId: pendingApprovalId,
+            appointmentDetails: {
+              date: appointmentData.date,
+              time: appointmentData.time,
+              services: appointmentData.selectedServices,
+              status: 'approved'
+            }
+          };
+
           await updateDoc(userRef, {
             appointmentData: updatedAppointmentData,
             appointments: updatedAppointments,
             lastUpdated: new Date().toISOString(),
-            currentAppointmentId: pendingApprovalId
+            currentAppointmentId: pendingApprovalId,
+            notifications: arrayUnion(notification)
           });
 
           const userAppointmentRef = doc(firestore, `users/${appointmentData.userId}/appointments`, pendingApprovalId);
@@ -227,11 +245,25 @@ function DashboardAdmin() {
         setApprovalRemark('');
         setIncludeRemark(false);
 
-        alert("Appointment approved successfully!");
+        toast.success("Appointment approved successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     } catch (error) {
       console.error("Error approving appointment: ", error);
-      alert("An error occurred while approving the appointment. Please try again.");
+      toast.error("An error occurred while approving the appointment. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
   
@@ -271,11 +303,28 @@ function DashboardAdmin() {
           const userDoc = await getDoc(userRef);
           const userData = userDoc.exists() ? userDoc.data() : {};
           
+          const notification = {
+            type: 'rejection',
+            message: `Your appointment for ${appointmentData.date} at ${appointmentData.time} has been rejected. Reason: ${rejectRemark}`,
+            timestamp: new Date().toISOString(),
+            read: false,
+            notificationType: 'appointment_rejection',
+            appointmentId: pendingRejectId,
+            appointmentDetails: {
+              date: appointmentData.date,
+              time: appointmentData.time,
+              services: appointmentData.selectedServices,
+              status: 'rejected',
+              rejectionReason: rejectRemark
+            }
+          };
+
           await updateDoc(userRef, {
             appointmentData: updatedAppointmentData,
             appointments: [...(userData.appointments || []), updatedAppointmentData],
             appointmentHistory: [...(userData.appointmentHistory || []), updatedAppointmentData],
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
+            notifications: arrayUnion(notification)
           });
         }
 
@@ -289,11 +338,25 @@ function DashboardAdmin() {
         setPendingRejectId(null);
         setRejectRemark('');
 
-        alert("Appointment rejected successfully!");
+        toast.success("Appointment rejected successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     } catch (error) {
       console.error("Error rejecting appointment: ", error);
-      alert("An error occurred while rejecting the appointment. Please try again.");
+      toast.error("An error occurred while rejecting the appointment. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
   
@@ -306,7 +369,7 @@ const handleDone = async (appointment) => {
 
     if (!user) {
       console.error("User not authenticated");
-      alert("You must be logged in to perform this action.");
+      toast.error("You must be logged in to perform this action.");
       return;
     }
 
@@ -315,14 +378,29 @@ const handleDone = async (appointment) => {
     const appointmentDoc = await getDoc(appointmentRef);
 
     if (!appointmentDoc.exists()) {
-      console.error(`Appointment with ID ${appointment.id} does not exist`);
-      alert("This appointment no longer exists in the database.");
+      toast.error("This appointment no longer exists in the database.");
       return;
     }
     const currentAppointmentData = appointmentDoc.data();
 
-    // Fetch the imported file if it exists
-    const importedFile = currentAppointmentData.importedFile || null;
+    // Get all imported files
+    const importedFiles = [];
+    if (currentAppointmentData.importedFile) {
+      importedFiles.push({
+        name: currentAppointmentData.importedFile.name,
+        url: currentAppointmentData.importedFile.url,
+        type: currentAppointmentData.importedFile.type,
+        uploadedAt: currentAppointmentData.importedFile.uploadedAt || new Date().toISOString(),
+        uploadedBy: currentAppointmentData.importedFile.uploadedBy || {
+          uid: user.uid,
+          email: user.email
+        }
+      });
+    }
+
+    if (currentAppointmentData.importedFiles && Array.isArray(currentAppointmentData.importedFiles)) {
+      importedFiles.push(...currentAppointmentData.importedFiles);
+    }
 
     const completedAppointment = {
       ...currentAppointmentData,
@@ -335,63 +413,83 @@ const handleDone = async (appointment) => {
       selectedPricingType: appointment.selectedPricingType || currentAppointmentData.selectedPricingType,
       selectedServices: appointment.selectedServices || currentAppointmentData.selectedServices || [],
       message: appointment.message || currentAppointmentData.message,
-      importedFile: currentAppointmentData.importedFile || null,
+      importedFiles: importedFiles,
       userId: appointment.userId,
       completedAt: new Date().toISOString(),
-      status: 'completed',  // Set status to completed
+      status: 'completed',
       isApproved: true,
       totalAmount: appointment.totalAmount || currentAppointmentData.totalAmount,
       remark: currentAppointmentData.remark || null
     };
 
-    // Update user's document first
     if (appointment.userId) {
       const userRef = doc(firestore, 'users', appointment.userId);
       const userDoc = await getDoc(userRef);
       const userData = userDoc.exists() ? userDoc.data() : {};
 
-      // Update appointments array
-      const updatedAppointments = userData.appointments || [];
-      const appointmentIndex = updatedAppointments.findIndex(app => app.id === appointment.id);
-      
-      if (appointmentIndex !== -1) {
-        updatedAppointments[appointmentIndex] = completedAppointment;
-      } else {
-        updatedAppointments.push(completedAppointment);
-      }
+      const notifications = [];
 
-      // Update user document
-      await updateDoc(userRef, {
-        appointmentData: completedAppointment,  // Update current appointment
-        appointments: updatedAppointments,      // Update appointments array
-        appointmentHistory: [...(userData.appointmentHistory || []), completedAppointment], // Add to history
-        lastUpdated: new Date().toISOString()
+      // Add completion notification
+      notifications.push({
+        type: 'completion',
+        message: `Your appointment for ${appointment.date} at ${appointment.time} has been completed`,
+        timestamp: new Date().toISOString(),
+        read: false,
+        notificationType: 'appointment_completion',
+        appointmentId: appointment.id,
+        appointmentDetails: {
+          date: appointment.date,
+          time: appointment.time,
+          services: appointment.selectedServices,
+          status: 'completed',
+          completedAt: new Date().toISOString()
+        }
       });
 
-      // Add to patients records
-      await setDoc(doc(firestore, 'patientsRecords', appointment.id), completedAppointment);
+      // Add medical records notification if files were imported
+      if (importedFiles.length > 0) {
+        notifications.push({
+          type: 'medical_records',
+          message: `New medical records have been added from your appointment on ${appointment.date}`,
+          timestamp: new Date().toISOString(),
+          read: false,
+          notificationType: 'medical_records_update',
+          appointmentId: appointment.id,
+          recordDetails: {
+            date: appointment.date,
+            time: appointment.time,
+            files: importedFiles.map(file => ({
+              name: file.name,
+              type: file.type,
+              uploadedAt: file.uploadedAt
+            }))
+          }
+        });
+      }
+
+      // Update user document with both notifications
+      await updateDoc(userRef, {
+        appointmentData: completedAppointment,
+        appointments: [...(userData.appointments || []), completedAppointment],
+        appointmentHistory: [...(userData.appointmentHistory || []), completedAppointment],
+        lastUpdated: new Date().toISOString(),
+        notifications: arrayUnion(...notifications)
+      });
     }
 
-    // Delete from approved appointments
+    // Rest of your existing code...
+    await setDoc(doc(firestore, 'patientsRecords', appointment.id), completedAppointment);
     await deleteDoc(appointmentRef);
-
-    // Update local state
     setApprovedAppointments(prevAppointments => 
       prevAppointments.filter(app => app.id !== appointment.id)
     );
-
     setApprovedAppointmentsCount(prev => prev - 1);
     setTotalAppointmentsCount(prev => prev - 1);
 
-    alert('Appointment marked as completed successfully!');
-
+    toast.success('Appointment marked as completed successfully!');
   } catch (error) {
     console.error("Error handling done action: ", error);
-    if (error.code === 'permission-denied') {
-      alert("You don't have permission to perform this action. Please contact your administrator.");
-    } else {
-      alert(`An error occurred: ${error.message}`);
-    }
+    toast.error("An error occurred while completing the appointment. Please try again.");
   }
 };
 
@@ -415,7 +513,18 @@ const handleImport = (appointment) => {
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
-        await updateAppointment(appointment, file.name, downloadURL, file.type);
+        const fileData = {
+          name: file.name,
+          url: downloadURL,
+          type: file.type,
+          uploadedAt: new Date().toISOString(),
+          uploadedBy: {
+            uid: user.uid,
+            email: user.email
+          }
+        };
+
+        await updateAppointment(appointment, fileData);
         
         alert('File uploaded successfully!');
       } catch (error) {
@@ -427,22 +536,28 @@ const handleImport = (appointment) => {
   input.click();
 };
 
-const updateAppointment = async (appointment, fileName, fileURL, fileType) => {
+const updateAppointment = async (appointment, fileData) => {
   try {
+    console.log('Updating appointment with fileData:', fileData);
+    
+    const updatedAppointment = {
+      ...appointment,
+      importedFile: fileData
+    };
+    
+    console.log('Updated appointment object:', updatedAppointment);
+
     setApprovedAppointments(prevAppointments => 
       prevAppointments.map(app => 
         app.id === appointment.id 
-          ? { ...app, importedFile: { name: fileName, url: fileURL, type: fileType } }
+          ? updatedAppointment
           : app
       )
     );
 
     const firestore = getFirestore();
     const appointmentRef = doc(firestore, 'approvedAppointments', appointment.id);
-    await setDoc(appointmentRef, {
-      ...appointment,
-      importedFile: { name: fileName, url: fileURL, type: fileType }
-    }, { merge: true });
+    await setDoc(appointmentRef, updatedAppointment, { merge: true });
 
     console.log('Appointment updated successfully in database');
   } catch (error) {
@@ -505,7 +620,19 @@ const paginatedPendingAppointments = pendingAppointments.slice(
 
   return (
     <div className="dashboard-container">
-          <Sidebar isAdmin={true} />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <Sidebar isAdmin={true} />
       <div className="main-content">
         <div className="content-wrapper">
           <div className="page-header">

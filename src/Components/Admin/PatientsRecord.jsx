@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { getAuth } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import UserProfilePopup from './AdminLogin/UserProfilePopup';
+import MedicalPictureFiles from './MedicalPictureFiles/MedicalPictureFiles';
 
 function formatPricingType(type) {
   switch (type) {
@@ -41,14 +42,12 @@ const validateFiles = (files) => {
 function PatientsRecord() {
   const [patientsRecords, setPatientsRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage] = useState(12);
   const location = useLocation();
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [groupedRecords, setGroupedRecords] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [sortOrder, setSortOrder] = useState('desc');
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -62,6 +61,8 @@ function PatientsRecord() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showFilesModal, setShowFilesModal] = useState(false);
   const [showMedicalFilesModal, setShowMedicalFilesModal] = useState(false);
+  const [showMedicalPictureFiles, setShowMedicalPictureFiles] = useState(false);
+  const [medicalFiles, setMedicalFiles] = useState([]);
 
   useEffect(() => {
     fetchRecords();
@@ -90,7 +91,6 @@ function PatientsRecord() {
     try {
       const q = query(
         collection(firestore, 'patientsRecords'), 
-        orderBy('date', sortOrder), 
         limit(100)
       );
       const recordsSnapshot = await getDocs(q);
@@ -159,29 +159,9 @@ function PatientsRecord() {
     setCurrentPage(1);
   };
 
-  const handleSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-
   const sortedRecords = React.useMemo(() => {
-    let sortableRecords = [...patientsRecords];
-    if (sortConfig.key !== null) {
-      sortableRecords.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableRecords;
-  }, [patientsRecords, sortConfig]);
+    return [...patientsRecords];
+  }, [patientsRecords]);
 
   const filteredRecords = sortedRecords.filter(record =>
     Object.values(record).some(value => 
@@ -206,9 +186,32 @@ function PatientsRecord() {
     setSelectedMessage(null);
   };
 
-  const handleFolderClick = (records) => {
-    setSelectedFolder(records);
-    setSelectedMessage(null); 
+  const handleFolderClick = async (records) => {
+    console.log('Initial records:', records);
+    
+    // Get the latest data for each record
+    const firestore = getFirestore();
+    try {
+      const updatedRecords = await Promise.all(records.map(async (record) => {
+        const recordRef = doc(firestore, 'patientsRecords', record.id);
+        const recordSnap = await getDoc(recordRef);
+        if (recordSnap.exists()) {
+          return {
+            id: recordSnap.id,
+            ...recordSnap.data()
+          };
+        }
+        return record;
+      }));
+
+      console.log('Updated records with files:', updatedRecords);
+      setSelectedFolder(updatedRecords);
+      setSelectedMessage(null);
+    } catch (error) {
+      console.error('Error fetching updated records:', error);
+      setSelectedFolder(records);
+      setSelectedMessage(null);
+    }
   };
 
   const handleFileClick = (record) => {
@@ -325,7 +328,11 @@ function PatientsRecord() {
           });
         }
 
-        await updateRecord(record, uploadedFiles);
+        // Update both the appointments record and the user's medical history
+        await Promise.all([
+          updateRecord(record, uploadedFiles),
+          updateUserMedicalHistory(record, uploadedFiles)
+        ]);
         
         toast.dismiss(loadingToast);
         toast.success(`Successfully uploaded ${files.length} file(s)!`);
@@ -376,27 +383,34 @@ function PatientsRecord() {
     }
   };
 
-  const updateHistoricalRecord = async (record, uploadedFiles) => {
+  const updateUserMedicalHistory = async (record, uploadedFiles) => {
+    if (!record.userId) return; // Skip if no userId is available
+
     try {
       const userRef = doc(crud, 'users', record.userId);
       const userDoc = await getDoc(userRef);
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        let appointmentHistory = userData.appointmentHistory || [];
         
+        // Update appointmentHistory
+        let appointmentHistory = userData.appointmentHistory || [];
         appointmentHistory = appointmentHistory.map(appointment => {
           if (appointment.date === record.date && appointment.time === record.time) {
             return {
               ...appointment,
-              importedFiles: [...(appointment.importedFiles || []), ...uploadedFiles]
+              importedFiles: [
+                ...(appointment.importedFiles || []),
+                ...uploadedFiles
+              ]
             };
           }
           return appointment;
         });
 
-        let medicalRecords = userData.medicalRecords || [];
-        const newRecords = uploadedFiles.map(file => ({
+        // Add to medicalRecords
+        const medicalRecords = userData.medicalRecords || [];
+        const newMedicalRecords = uploadedFiles.map(file => ({
           fileName: file.name,
           fileUrl: file.url,
           fileType: file.type,
@@ -405,18 +419,19 @@ function PatientsRecord() {
           appointmentDate: record.date,
           appointmentTime: record.time,
           appointmentType: record.appointmentType || 'General Checkup',
-          status: record.status,
-          patientName: record.name,
-          patientEmail: record.email
+          status: record.status
         }));
 
+        // Update the user document
         await updateDoc(userRef, {
           appointmentHistory,
-          medicalRecords: [...medicalRecords, ...newRecords]
+          medicalRecords: [...medicalRecords, ...newMedicalRecords]
         });
+
+        console.log('User medical history updated successfully');
       }
     } catch (error) {
-      console.error('Error updating historical record:', error);
+      console.error('Error updating user medical history:', error);
       throw error;
     }
   };
@@ -503,14 +518,23 @@ function PatientsRecord() {
         
         if (userDoc.exists()) {
             const userData = userDoc.data();
-            
             const files = {};
             
             if (userData.appointmentHistory) {
                 userData.appointmentHistory.forEach(appointment => {
+                    const key = `${appointment.date}_${appointment.time}`;
+                    let appointmentFiles = [];
+                    
                     if (appointment.importedFile) {
-                        const key = `${appointment.date}_${appointment.time}`;
-                        files[key] = appointment.importedFile;
+                        appointmentFiles.push(appointment.importedFile);
+                    }
+                    
+                    if (appointment.importedFiles && Array.isArray(appointment.importedFiles)) {
+                        appointmentFiles = [...appointmentFiles, ...appointment.importedFiles];
+                    }
+                    
+                    if (appointmentFiles.length > 0) {
+                        files[key] = appointmentFiles;
                     }
                 });
             }
@@ -518,7 +542,7 @@ function PatientsRecord() {
             if (userData.medicalRecords) {
                 userData.medicalRecords.forEach(record => {
                     const key = `${record.appointmentDate}_${record.appointmentTime}`;
-                    files[key] = {
+                    const fileRecord = {
                         name: record.fileName,
                         url: record.fileUrl,
                         uploadedAt: record.uploadedAt,
@@ -527,10 +551,10 @@ function PatientsRecord() {
                         size: record.fileSize,
                         appointmentType: record.appointmentType
                     };
+                    
+                    files[key] = files[key] ? [...files[key], fileRecord] : [fileRecord];
                 });
             }
-
-            setImportedFiles(files);
 
             setGroupedRecords(prev => {
                 const updatedGroups = { ...prev };
@@ -540,7 +564,8 @@ function PatientsRecord() {
                         if (files[fileKey]) {
                             return {
                                 ...record,
-                                importedFile: files[fileKey]
+                                importedFiles: files[fileKey],
+                                importedFile: files[fileKey][0]
                             };
                         }
                         return record;
@@ -548,6 +573,8 @@ function PatientsRecord() {
                 });
                 return updatedGroups;
             });
+
+            setImportedFiles(files);
         }
     } catch (error) {
         console.error("Error fetching medical records:", error);
@@ -641,45 +668,59 @@ function PatientsRecord() {
     </div>
   );
 
-  const MedicalFilesModal = () => (
-    <div className="folder-popup" onClick={() => setShowMedicalFilesModal(false)}>
-        <div className="folder-popup-content">
-            <div className="modal-header">
-                <h4 className="modal-title">Medical Picture Files</h4>
-                <button 
-                    className="close-modal-btn"
-                    onClick={() => setShowMedicalFilesModal(false)}
-                    aria-label="Close modal"
-                >
-                    &times;
-                </button>
-            </div>
-            <div className="modal-body">
-                {Object.values(importedFiles).length > 0 ? (
-                    <div className="file-links-container">
-                        {Object.values(importedFiles).map((file, index) => (
-                            <div key={index} className="file-link-item">
-                                <a 
-                                    href={file.url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="file-link"
-                                >
-                                    <FaFile /> {file.name}
-                                </a>
-                                <small className="file-upload-info">
-                                    Uploaded on: {new Date(file.uploadedAt).toLocaleString()}
-                                </small>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p>No medical picture files attached.</p>
-                )}
-            </div>
-        </div>
-    </div>
-  );
+  const handleMedicalPictureClick = async () => {
+    if (!selectedFolder) return;
+
+    const firestore = getFirestore();
+    try {
+      // Get all files from the selected folder's records
+      const filesMap = new Map(); // Use Map to track unique files by URL
+      
+      for (const record of selectedFolder) {
+        const recordRef = doc(firestore, 'patientsRecords', record.id);
+        const recordSnap = await getDoc(recordRef);
+        
+        if (recordSnap.exists()) {
+          const data = recordSnap.data();
+          
+          // Add single importedFile if it exists
+          if (data.importedFile && data.importedFile.url && !filesMap.has(data.importedFile.url)) {
+            filesMap.set(data.importedFile.url, {
+              ...data.importedFile,
+              recordId: record.id,
+              appointmentDate: data.date,
+              appointmentTime: data.time,
+              status: data.status
+            });
+          }
+          
+          // Add array of importedFiles if they exist
+          if (data.importedFiles && Array.isArray(data.importedFiles)) {
+            data.importedFiles.forEach(file => {
+              if (file && file.url && !filesMap.has(file.url)) {
+                filesMap.set(file.url, {
+                  ...file,
+                  recordId: record.id,
+                  appointmentDate: data.date,
+                  appointmentTime: data.time,
+                  status: data.status
+                });
+              }
+            });
+          }
+        }
+      }
+
+      // Convert Map values to array
+      const uniqueFiles = Array.from(filesMap.values());
+      console.log('Collected unique medical files:', uniqueFiles);
+      setMedicalFiles(uniqueFiles);
+      setShowMedicalPictureFiles(true);
+    } catch (error) {
+      console.error('Error fetching medical files:', error);
+      toast.error('Failed to load medical files');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -716,15 +757,6 @@ function PatientsRecord() {
                   onChange={handleSearch}
                 />
               </div>
-              <button 
-                className="btn btn-outline-secondary btn-sm ms-2"
-                onClick={() => {
-                  setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
-                  fetchRecords();
-                }}
-              >
-                <FaSort /> {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
-              </button>
             </div>
           </div>
           <div className="patients-record-content">
@@ -786,35 +818,29 @@ function PatientsRecord() {
             ) : (
               <div className="files-view">
                 <div className="files-header">
-                  <button 
-                    className="btn btn-back"
-                    onClick={() => setSelectedFolder(null)}
-                  >
-                    <FaFolder /> Back to Folders
-                  </button>
-                  <div className="folder-info">
-                    <h3>{selectedFolder[0]?.name}'s Records</h3>
-                    <span className="record-count">
-                      {selectedFolder.length} {selectedFolder.length === 1 ? 'record' : 'records'}
-                    </span>
+                  <div className="files-header-left">
+                    <button 
+                      className="btn btn-back"
+                      onClick={() => setSelectedFolder(null)}
+                    >
+                      <FaFolder /> Back to Folders
+                    </button>
+                    <div className="folder-info">
+                      <h3>{selectedFolder[0]?.name}'s Records</h3>
+                      <span className="record-count">
+                        {selectedFolder.length} {selectedFolder.length === 1 ? 'record' : 'records'}
+                      </span>
+                    </div>
+                   
                   </div>
-                  <div className="imported-files">
-                    {selectedFolder.map(record => (
-                      record.importedFile && (
-                        <div key={record.id} className="imported-file">
-                          <a href={record.importedFile.url} target="_blank" rel="noopener noreferrer">
-                            {record.importedFile.name}
-                          </a>
-                        </div>
-                      )
-                    ))}
+                  <div className="files-header-right">
+                    <button 
+                      className="btn btn-primary"
+                      onClick={handleMedicalPictureClick}
+                    >
+                      <FaImage /> Medical Picture
+                    </button>
                   </div>
-                  <button 
-                    className="btn btn-primary ms-2"
-                    onClick={() => setShowMedicalFilesModal(true)}
-                  >
-                    Medical Picture Files
-                  </button>
                 </div>
                 <div className="files-grid">
                   {selectedFolder
@@ -912,9 +938,9 @@ function PatientsRecord() {
             setShowAppointmentModal(false);
           }
         }}>
-          <div className="folder-popup-content appointment-modal">
+          <div className="folder-popup-content patients-record-appointment-modal">
             <div className="modal-header">
-              <h4 className="modal-title">{selectedFile?.importedFile?.name || 'Medical Record'}</h4>
+              <h4 className="modal-title"></h4>
               <button 
                 className="close-modal-btn"
                 onClick={() => setShowAppointmentModal(false)}
@@ -987,27 +1013,10 @@ function PatientsRecord() {
                 </div>
               </div>
 
-              <div className="modal-footer">
-                {/* Remove this button */}
-                {/* <button 
-                  className="btn btn-primary"
-                  onClick={handleFilesButtonClick}
-                >
-                  record files pic
-                </button> */}
-              </div>
 
               {showFilesModal && <FilesModal />}
             </div>
 
-            <div className="modal-footer">
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setShowAppointmentModal(false)}
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -1058,18 +1067,18 @@ function PatientsRecord() {
                 </label>
               </div>
             </div>
-            <div className="modal-footer">
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setSelectedRecordForImport(null)}
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         </div>
       )}
-      {showMedicalFilesModal && <MedicalFilesModal />}
+      {showMedicalPictureFiles && (
+        <MedicalPictureFiles
+          isOpen={showMedicalPictureFiles}
+          onClose={() => setShowMedicalPictureFiles(false)}
+          selectedFolder={selectedFolder}
+          files={medicalFiles}
+          patientName={selectedFolder[0]?.name}
+        />
+      )}
       <ToastContainer position="bottom-right" />
     </div>
   );

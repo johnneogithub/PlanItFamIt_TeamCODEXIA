@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useParams, useHistory } from 'react-router-dom';
 import { FaCalendarAlt, FaClock, FaCommentDots, FaCheckCircle, FaTimesCircle, FaList, FaFileAlt, FaArrowLeft } from 'react-icons/fa';
 import Navbar from '../Components/Global/Navbar_Main';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { crud } from '../Config/firebase';
 import './AppointmentHistoryStyle.css';
+import { auth } from '../Config/firebase';
 
 const formatPricingType = (type) => {
   switch (type) {
@@ -31,6 +32,7 @@ const AppointmentHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const initializeData = async () => {
@@ -54,41 +56,64 @@ const AppointmentHistory = () => {
     initializeData();
   }, [location.state, userId]);
 
+  useEffect(() => {
+    if (appointments.length > 0) {
+      console.log("Processing appointments:", appointments);
+      
+      const sortedAppointments = [...appointments].sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time}`);
+        const dateB = new Date(`${b.date} ${b.time}`);
+        return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+      });
+      
+      const filtered = filterStatus === 'all' 
+        ? sortedAppointments 
+        : sortedAppointments.filter(app => app.status === filterStatus);
+      
+      console.log("Filtered appointments:", filtered);
+      setFilteredAppointments(filtered);
+    } else {
+      setFilteredAppointments([]);
+    }
+  }, [appointments, filterStatus, sortOrder]);
+
   const fetchUserData = async () => {
     try {
       setIsDataLoading(true);
       const userRef = doc(crud, `users/${userId}`);
-      const docSnap = await getDoc(userRef);
       
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        console.log("Fetched user data:", userData);
-        
-        let allAppointments = [];
-        
-        if (userData.appointmentData && 
-            userData.appointmentData.status !== 'completed' && 
-            userData.appointmentData.status !== 'rejected') {
-          allAppointments.push({
-            ...userData.appointmentData,
-            isCurrent: true
-          });
-        }
-        
-        if (userData.appointmentHistory) {
-          allAppointments = [...allAppointments, ...userData.appointmentHistory];
-        }
+      // Set up real-time listener for notifications
+      const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          
+          // Update notifications
+          const userNotifications = userData.notifications || [];
+          const completionNotifications = userNotifications.filter(
+            n => n.notificationType === 'appointment_completion' && !n.read
+          );
+          setNotifications(completionNotifications);
 
-        console.log("Combined appointments:", allAppointments);
-        setAppointments(allAppointments);
+          // Update appointments
+          let allAppointments = [];
+          if (userData.appointmentData) {
+            allAppointments.push({
+              ...userData.appointmentData,
+              isCurrent: true,
+              id: `current_${userData.appointmentData.date}_${userData.appointmentData.time}`
+            });
+          }
+          
+          if (userData.appointmentHistory) {
+            allAppointments = [...allAppointments, ...userData.appointmentHistory];
+          }
+          
+          setAppointments(allAppointments);
+          setFilteredAppointments(allAppointments);
+        }
+      });
 
-        setUserInfo({
-          name: `${userData.firstName || ''} ${userData.middleName || ''} ${userData.lastName || ''}`.trim(),
-          email: userData.email,
-          profilePic: userData.profilePicture,
-          userId: userId
-        });
-      }
+      return () => unsubscribe();
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -138,27 +163,6 @@ const AppointmentHistory = () => {
       fetchAppointments();
     }
   }, [userInfo.userId, isLoading]);
-
-  useEffect(() => {
-    if (appointments.length > 0) {
-      console.log("Processing appointments:", appointments);
-      
-      const sortedAppointments = [...appointments].sort((a, b) => {
-        const dateA = new Date(`${a.date} ${a.time}`);
-        const dateB = new Date(`${b.date} ${b.time}`);
-        return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-      });
-      
-      const filtered = filterStatus === 'all' 
-        ? sortedAppointments 
-        : sortedAppointments.filter(app => app.status === filterStatus);
-      
-      console.log("Filtered appointments:", filtered);
-      setFilteredAppointments(filtered);
-    } else {
-      setFilteredAppointments([]);
-    }
-  }, [appointments, filterStatus, sortOrder]);
 
   const getStatusIcon = (status) => {
     switch(status) {
@@ -233,7 +237,7 @@ const AppointmentHistory = () => {
               <div className="header-title">
                 <h2>Appointment History</h2>
                 <span className="total-count">
-                  Total Completed: {appointments.filter(apt => apt.status === 'completed').length} Appointments
+                  Completed: {appointments.filter(apt => apt.status === 'completed').length}
                 </span>
                 <button 
                   className="historical-btn"
@@ -490,6 +494,22 @@ const AppointmentHistory = () => {
           </div>
         )}
       </div>
+
+      {notifications.length > 0 && (
+        <div className="notifications-banner">
+          {notifications.map((notification, index) => (
+            <div key={index} className="notification-item">
+              <div className="notification-content">
+                <FaCheckCircle className="notification-icon" />
+                <span>{notification.message}</span>
+              </div>
+              <small className="notification-time">
+                {new Date(notification.timestamp).toLocaleDateString()}
+              </small>
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 };

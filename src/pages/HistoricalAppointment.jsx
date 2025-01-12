@@ -109,33 +109,42 @@ const HistoricalAppointment = () => {
     const seenRecords = new Map();
 
     records.forEach(record => {
-      if (!record.date || !record.time) return;
-      
-      const key = `${record.date}_${record.time}`;
-      if (seenRecords.has(key)) {
-        const existing = seenRecords.get(key);
-        existing.importedFiles = [
-          ...(existing.importedFiles || []),
-          ...(record.importedFiles || [])
-        ];
-      } else {
-        seenRecords.set(key, record);
-      }
+        if (!record.date || !record.time) return;
+
+        const key = `${record.date}_${record.time}`;
+        if (seenRecords.has(key)) {
+            const existing = seenRecords.get(key);
+            existing.importedFiles = [
+                ...(existing.importedFiles || []),
+                ...(record.importedFiles || [])
+            ];
+            existing.hasNewImport = existing.hasNewImport || !!record.importedFiles.length;
+        } else {
+            seenRecords.set(key, {
+                ...record,
+                hasNewImport: !!record.importedFiles.length
+            });
+        }
     });
 
     const finalRecords = Array.from(seenRecords.values()).map(record => {
-      if (record.importedFiles) {
-        const seenUrls = new Set();
-        record.importedFiles = record.importedFiles.filter(file => {
-          if (!file || !file.url || seenUrls.has(file.url)) return false;
-          seenUrls.add(file.url);
-          return true;
-        });
-      }
-      return record;
+        if (record.importedFiles) {
+            const seenUrls = new Set();
+            record.importedFiles = record.importedFiles.filter(file => {
+                if (!file || !file.url || seenUrls.has(file.url)) return false;
+                seenUrls.add(file.url);
+                return true;
+            });
+        }
+        return record;
     });
 
-    return finalRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return finalRecords.sort((a, b) => {
+        if (b.hasNewImport - a.hasNewImport !== 0) {
+            return b.hasNewImport - a.hasNewImport;
+        }
+        return new Date(b.date) - new Date(a.date);
+    });
   };
 
   const handleFilePreview = (file) => {

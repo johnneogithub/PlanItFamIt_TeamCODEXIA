@@ -45,19 +45,21 @@ const Type = () => {
           St. Margaret Lying In Clinic
         </h1>
         <p className="lead mb-4" style={{ color: 'white' }}>Compassionate care for mothers and babies</p>
-        <button 
-          className="btn btn-lg mt-3 shadow-sm" 
-          onClick={handleAppointmentClick}
-          style={{
-            backgroundColor: 'rgb(197, 87, 219)',
-            color: 'white',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(177, 67, 199)'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = 'rgb(197, 87, 219)'}
-        >
-          <i className="bi bi-calendar-check me-2"></i> Book an Appointment
-        </button>
+        <div className="d-flex justify-content-center">
+          <button 
+            className="btn btn-book-appointment mt-3 shadow-sm" 
+            onClick={handleAppointmentClick}
+            style={{
+              backgroundColor: 'rgb(197, 87, 219)',
+              color: 'white',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(177, 67, 199)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgb(197, 87, 219)'}
+          >
+            <i className="bi bi-calendar-check me-2"></i> Book an Appointment
+          </button>
+        </div>
       </div>
     </section>
 

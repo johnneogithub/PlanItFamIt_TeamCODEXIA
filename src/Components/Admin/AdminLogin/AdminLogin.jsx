@@ -47,7 +47,7 @@ function AdminLogin() {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-xxl-11">
-            <div className="card border-light-subtle shadow-sm p-4">
+            <div className="card border-light-subtle shadow-sm">
               <div className="row g-0">
                 <div className="col-12 col-md-6">
                   <img
@@ -100,14 +100,14 @@ function AdminLogin() {
                             Password
                           </label>
                         </div>
-                        <div className="d-flex text-center">
-                          <button className="btn btn-primary btn-lg unique-login-button  text-center" type="submit">
-                            Log in Dashboard
+                        <div className="d-grid">
+                          <button className="btn btn-dark btn-lg" type="submit">
+                            Login to Dashboard
                           </button>
                         </div>
                       </form>
                       <div className="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-center mt-5">
-                        <a href="/Welcome" className="link-secondary text-decoration-none hover-link">
+                        <a href="/Welcome" className="link-secondary text-decoration-none">
                           Go to Welcome Page
                         </a>
                       </div>

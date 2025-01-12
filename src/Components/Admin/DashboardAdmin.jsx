@@ -653,7 +653,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
             </nav>
           </div>
           <div className="row">
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-4 stretch-card grid-margin unique-card">
               <div className="card bg-gradient-danger card-img-holder text-white">
                 <div className="card-body">
                 <img src={Circle} class="card-img-absolute" alt="circle-image" />
@@ -665,7 +665,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                 </div>
               </div>
             </div>
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-4 stretch-card grid-margin unique-card">
               <div className="card bg-gradient-info card-img-holder text-white">
                 <div className="card-body">
                   <img src={Circle} className="card-img-absolute" alt="circle-image" />
@@ -678,7 +678,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
               </div>
             </div>
 
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-4 stretch-card grid-margin unique-card">
               <div className="card bg-gradient-success card-img-holder text-white">
                 <div className="card-body">
                 <img src={Circle} className="card-img-absolute" alt="circle-image" />

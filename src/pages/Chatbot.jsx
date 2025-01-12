@@ -1,125 +1,73 @@
-// Chatbot.jsx
-// PlanItAssistant 
-import React, { useState, useEffect, useRef } from 'react';
-import './ChatbotStyle.css';
-import { FaRobot, FaSync, FaPaperPlane, FaCompress, FaExpand, FaArrowLeft } from "react-icons/fa";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import '../pages/ChatbotStyle.css';
+import { FaRobot, FaSync, FaPaperPlane, FaUser, FaCompress, FaExpand, FaArrowLeft } from "react-icons/fa";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Replace with your secure API key
-const API_KEY = "AIzaSyCZKZbTGaRVNnDnhaLJ84fO8kdrANVVDM8";
+const API_KEY = "AIzaSyBuFKyNIr5d7AecVfupZbzrHoIoJRzp7vg"; // Add your Google API key here
+const MODEL_NAME = "gemini-2.0-flash-exp";
+const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+const chat = model.startChat({
+  history: [],
+});
 
 const Chatbot = () => {
   const [chatInput, setChatInput] = useState("");
-  const [chatList, setChatList] = useState([
-    { message: "Hi there! I am PlanIt Assistant. How may I help you today?", className: "incoming" }
-  ]);
-  const [chatHistory, setChatHistory] = useState([]);
-  const chatContainerRef = useRef(null);
+  const [chatList, setChatList] = useState([{ message: "Hi there! I am PlanIt Assistant. How may I help you today?", className: "incoming"}]);
   const chatInputRef = useRef(null);
+  const chatContainerRef = useRef(null);
+  const [chatHistory, setChatHistory] = useState([{ role: 'assistant', text: "Hi there👋! I am PlanIt Assistant. How may I help you today?" }]);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
 
-  // Initialize genAI and model inside the component
-  const genAI = new GoogleGenerativeAI(API_KEY);
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-  });
-
-  // Debugging: Log the model to ensure it's correctly initialized
-  useEffect(() => {
-    console.log('Initialized model:', model);
-  }, [model]);
-
+  // Function to handle sending the message
   const sendMessage = async (userMessage) => {
-    if (!userMessage.trim()) return;
-
-    // Create user message entry
-    const userMessageEntry = { message: userMessage, className: "outgoing" };
-    const thinkingEntry = { message: "Thinking...", className: "incoming" };
-
-    // Update chatList with user's message and a placeholder for the assistant's response
-    setChatList((prevList) => [
-      ...prevList,
-      userMessageEntry,
-      thinkingEntry,
-    ]);
-
-    // Compute the new chat history including the user's message
-    const newChatHistory = [
-      ...chatHistory,
-      { role: "user", text: userMessage },
+    if (!userMessage.trim()) return; // Avoid sending empty messages
+    
+    // Append the user's message and a single "Thinking..." message
+    const updatedChatList = [
+      ...chatList,
+      { message: userMessage, className: "outgoing" },
+      { message: "Thinking...", className: "incoming" },
     ];
-
-    // Update chatHistory state
-    setChatHistory(newChatHistory);
-
-    // Set isTyping to true when the assistant is generating a response
-    setIsTyping(true);
+    
+    setChatList(updatedChatList);
+    setChatHistory((prev) => [...prev, { role: 'user', text: userMessage }]);
 
     try {
-      // Start a new chat session with the updated history
-      const chatSession = await model.startChat({
-        generationConfig: {
-          temperature: 0.75,
-          topP: 0.95,
-          topK: 64,
-          maxOutputTokens: 8192,
-          responseMimeType: "text/plain",
-        },
-        history: newChatHistory,
-      });
+      const result = await chat.sendMessage(userMessage); // Send message to API
+      const response = await result.response.text(); // Await text content from API response
 
-      // Debugging: Log the chatSession to ensure it's correctly initialized
-      console.log('Initialized chatSession:', chatSession);
-
-      // Ensure chatSession.sendMessage is a function
-      if (typeof chatSession?.sendMessage !== 'function') {
-        throw new Error("chatSession.sendMessage is not a function");
-      }
-
-      // Send the user's message and await the response
-      const result = await chatSession.sendMessage(userMessage);
-      const responseText = typeof result?.response?.text === 'string' ? result.response.text : "No response received.";
-
-      // Update chatList by replacing the "Thinking..." placeholder with the actual response
-      setChatList((prevList) => [
-        ...prevList.slice(0, -1), // Remove the last "Thinking..." entry
-        { message: responseText, className: "incoming" },
-      ]);
-
-      // Update chatHistory with the assistant's response
-      setChatHistory((prevHistory) => [
-        ...prevHistory,
-        { role: "assistant", text: responseText },
-      ]);
+      // Replace "Thinking..." with the assistant's actual response
+      const updatedResponseList = updatedChatList.filter(chat => chat.message !== "Thinking...");
+      setChatList([...updatedResponseList, { message: response, className: "incoming" }]);
+      setChatHistory((prev) => [...prev, { role: 'assistant', text: response }]);
     } catch (error) {
       console.error("Error fetching response:", error);
-      // Replace the "Thinking..." placeholder with an error message
-      setChatList((prevList) => [
-        ...prevList.slice(0, -1),
-        { message: "Error fetching response. Please try again.", className: "incoming" },
-      ]);
-    } finally {
-      // Set isTyping to false after the response is received
-      setIsTyping(false);
     }
   };
+
+  const createChatLi = useCallback((message, className) => {
+    return { message, className };
+  }, []);
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
-    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+    if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
-    } else if (document.exitFullscreen) {
-      document.exitFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
     }
   };
 
+  // Handles when the user sends a message by clicking the button
   const handleChat = () => {
-    if (!chatInput.trim()) return;
-    const userMessage = chatInput.trim();
-    setChatInput("");
-    sendMessage(userMessage);
+    if (!chatInput.trim()) return; // Prevent sending if no input
+    const userMessage = chatInput.trim(); // Capture input message directly
+    setChatInput(""); // Clear input
+    sendMessage(userMessage); // Pass the message to the sendMessage function
   };
 
   const handleKeyPress = (event) => {
@@ -130,38 +78,18 @@ const Chatbot = () => {
   };
 
   const handleRefresh = () => {
-    setChatList([{ message: "Hi there! I am PlanIt Assistant. How may I help you today?", className: "incoming" }]);
-    setChatHistory([]);
+    setChatList([{ message: "Hi there! I am PlanIt Assistant. How may I help you today?", className: "incoming"}]);
+    setChatHistory([{ role: 'assistant', text: "Hi there👋! I am PlanIt Assistant. How may I help you today?" }]);
   };
 
   const handleBack = () => {
+    console.log("Back button clicked");
     window.history.back();
   };
 
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
+    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
   }, [chatList]);
-
-  // Debugging: Ensure all chat.message entries are strings
-  useEffect(() => {
-    chatList.forEach((chat, index) => {
-      if (typeof chat.message !== 'string') {
-        console.error(`chat.message at index ${index} is not a string:`, chat.message);
-      }
-    });
-  }, [chatList]);
-
-  // Update chatList to include typing indicator
-  useEffect(() => {
-    if (isTyping) {
-      setChatList((prevList) => [
-        ...prevList,
-        { message: "Assistant is typing...", className: "incoming typing" }, // Typing indicator
-      ]);
-    }
-  }, [isTyping]);
 
   return (
     <div className={`chatbot-container ${isFullscreen ? 'fullscreen' : ''}`}>
@@ -208,7 +136,7 @@ const Chatbot = () => {
             required
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={handleKeyPress}
+            onKeyPress={handleKeyPress}
             ref={chatInputRef}
             rows={1}
           />

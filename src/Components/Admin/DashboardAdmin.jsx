@@ -311,7 +311,6 @@ const handleDone = async (appointment) => {
     }
 
     const firestore = getFirestore();
-
     const appointmentRef = doc(firestore, 'approvedAppointments', appointment.id);
     const appointmentDoc = await getDoc(appointmentRef);
 
@@ -321,6 +320,9 @@ const handleDone = async (appointment) => {
       return;
     }
     const currentAppointmentData = appointmentDoc.data();
+
+    // Fetch the imported file if it exists
+    const importedFile = currentAppointmentData.importedFile || null;
 
     const completedAppointment = {
       ...currentAppointmentData,
@@ -402,35 +404,23 @@ const handleImport = (appointment) => {
       try {
         const auth = getAuth();
         const user = auth.currentUser;
-        
+
         if (!user) {
           throw new Error('User not authenticated');
         }
 
-        console.log('Current user:', user.uid); 
-
         const storage = getStorage();
         const storageRef = ref(storage, `appointments/${user.uid}/${appointment.id}/${file.name}`);
-        
-        console.log('Attempting to upload file:', file.name); 
-        console.log('Upload path:', `appointments/${user.uid}/${appointment.id}/${file.name}`); 
 
         const snapshot = await uploadBytes(storageRef, file);
-        console.log('File uploaded successfully:', snapshot);
-
         const downloadURL = await getDownloadURL(snapshot.ref);
-        console.log('Download URL obtained:', downloadURL);
-        
+
         await updateAppointment(appointment, file.name, downloadURL, file.type);
         
         alert('File uploaded successfully!');
       } catch (error) {
         console.error('Error uploading file:', error);
-        let errorMessage = 'An error occurred while uploading the file.';
-        if (error.code === 'storage/unauthorized') {
-          errorMessage = 'You do not have permission to upload files. Please contact the administrator.';
-        }
-        alert(`Error: ${errorMessage}`);
+        alert(`Error: ${error.message}`);
       }
     }
   };
@@ -446,7 +436,7 @@ const updateAppointment = async (appointment, fileName, fileURL, fileType) => {
           : app
       )
     );
-    
+
     const firestore = getFirestore();
     const appointmentRef = doc(firestore, 'approvedAppointments', appointment.id);
     await setDoc(appointmentRef, {
@@ -687,14 +677,15 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                                   className='btn btn-sm'
                                   style={{
                                     ...tableStyles.actionButton,
-                                    backgroundColor: '#11cdef',
+                                    backgroundColor: appointment.importedFile ? '#6c757d' : '#11cdef',
                                     color: 'white',
                                     border: 'none'
                                   }}
                                   onClick={() => handleImport(appointment)}
+                                  disabled={!!appointment.importedFile}
                                 >
                                   <i className="bi bi-file-earmark-arrow-up me-1"></i>
-                                  Import
+                                  {appointment.importedFile ? 'Imported' : 'Import'}
                                 </button>
                               </div>
                             </td>

@@ -1487,233 +1487,144 @@
 }
 
 .folder-popup-content.appointment-modal {
-    background-color: #ffffff; /* White background for the modal */
-    border-radius: 12px; /* Rounded corners */
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); /* Enhanced shadow for depth */
-    padding: 30px; /* Increased padding for better spacing */
-    max-width: 600px; /* Set a max width for the modal */
-    width: 90%; /* Responsive width */
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.modal-header {
-    display: flex; /* Flexbox for alignment */
-    justify-content: space-between; /* Space between title and close button */
-    align-items: center; /* Center items vertically */
-    padding-bottom: 15px; /* Padding for header */
-    border-bottom: 2px solid #680074; /* Distinct border for separation */
-}
-
-.modal-title {
-    font-size: 1.5rem; /* Larger font size for title */
-    color: #680074; /* Primary color for title */
-    font-weight: bold; /* Bold title */
-}
-
-.close-modal-btn {
-    background: none; /* No background for close button */
-    border: none; /* No border */
-    font-size: 1.5rem; /* Larger font size for close button */
-    color: #680074; /* Primary color */
-    cursor: pointer; /* Pointer cursor */
-    transition: color 0.3s; /* Smooth color transition */
-}
-
-.close-modal-btn:hover {
-    color: #b3004d; /* Darker shade on hover */
-}
-
-.modal-body {
-    padding: 20px; /* Padding for body */
-    color: #333; /* Text color */
-    line-height: 1.6; /* Improved line height for readability */
-    background-color: #f9f9f9; /* Light background for better contrast */
-    border-radius: 8px; /* Rounded corners for body */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-.info-card {
-    margin-bottom: 20px; /* Space between cards */
-    border: 1px solid #e0e0e0; /* Light border for cards */
-    border-radius: 8px; /* Rounded corners for cards */
-    background-color: #ffffff; /* White background for cards */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-.info-card-header {
-    background-color: #680074; /* Header background color */
-    color: white; /* Header text color */
-    padding: 10px; /* Padding for header */
-    border-top-left-radius: 8px; /* Rounded corners for header */
-    border-top-right-radius: 8px; /* Rounded corners for header */
-}
-
-.info-item {
-    margin: 10px 0; /* Space between items */
-}
-
-.info-item label {
-    font-weight: bold; /* Bold labels */
-    color: #555; /* Darker color for labels */
-}
-
-.info-item span {
-    color: #333; /* Darker color for text */
-}
-
-.modal-footer {
-    display: flex; /* Flexbox for footer */
-    justify-content: flex-end; /* Align buttons to the right */
-    gap: 10px; /* Space between buttons */
-    padding-top: 15px; /* Padding for footer */
-    border-top: 1px solid #e0e0e0; /* Border for separation */
-}
-
-/* Modal Header */
-.modal-header {
+.folder-popup-content .modal-header {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-bottom: 1px solid #ccc;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background-color: #680074; /* Header background color */
-  color: white; /* Header text color */
-  border-top-left-radius: 8px; /* Rounded corners for header */
-  border-top-right-radius: 8px; /* Rounded corners for header */
 }
 
-/* Modal Title */
-.modal-title {
-  font-size: 1.5rem;
+.folder-popup-content .modal-title {
+  font-size: 1.6em;
   font-weight: bold;
+  color: #333;
 }
 
-/* Close Button */
-.close-modal-btn {
+.folder-popup-content .close-modal-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: white; /* Close button color */
+  font-size: 1.5em;
+  color: #666;
   cursor: pointer;
   transition: color 0.3s;
 }
 
-.close-modal-btn:hover {
-  color: #b3004d; /* Darker shade on hover */
-}
-
-/* Modal Body */
-.modal-body {
-  padding: 20px;
+.folder-popup-content .close-modal-btn:hover {
   color: #333;
-  line-height: 1.6;
 }
 
-/* Info Card */
-.info-card {
-  margin-bottom: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #f9f9f9; /* Light background for cards */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-/* Info Card Header */
-.info-card-header {
-  background-color: #680074; /* Header background color */
-  color: white; /* Header text color */
-  padding: 10px;
-  border-top-left-radius: 8px; /* Rounded corners for header */
-  border-top-right-radius: 8px; /* Rounded corners for header */
-}
-
-/* Info Card Content */
-.info-card-content {
-  padding: 15px; /* Padding for content */
-}
-
-/* File Links Container */
-.file-links-container {
+.folder-popup-content .modal-body {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Space between file links */
+  gap: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
-/* File Link Item */
-.file-link-item {
-  display: flex;
-  flex-direction: column;
-  padding: 10px; /* Increased padding for better touch targets */
-  border: 1px solid #ddd; /* Light border for file links */
+.folder-popup-content .modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.folder-popup-content .modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
   border-radius: 4px;
-  background-color: #f8f9fa; /* Light background for file links */
-  transition: background-color 0.2s; /* Smooth background transition */
 }
 
-.file-link-item:hover {
-  background-color: #e9ecef; /* Darker background on hover */
+.folder-popup-content .modal-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
 }
 
-/* File Upload Info */
-.file-upload-info {
-  color: #666; /* Darker color for upload info */
-  font-size: 0.8rem;
-  margin-top: 4px; /* Space above upload info */
+.folder-popup-content .modal-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
-/* Modal Footer */
-.modal-footer {
+.folder-popup-content .info-card {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.folder-popup-content .info-card-header {
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.folder-popup-content .info-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.folder-popup-content .file-links-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.folder-popup-content .file-link-item {
+  background-color: #e9e9e9;
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: background-color 0.3s;
+}
+
+.folder-popup-content .file-link-item:hover {
+  background-color: #d9d9d9;
+}
+
+.folder-popup-content .file-link {
+  color: #0056b3;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.folder-popup-content .file-upload-info {
+  font-size: 0.85em;
+  color: #555;
+}
+
+.folder-popup-content .modal-footer {
+  padding: 20px;
+  border-top: 1px solid #ccc;
   display: flex;
   justify-content: flex-end;
-  gap: 10px; /* Space between buttons */
-  padding-top: 15px;
-  border-top: 1px solid #e0e0e0; /* Border for separation */
 }
 
-/* Button Styles */
-.btn {
-  padding: 10px 15px; /* Padding for buttons */
-  border-radius: 5px; /* Rounded corners for buttons */
-  background-color: #680074; /* Primary button color */
-  color: white; /* Button text color */
-  border: none; /* No border */
-  cursor: pointer; /* Pointer cursor */
-  transition: background-color 0.3s; /* Smooth background transition */
+.folder-popup-content .btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  background-color: #680074;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.btn:hover {
-  background-color: #b3004d; /* Darker shade on hover */
+.folder-popup-content .btn:hover {
+  background-color: #520057;
 }
 
-.imported-files-section {
-    margin-top: 20px; /* Space above the imported files section */
-    padding: 15px; /* Padding for the section */
-    background-color: #f1f1f1; /* Light background for contrast */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-.imported-files-header {
-    font-size: 1.2rem; /* Header font size */
-    font-weight: bold; /* Bold header */
-    color: #680074; /* Primary color for header */
-    margin-bottom: 10px; /* Space below the header */
-}
-
-.imported-file-item {
-    display: flex; /* Flexbox for layout */
-    justify-content: space-between; /* Space between file name and actions */
-    padding: 10px; /* Padding for each file item */
-    border-bottom: 1px solid #e0e0e0; /* Light border for separation */
-}
-
-.imported-file-item:last-child {
-    border-bottom: none; /* Remove border for the last item */
-}
-
-.file-link {
-    color: #007bff; /* Link color */
-    text-decoration: none; /* No underline */
-}
-
-.file-link:hover {
-    text-decoration: underline; /* Underline on hover */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

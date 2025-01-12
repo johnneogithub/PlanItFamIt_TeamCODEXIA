@@ -1071,7 +1071,6 @@ function UserProfile() {
                     <thead>
                       <tr>
                         <th>Name</th>
-                        <th>Type</th>
                         <th>Date</th>
                         <th>Time</th>
                         <th>Pricing Type</th>
@@ -1082,7 +1081,6 @@ function UserProfile() {
                       {appointmentData ? (
                         <tr>
                           <td>{appointmentData.name || 'N/A'}</td>
-                          <td>{appointmentData.appointmentType || 'N/A'}</td>
                           <td>{appointmentData.date || 'N/A'}</td>
                           <td>{appointmentData.time || 'N/A'}</td>
                           <td>{formatPricingType(appointmentData.selectedPricingType) || 'N/A'}</td>
@@ -1094,7 +1092,7 @@ function UserProfile() {
                         </tr>
                       ) : (
                         <tr>
-                          <td colSpan="6" className="text-center">No appointment data available</td>
+                          <td colSpan="5" className="text-center">No appointment data available</td>
                         </tr>
                       )}
                     </tbody>

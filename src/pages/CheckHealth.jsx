@@ -68,7 +68,7 @@ const Type = () => {
             <h2 className="mb-4" style={{color: 'rgb(197, 87, 219)'}}>
               Welcome to St. Margaret Lying In Clinic
             </h2>
-            <p className="lead text-muted">
+            <p>
               We are thrilled to be a part of your journey through the miracle of life. 
               As a dedicated pregnancy care center, we are committed to providing comprehensive and compassionate care.
             </p>

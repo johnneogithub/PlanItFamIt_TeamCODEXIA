@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../pages/ChatbotStyle.css';
-import { FaRobot, FaSync, FaPaperPlane, FaUser, FaCompress, FaExpand, FaArrowLeft } from "react-icons/fa";
+import { FaRobot, FaPaperPlane, FaUser, FaArrowLeft } from "react-icons/fa";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const API_KEY = "AIzaSyBuFKyNIr5d7AecVfupZbzrHoIoJRzp7vg"; // Add your Google API key here
@@ -18,7 +18,6 @@ const Chatbot = () => {
   const chatInputRef = useRef(null);
   const chatContainerRef = useRef(null);
   const [chatHistory, setChatHistory] = useState([{ role: 'assistant', text: "Hi there👋! I am PlanIt Assistant. How may I help you today?" }]);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Function to handle sending the message
   const sendMessage = async (userMessage) => {
@@ -28,7 +27,7 @@ const Chatbot = () => {
     const updatedChatList = [
       ...chatList,
       { message: userMessage, className: "outgoing" },
-      { message: "Thinking...", className: "incoming" },
+      { message: "Thinking...", className: "incoming thinking-animation" },
     ];
     
     setChatList(updatedChatList);
@@ -38,10 +37,24 @@ const Chatbot = () => {
       const result = await chat.sendMessage(userMessage); // Send message to API
       const response = await result.response.text(); // Await text content from API response
 
-      // Replace "Thinking..." with the assistant's actual response
+
       const updatedResponseList = updatedChatList.filter(chat => chat.message !== "Thinking...");
-      setChatList([...updatedResponseList, { message: response, className: "incoming" }]);
-      setChatHistory((prev) => [...prev, { role: 'assistant', text: response }]);
+      setChatList(updatedResponseList);
+
+
+      let currentText = '';
+      const typingInterval = 3; 
+      const typeResponse = (text, index) => {
+        if (index < text.length) {
+          currentText += text[index];
+          setChatList([...updatedResponseList, { message: currentText, className: "incoming" }]);
+          setTimeout(() => typeResponse(text, index + 1), typingInterval);
+        } else {
+          setChatHistory((prev) => [...prev, { role: 'assistant', text: response }]);
+        }
+      };
+
+      typeResponse(response, 0);
     } catch (error) {
       console.error("Error fetching response:", error);
     }
@@ -51,23 +64,11 @@ const Chatbot = () => {
     return { message, className };
   }, []);
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
-
-  // Handles when the user sends a message by clicking the button
   const handleChat = () => {
-    if (!chatInput.trim()) return; // Prevent sending if no input
-    const userMessage = chatInput.trim(); // Capture input message directly
-    setChatInput(""); // Clear input
-    sendMessage(userMessage); // Pass the message to the sendMessage function
+    if (!chatInput.trim()) return; 
+    const userMessage = chatInput.trim(); 
+    setChatInput("");
+    sendMessage(userMessage);
   };
 
   const handleKeyPress = (event) => {
@@ -75,11 +76,6 @@ const Chatbot = () => {
       handleChat();
       event.preventDefault();
     }
-  };
-
-  const handleRefresh = () => {
-    setChatList([{ message: "Hi there! I am PlanIt Assistant. How may I help you today?", className: "incoming"}]);
-    setChatHistory([{ role: 'assistant', text: "Hi there👋! I am PlanIt Assistant. How may I help you today?" }]);
   };
 
   const handleBack = () => {
@@ -92,7 +88,7 @@ const Chatbot = () => {
   }, [chatList]);
 
   return (
-    <div className={`chatbot-container ${isFullscreen ? 'fullscreen' : ''}`}>
+    <div className="chatbot-container">
       <div className="chatbot">
         <div className="chatbot-header">
           <button className="back-btn" onClick={handleBack} title="Go back">
@@ -103,12 +99,7 @@ const Chatbot = () => {
             <h2>PlanIt Assistant</h2>
           </div>
           <div className="header-buttons">
-            <button className="refresh-btn" onClick={handleRefresh} title="Reset conversation">
-              <FaSync />
-            </button>
-            <button className="fullscreen-btn" onClick={toggleFullscreen} title="Toggle Fullscreen">
-              {isFullscreen ? <FaCompress /> : <FaExpand />}
-            </button>
+        
           </div>
         </div>
 
@@ -122,7 +113,13 @@ const Chatbot = () => {
               ) : (
                 <div className="message-content assistant-message">
                   <span className="bot-icon"><FaRobot /></span>
-                  <p>{chat.message}</p>
+                  <p>
+                    {chat.message.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                      part.startsWith('**') && part.endsWith('**') ? 
+                      <strong key={i}>{part.slice(2, -2)}</strong> : 
+                      part.replace(/\*/g, '')
+                    )}
+                  </p>
                 </div>
               )}
             </li>

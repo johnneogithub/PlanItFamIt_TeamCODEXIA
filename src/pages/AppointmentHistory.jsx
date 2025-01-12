@@ -428,7 +428,7 @@ const AppointmentHistory = () => {
                       <strong>Selected Services</strong>
                       <div className="services-container">
                         {selectedAppointment.selectedServices.map((service, index) => (
-                          <div key={index} className="service-item">
+                          <div key={index} className="service-item-AH">
                             <span className="service-name">{service.name}</span>
                             <div className="service-prices">
                               {typeof service[selectedAppointment.selectedPricingType] === 'number' && (

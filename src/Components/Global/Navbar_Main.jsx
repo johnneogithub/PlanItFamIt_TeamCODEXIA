@@ -294,9 +294,7 @@ function Nav({ isAdmin = false }) {
                       onClick={handleMedicalRecordsClick}
                     >
                       <div className="d-flex align-items-center justify-content-between">
-                        <div>
                           <FaFolder /> Medical Records
-                        </div>
                         {hasUnreadNotifications && (
                           <span className="badge bg-danger ms-2">
                             {notifications.filter(n => 

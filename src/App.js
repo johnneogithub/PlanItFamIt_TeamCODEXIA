@@ -24,7 +24,7 @@ import Articles from './pages/Articles';
 import PregnancyWheel from './Components/Admin/PregnancyWheelLMP.jsx';
 import Chatbot from './pages/Chatbot';
 import UserProfile from './pages/UserProfile';
-import OvulationTracker from './pages/OvulationTracker';
+import OvulationTracker from './pages/ovulation-tracker-folder/OvulationTracker.jsx';
 import Aboutus from './pages/Aboutus';
 import AppointmentHistory from './pages/AppointmentHistory';
 import HistoricalAppointment from './pages/HistoricalAppointment';

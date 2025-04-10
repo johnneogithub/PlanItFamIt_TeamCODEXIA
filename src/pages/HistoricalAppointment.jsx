@@ -201,7 +201,7 @@ const HistoricalAppointment = () => {
       <Navbar />
       <div className="historical-appointment-container">
         <button 
-          className="btn btn-back" 
+          className="btn-historical btn-back" 
           onClick={() => history.goBack()}
         >
           <FaArrowLeft /> Back
@@ -218,7 +218,7 @@ const HistoricalAppointment = () => {
               <div className="no-records">No historical records found.</div>
             ) : (
               appointments.map((appointment, index) => (
-                <div key={index} className="appointment-card">
+                <div key={index} className="historical-appointment-card">
                   <div className="appointment-header">
                     <h3>{appointment.appointmentType || 'General Checkup'}</h3>
                     <span className="appointment-date">
@@ -233,7 +233,7 @@ const HistoricalAppointment = () => {
                           <span className="file-name">{file.name || file.fileName}</span>
                           <div className="file-actions">
                             <button 
-                              className="btn btn-preview"
+                              className="btn-historical btn-preview"
                               onClick={() => handleFilePreview(file)}
                             >
                               <FaEye /> Preview
@@ -254,10 +254,16 @@ const HistoricalAppointment = () => {
                           <span className="file-name">{appointment.importedFile.name}</span>
                           <div className="file-actions">
                             <button 
-                              className="btn btn-preview"
+                              className="btn-historical btn-preview"
                               onClick={() => handleFilePreview(appointment.importedFile)}
                             >
                               <FaEye /> Preview
+                            </button>
+                            <button 
+                              className="btn-historical btn-download"
+                              onClick={() => handleDownload(appointment.importedFile.url, appointment.importedFile.name)}
+                            >
+                              <FaFileDownload /> Download
                             </button>
                           </div>
                           {appointment.importedFile.uploadedAt && (
@@ -289,4 +295,4 @@ const HistoricalAppointment = () => {
   );
 };
 
-export default HistoricalAppointment; 
+export default HistoricalAppointment;

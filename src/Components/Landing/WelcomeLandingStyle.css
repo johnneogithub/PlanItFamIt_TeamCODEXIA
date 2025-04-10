@@ -637,3 +637,15 @@ body.page-exit {
 .mobile-nav-button {
   transition: all 0.3s ease;
 }
+
+.page-views-counter {
+  text-align: center;
+  padding: 10px;
+  color: #333;
+  font-size: 14px;
+}
+
+.page-views-counter span {
+  font-weight: bold;
+  color: #2c3e50;
+}

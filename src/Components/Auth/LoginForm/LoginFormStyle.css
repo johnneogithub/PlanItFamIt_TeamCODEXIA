@@ -158,3 +158,40 @@ height: 100%;
 .bg-fotlogin {
   background-color: #8b1a98;
 }
+
+/* Add these styles to your existing CSS file */
+
+.login-form {
+  background-color: white;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.login-form:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-login {
+  color: white;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+}
+
+.form-control:focus {
+  border-color: #8e44ad;
+  box-shadow: 0 0 0 0.2rem rgba(142, 68, 173, 0.25);
+}
+
+.logo-img {
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}

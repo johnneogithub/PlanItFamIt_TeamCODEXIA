@@ -4,15 +4,16 @@ import { Route, Redirect } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 const UserProtectedRoute = ({ component: Component, ...rest }) => {
-  const { currentUser } = useAuth(); // Check if a regular user is logged in
+  const { currentUser, isAdmin } = useAuth(); // Get both currentUser and isAdmin
 
   console.log("Current User in UserProtectedRoute:", currentUser); // Debugging log
+  console.log("Is Admin in UserProtectedRoute:", isAdmin); // Debugging log
 
   return (
     <Route
       {...rest}
       render={(props) =>
-        currentUser ? <Component {...props} /> : <Redirect to="/Login" />
+        currentUser ? <Component {...props} isAdmin={isAdmin} /> : <Redirect to="/Login" />
       }
     />
   );

@@ -1,25 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import BkgVideo from '../../Components/Assets/Happy_family2.mp4';
 import '../../Components/Landing/WelcomeLandingStyle.css';
 import { FaFacebook } from 'react-icons/fa';
 import Logo from '../../Components/Assets/PlantItFamIt_Logo.png';
+import PageViewsCounter from '../Global/PageViewsCounter';
 
 const WelcomeLanding = () => {
-  const [pageViews, setPageViews] = useState(350);
-
-  useEffect(() => {
-    // Check if page views exist in local storage, if not, start with 350
-    const storedPageViews = localStorage.getItem('pageViews');
-    const currentViews = storedPageViews ? parseInt(storedPageViews, 10) : 350;
-
-    // Increment page views
-    const updatedViews = currentViews + 1;
-    setPageViews(updatedViews);
-
-    // Store the updated page views in local storage
-    localStorage.setItem('pageViews', updatedViews);
-  }, []);
-
   return (
     <>
       <nav className='nav-container-WL'>
@@ -74,18 +60,12 @@ const WelcomeLanding = () => {
         </div>
       </main>
 
-      <Footer pageViews={pageViews} />
+      <footer className='footerers-WL'>
+        <div className="foot_container">
+          <PageViewsCounter />
+        </div>
+      </footer>
     </>
-  );
-};
-
-const Footer = ({ pageViews }) => {
-  return (
-    <footer className='footerers-WL'>
-      <div className="foot_container">
-        <p>Page Views: <span id="page-views">{pageViews}</span></p>
-      </div>
-    </footer>
   );
 };
 

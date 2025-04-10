@@ -266,7 +266,7 @@ const OvulationTracker = ({ height, weight }) => {
                   <span className="indicator-text">Vaginal Discharge</span>
                 </h3>
                 <select name="dischargeType" value={formData.dischargeType} onChange={handleInputChange} className="ot-pink-select">
-                  <option value="">Pick here</option>
+                  <option value="">Select Discharge Type</option>
                   <option value="1">No Discharge</option>
                   <option value="2">Creamy Discharge</option>
                   <option value="3">Sticky Discharge</option>
@@ -283,7 +283,7 @@ const OvulationTracker = ({ height, weight }) => {
                   <span className="indicator-text">Period Flow</span>
                 </h3>
                 <select name="bleedingIntensity" value={formData.bleedingIntensity} onChange={handleInputChange} className="ot-purple-select">
-                  <option value="">Pick here</option>
+                  <option value="">Select Period Flow</option>
                   <option value="1">Light</option>
                   <option value="2">Normal</option>
                   <option value="3">Heavy</option>

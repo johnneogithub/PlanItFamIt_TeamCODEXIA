@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams, useHistory } from 'react-router-dom';
-import { FaCalendarAlt, FaClock, FaCommentDots, FaCheckCircle, FaTimesCircle, FaList, FaFileAlt, FaArrowLeft } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaCommentDots, FaCheckCircle, FaTimesCircle, FaList, FaFileAlt, FaArrowLeft, FaChevronRight, FaEllipsisH, FaTrash, FaEye   } from 'react-icons/fa';
 import Navbar from '../Components/Global/Navbar_Main';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, updateDoc, arrayRemove } from 'firebase/firestore';
 import { crud } from '../Config/firebase';
 import './AppointmentHistoryStyle.css';
+import './AppointmentHistoryTable.css'; // Add this new import
 import { auth } from '../Config/firebase';
+import AppointmentCard from '../Components/Appointments/AppointmentCard';
+import AppointmentModal from '../Components/Appointments/AppointmentModal';
+import AppointmentFilters from '../Components/Appointments/AppointmentFilters';
+import NotificationBanner from '../Components/Notifications/NotificationBanner';
+import HistoryHeader from '../Components/Appointments/HistoryHeader';
+import LoadingSpinner from '../Components/UI/LoadingSpinner';
 
 const formatPricingType = (type) => {
   switch (type) {
@@ -33,6 +40,8 @@ const AppointmentHistory = () => {
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [openMenuIndex, setOpenMenuIndex] = useState(null);
+
 
   useEffect(() => {
     const initializeData = async () => {
@@ -132,7 +141,6 @@ const AppointmentHistory = () => {
         const userData = userSnap.data();
         const userAppointments = userData.appointments || [];
 
-        // Filter out pending appointments that are now approved or completed
         const filteredAppointments = userAppointments.filter(appointment => {
           if (appointment.status === 'pending') {
             const existsWithNewStatus = userAppointments.some(other =>
@@ -180,7 +188,9 @@ const AppointmentHistory = () => {
   };
 
   const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    if (sortOrder !== undefined) {
+      setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -214,157 +224,175 @@ const AppointmentHistory = () => {
   const handleCloseModal = () => {
     setSelectedAppointment(null);
   };
+  const handleOpenClick = (index) => {
+    setOpenMenuIndex(prevIndex => (prevIndex === index ? null : index));
+  };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.details-cell')) {
+        setOpenMenuIndex(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+
+
+  
+  const handleDeleteAppointment = async (appointment) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this appointment?");
+    if (!confirmDelete) return;
+  
+    try {
+      const userRef = doc(crud, `users/${userId}`);
+      const userSnap = await getDoc(userRef);
+  
+      if (!userSnap.exists()) {
+        console.error("User not found.");
+        return;
+      }
+  
+      const userData = userSnap.data();
+      const originalHistory = userData.appointmentHistory || [];
+  
+      // Filter out the appointment to be deleted
+      const updatedHistory = originalHistory.filter((app) => {
+        return !(
+          app.date === appointment.date &&
+          app.time === appointment.time &&
+          app.endTime === appointment.endTime &&
+          app.name === appointment.name &&
+          app.email === appointment.email &&
+          app.selectedPricingType === appointment.selectedPricingType &&
+          app.status === appointment.status &&
+          app.appointmentType === appointment.appointmentType
+        );
+      });
+  
+      // Update Firestore with filtered list
+      await updateDoc(userRef, {
+        appointmentHistory: updatedHistory
+      });
+  
+      console.log("Appointment successfully removed from Firestore.");
+  
+      // Update local state to reflect deletion in UI
+      setAppointments((prevAppointments) =>
+        prevAppointments.filter((app) => app.id !== appointment.id)
+      );
+  
+      setFilteredAppointments((prevFilteredAppointments) =>
+        prevFilteredAppointments.filter((app) => app.id !== appointment.id)
+      );
+  
+      console.log("Appointment deleted successfully from local state.");
+    } catch (error) {
+      console.error("Failed to delete appointment:", error);
+    }
+  };
+  
+  
   return (
     <>
       <Navbar />
       <div className="appointment-history-container">
         {isLoading ? (
-          <div className="loading-spinner-small">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
+          <LoadingSpinner />
         ) : (
           <>
-            <div className="history-header">
-              <button 
-                className="back-button"
-                onClick={handleGoBack}
-              >
-                <FaArrowLeft /> Back
-              </button>
-              <div className="header-title">
-                <h2>Appointment History</h2>
-                <span className="total-count">
-                  Completed: {appointments.filter(apt => apt.status === 'completed').length}
-                </span>
-                <button 
-                  className="historical-btn"
-                  onClick={handleNavigateToHistorical}
-                >
-                  <FaFileAlt className="me-2" />
-                  View Historical Records
-                </button>
-              </div>
-              {userInfo?.name && (
-                <div className="user-info">
-                  {userInfo.profilePic && (
-                    <img src={userInfo.profilePic} alt="Profile" className="profile-pic" />
-                  )}
-                  <div className="user-details">
-                    <h4>{userInfo.name}</h4>
-                    <p>{userInfo.email}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            <HistoryHeader 
+              userInfo={userInfo}
+              appointmentsCount={appointments.filter(apt => apt.status === 'completed').length}
+              onGoBack={handleGoBack}
+              onNavigateToHistorical={handleNavigateToHistorical}
+            />
 
-            <div className="controls-section">
-              <div className="filter-section">
-                <button 
-                  className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                  onClick={() => handleFilterChange('all')}
-                >
-                  All
-                </button>
-                <button 
-                  className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
-                  onClick={() => handleFilterChange('pending')}
-                >
-                  Pending
-                </button>
-                <button 
-                  className={`filter-btn ${filterStatus === 'approved' ? 'active' : ''}`}
-                  onClick={() => handleFilterChange('approved')}
-                >
-                  Approved
-                </button>
-                <button 
-                  className={`filter-btn ${filterStatus === 'completed' ? 'active' : ''}`}
-                  onClick={() => handleFilterChange('completed')}
-                >
-                  Completed
-                </button>
-                <button 
-                  className={`filter-btn ${filterStatus === 'rejected' ? 'active' : ''}`}
-                  onClick={() => handleFilterChange('rejected')}
-                >
-                  Rejected
-                </button>
-              </div>
-              
-              <button className="sort-btn" onClick={toggleSortOrder}>
-                <FaList /> {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
-              </button>
-            </div>
+            <AppointmentFilters 
+              filterStatus={filterStatus}
+              sortOrder={sortOrder}
+              onFilterChange={handleFilterChange}
+              onToggleSortOrder={toggleSortOrder}
+            />
 
-            <div className="appointments-grid">
-              {filteredAppointments.length === 0 ? (
-                <div className="no-appointments">
-                  <p>No appointments found.</p>
-                </div>
-              ) : (
-                filteredAppointments.map((appointment, index) => (
-                  <div 
-                    key={index} 
-                    className={`appointment-card ${appointment.status}`}
-                    onClick={() => handleCardClick(appointment)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="card-header">
-                      <h3>{appointment.appointmentType}</h3>
-                      <div className="status-badge">
-                        {getStatusIcon(appointment.status)}
-                        <span>{appointment.status || 'pending'}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="card-body">
-                      <div className="appointment-info">
-                        <div className="info-item">
-                          <FaCalendarAlt />
-                          <span>{formatDate(appointment.date)}</span>
-                        </div>
-                        <div className="info-item">
-                          <FaClock />
-                          <span>{formatTime(appointment.time)}</span>
-                        </div>
-                      </div>
+            <div className="appointments-table-container">
+              <table className="appointments-table">
+                <thead>
+                  <tr>
+                    <th className="date-column">
+                      <input type="checkbox" />
+                      Date <span className="sort-icon">↓</span>
+                    </th>
+                    <th className="name-column">Name <span className="sort-icon">↓</span></th>
+                    <th className="event-type-column">Pricing Type <span className="sort-icon">↓</span></th>
+                    <th className="attendance-column">Status <span className="sort-icon">↓</span></th>
+                    <th className="details-column"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAppointments.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="no-appointments">
+                        <p>No appointments found.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredAppointments.map((appointment, index) => (
+                      <tr key={index} className={`appointment-row ${appointment.status}`}>
+                        <td className="date-cell">
+                          <div className="date-info">
+                            <div className="date-label">
+                            {formatDate(appointment.date)}
 
-                      {appointment.message && (
-                        <div className="message-section">
-                          <FaCommentDots />
-                          <p>{appointment.message}</p>
-                        </div>
-                      )}
-
-                      {appointment.remark && (
-                        <div className="remark-section">
-                          <FaCommentDots />
-                          <div>
-                            <strong>Remark:</strong>
-                            <p>{appointment.remark}</p>
+                            </div>
+                            <div className="time-range">
+                              {formatTime(appointment.time)} - {formatTime(appointment.endTime || 
+                                new Date(new Date(`2000/01/01 ${appointment.time}`).getTime() + 30*60000).toTimeString().substring(0, 5))}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="name-cell">
+                          <div className="name-info">
+                            <div className="client-name">{appointment.name || 'Client Name'}</div>
+                            <div className="client-email">{appointment.email || 'client@example.com'}</div>
+                          </div>
+                        </td>
+                        <td className="event-type-cell">
+                          <div className="event-info">
+                          <span>{formatPricingType(appointment.selectedPricingType)}</span>
+                          </div>
+                        </td>
+                        <td className="attendance-cell">
+                        <div className="detail-item-history status-section">
+                          <div className="status-badge-history">
+                            {getStatusIcon(appointment.status)}
+                            <span>{appointment.status || 'pending'}</span>
                           </div>
                         </div>
-                      )}
-
-                      {appointment.importedFile && (
-                        <div className="imported-file-notification">
-                          <FaFileAlt className="file-icon" />
-                          <span>This appointment has an imported file</span>
-                          <button 
-                            className="btn btn-link view-file-btn"
-                            onClick={() => history.push('/HistoricalAppointment')}
+                        </td>
+                        <td className="details-cell" style={{ position: 'relative' }}>
+                          <button
+                            className="details-button"
+                            onClick={() => handleOpenClick(index)}
                           >
-                            View in Historical Records
+                            <FaEllipsisH />
                           </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
+
+                          {openMenuIndex === index && (
+                          <div className="dropdown-menu-appointment">
+                            <button onClick={() => setSelectedAppointment(appointment)}><FaEye/></button>
+                            <button onClick={() => handleDeleteAppointment(appointment)}><FaTrash/></button>
+                          </div>
+                        )}
+
+                        </td>
+
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </>
         )}
@@ -379,139 +407,19 @@ const AppointmentHistory = () => {
         )}
       </div>
 
-      <div className={`appt-history-modal ${selectedAppointment ? 'show' : ''}`}>
-        <div className="appt-history-modal-backdrop" onClick={handleCloseModal}></div>
-        {selectedAppointment && (
-          <div className="appt-history-modal-content">
-            <div className="appt-history-modal-header">
-              <h3>{selectedAppointment.appointmentType}</h3>
-              <button className="appt-history-modal-close" onClick={handleCloseModal}>&times;</button>
-            </div>
-            <div className="appt-history-modal-body">
-              <div className="appointment-details">
-                <div className="appt-history-detail-row header-info">
-                  <div className="detail-item-history name-status">
-                    <div className="detail-item-history name-section">
-                      <strong>Name:</strong>
-                      <span className="name-value">{selectedAppointment.name || 'N/A'}</span>
-                    </div>
-                    <div className="detail-item-history status-section">
-                      <div className="status-badge">
-                        {getStatusIcon(selectedAppointment.status)}
-                        <span>{selectedAppointment.status || 'pending'}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <AppointmentModal
+        appointment={selectedAppointment}
+        onClose={handleCloseModal}
+        formatDate={formatDate}
+        formatTime={formatTime}
+        getStatusIcon={getStatusIcon}
+        formatPricingType={formatPricingType}
+        navigateToHistorical={() => history.push('/HistoricalAppointment')}
+      />
 
-                <div className="appt-history-detail-row">
-                  <div className="datetime-info-row">
-                    <div className="datetime-info-item">
-                      <FaCalendarAlt />
-                      <strong>Date:</strong>
-                      <span>{formatDate(selectedAppointment.date)}</span>
-                    </div>
-                    <div className="datetime-info-item">
-                      <FaClock />
-                      <strong>Time:</strong>
-                      <span>{formatTime(selectedAppointment.time)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="appt-history-detail-row">
-                  <div className="detail-item-history">
-                    <strong>Pricing Type:</strong>
-                    <span>{formatPricingType(selectedAppointment.selectedPricingType)}</span>
-                  </div>
-                </div>
-
-                {selectedAppointment.selectedServices && selectedAppointment.selectedServices.length > 0 && (
-                  <div className="appt-history-detail-row">
-                    <div className="detail-item-history services-list">
-                      <strong>Selected Services</strong>
-                      <div className="services-container">
-                        {selectedAppointment.selectedServices.map((service, index) => (
-                          <div key={index} className="service-item-AH">
-                            <span className="service-name">{service.name}</span>
-                            <div className="service-prices">
-                              {typeof service[selectedAppointment.selectedPricingType] === 'number' && (
-                                <div className="price-item">
-                                  <span className="price-value">
-                                    ₱{service[selectedAppointment.selectedPricingType].toLocaleString()}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {selectedAppointment.message && (
-                  <div className="appt-history-detail-row">
-                    <div className="detail-item-history">
-                      <strong>Message:</strong>
-                      <p>{selectedAppointment.message}</p>
-                    </div>
-                  </div>
-                )}
-
-                {selectedAppointment.remark && (
-                  <div className="appt-history-detail-row">
-                    <div className="detail-item-history">
-                      <strong>Appointment Remark:</strong>
-                      <p>{selectedAppointment.remark}</p>
-                    </div>
-                  </div>
-                )}
-
-                {selectedAppointment.importedFile && (
-                  <div className="appt-history-detail-row">
-                    <div className="imported-file-section">
-                      <div className="imported-file-header">
-                        <FaFileAlt className="file-icon" />
-                        <strong>Imported File</strong>
-                      </div>
-                      <div className="imported-file-content">
-                        <span>This appointment has an imported file</span>
-                        <button 
-                          className="view-historical-btn"
-                          onClick={() => history.push('/HistoricalAppointment')}
-                        >
-                          <FaFileAlt />
-                          View in Historical Records
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {notifications.length > 0 && (
-        <div className="notifications-banner">
-          {notifications.map((notification, index) => (
-            <div key={index} className="notification-item">
-              <div className="notification-content">
-                <FaCheckCircle className="notification-icon" />
-                <span>{notification.message}</span>
-              </div>
-              <small className="notification-time">
-                {new Date(notification.timestamp).toLocaleDateString()}
-              </small>
-            </div>
-          ))}
-        </div>
-      )}
+      <NotificationBanner notifications={notifications} />
     </>
   );
 };
 
-export default AppointmentHistory; 
+export default AppointmentHistory;

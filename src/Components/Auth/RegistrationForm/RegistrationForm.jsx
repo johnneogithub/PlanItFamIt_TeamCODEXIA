@@ -1,24 +1,20 @@
-// RegistrationForm.jsx
+
 import React, { useState, useEffect } from "react";
 import { addYears, subYears } from 'date-fns';
 
-// Firebase Auth and Firestore
 import { getFirestore, doc, runTransaction, setDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail, sendEmailVerification } from "firebase/auth";
 
-// React Router and Date Picker
 import { useHistory, useLocation } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-// Modals
 import TermsAndConditionsModal from "./TermsAndConditionsModal";
 import DataPrivacyPlanItFamIt from "./DataPrivacyPlanItFamIt";
-
-// Assets
 import background1 from '../../Assets/landing_page_bkg1.png';
 import { FaFacebookF, FaEnvelope } from "react-icons/fa";
-
+import logo from '../../../Components/Assets/PlantItFamIt_Logo_v2.png'
+import "./RegistrationFormStyle.css";
   function RegistrationForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -208,38 +204,40 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
             </div>
 
             <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-              <form onSubmit={SignUp} className="registration-form">
+              <form onSubmit={SignUp} className="registration-form shadow-sm rounded p-5 px-5 ">
+              <div className="text-center ">
+                <img src={logo} alt="PlanItFamIt Logo" className="logo-img" style={{ maxWidth: '280px' }} />
+              </div>
                 <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                  <p className="lead fw-normal mb-3 me-3">Register with us!</p>
+                  <p className="lead fw-bold  text-center w-100">Register with us!</p>
                 </div>
 
                 {/* Email */}
-                <div className="form-outline mb-8">
-                  <label className="form-label">Email address</label>
+                <div className="form-outline mb-2">
+                  <label className="form-label fw-semibold">Email address</label>
                   <input type="email" className="form-control form-control-lg"
                     placeholder="Enter a valid email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)} />
                 </div>
 
-  
-                <div className="d-flex justify-content-between mb-3">
+                <div className="d-flex justify-content-between mb-2">
                   <div className="form-outline me-2">
-                    <label className="form-label">First Name</label>
+                    <label className="form-label fw-semibold">First Name</label>
                     <input type="text" className="form-control form-control-lg"
                       placeholder="First Name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div className="form-outline me-2">
-                    <label className="form-label">Middle Initial</label>
+                    <label className="form-label fw-semibold">Middle Initial</label>
                     <input type="text" className="form-control form-control-lg"
                       placeholder="M.I. (Optional)"
                       value={middleInitial}
                       onChange={(e) => setMiddleInitial(e.target.value)} />
                   </div>
                   <div className="form-outline">
-                    <label className="form-label">Last Name</label>
+                    <label className="form-label fw-semibold">Last Name</label>
                     <input type="text" className="form-control form-control-lg"
                       placeholder="Last Name"
                       value={lastName}
@@ -248,8 +246,8 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
                 </div>
 
                 {/* Birthdate (Calendar Modal) */}
-                <div className="form-outline mb-3">
-                  <label className="form-label">Birthdate</label>
+                <div className="form-outline mb-2">
+                  <label className="form-label fw-semibold">Birthdate</label>
                   <DatePicker
                     selected={birthdate}
                     onChange={(date) => setBirthdate(date)}
@@ -321,8 +319,8 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
                 </div>
 
                 {/* Password */}
-                <div className="form-outline mb-3">
-                  <label className="form-label">Password</label>
+                <div className="form-outline mb-2">
+                  <label className="form-label fw-semibold">Password</label>
                   <input type="password" className="form-control form-control-lg"
                     placeholder="Enter password"
                     value={password}
@@ -330,25 +328,25 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
                 </div>
 
                 {/* Confirm Password */}
-                <div className="form-outline mb-3">
-                  <label className="form-label">Confirm Password</label>
+                <div className="form-outline mb-2">
+                  <label className="form-label fw-semibold">Confirm Password</label>
                   <input type="password" className="form-control form-control-lg"
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)} />
                 </div>
 
-                <div className="row mb-3">
+                <div className="row">
                   <div className="col-md-6">
                     <div className="form-check">
                       <input
                         type="checkbox"
                         checked={agreedToTerms}
-                        className="form-check-input me-2"
+                        className="form-check-input "
                         onChange={handleTermsCheckboxChange}
                       />
                       <label>
-                        <a href="#" onClick={openTermsModal}>Terms and Conditions</a>
+                        <a href="#" onClick={openTermsModal} style={{ color: '#8e44ad' }}>Terms and Conditions</a>
                       </label>
                     </div>
                   </div>
@@ -361,39 +359,47 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
                         onChange={handlePrivacyCheckboxChange}
                       />
                       <label>
-                        <a href="#" onClick={openPrivacyModal}>Data Privacy Act of 2012</a>
+                        <a href="#" onClick={openPrivacyModal} style={{ color: '#8e44ad' }}>Data Privacy Act of 2012</a>
                       </label>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-center text-lg-start mt-4 pt-2">
-                  <button type="submit" className="btn-login" disabled={!agreedToTerms || !agreedToPrivacy}
-                    style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}>Register Now!</button>
-                  <p className="small fw-bold mt-2 pt-1 mb-0">Already have an account? <a href="/Login"
-                      className="link-danger">Login</a></p>
+                <div className="text-center mt-3  ">
+                  <button 
+                    type="submit" 
+                    className="btn-login w-100  " 
+                    disabled={!agreedToTerms || !agreedToPrivacy}
+                    style={{ 
+                      borderRadius: '30px',
+                      background: 'linear-gradient(to right, #6a11cb, #8e44ad)',
+                      border: 'none',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    Register Now!
+                  </button>
+                  <p className="fw-bold mt-2 mb-0">
+                    Already have an account? <a href="/Login" className="link-danger" style={{ color: '#8e44ad' }}>Login</a>
+                  </p>
                 </div>
               </form>
             </div>
           </div>
         </div>
-
-        <footer className="footer-register bg-fotregister mt-auto">
-          <div className="footer-content-register">
-            <div className="text-white">
-              Copyright © 2024 PlanItFamIt. All rights reserved. 
-            </div>
-
-            <div>
-              <a href="https://www.facebook.com" className="text-white me-4" target="_blank" rel="noopener noreferrer">
-                <FaFacebookF />
-              </a>
-              <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
-                <FaEnvelope />
-              </a>
-            </div>
+  <footer className="footer-login bg-fotlogin">
+        <div className="footer-content-login">
+          <div className="text-white">Copyright © 2024 PlanItFamIt. All rights reserved.</div>
+          <div>
+            <a href="https://www.facebook.com" className="text-white me-4" target="_blank" rel="noopener noreferrer">
+              <FaFacebookF />
+            </a>
+            <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
+              <FaEnvelope />
+            </a>
           </div>
-        </footer>
+        </div>
+      </footer>
       </div>
 
       {registrationSuccess && <p style={{ color: 'green' }}>Successfully registered! Please check your email to verify your account.</p>}

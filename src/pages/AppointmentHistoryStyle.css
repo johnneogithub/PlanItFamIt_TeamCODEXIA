@@ -1,10 +1,10 @@
-.appointment-history-container {
+/* .appointment-history-container {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
   background-color: #f8f9fa;
   min-height: calc(100vh - 64px);
-}
+} */
 
 .history-header {
   display: flex;
@@ -377,11 +377,10 @@
   line-height: 1.4;
 }
 
-.status-badge {
+.status-badge-history {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
   border-radius: 25px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -389,25 +388,25 @@
   transition: all 0.2s ease;
 }
 
-.appointment-card.pending .status-badge { 
+.appointment-card.pending .status-badge-history { 
   background: #fff8e1; 
   color: #ed8936;
   border: 1px solid rgba(237, 137, 54, 0.2);
 }
 
-.appointment-card.approved .status-badge { 
+.appointment-card.approved .status-badge-history { 
   background: #e6fffa; 
   color: #38b2ac;
   border: 1px solid rgba(56, 178, 172, 0.2);
 }
 
-.appointment-card.completed .status-badge { 
+.appointment-card.completed .status-badge-history { 
   background: #ebf8ff; 
   color: #4299e1;
   border: 1px solid rgba(66, 153, 225, 0.2);
 }
 
-.appointment-card.rejected .status-badge { 
+.appointment-card.rejected .status-badge-history { 
   background: #fff5f5; 
   color: #f56565;
   border: 1px solid rgba(245, 101, 101, 0.2);
@@ -491,7 +490,7 @@
   color: rgb(177, 77, 199);
 }
 
-.appointment-card:hover .status-badge {
+.appointment-card:hover .status-badge-history {
   transform: scale(1.02);
 }
 

@@ -6,9 +6,7 @@ import './AppointmentForm.css';
 import Navbar from '../Components/Global/Navbar_Main';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import backgroudappointmentF from '../Components/Assets/FamilyPlanning_img2.jpg';
-import { ToastContainer, toast } from 'react-toastify';
 import { FaCalendarAlt, FaClock, FaListAlt } from 'react-icons/fa';
-import 'react-toastify/dist/ReactToastify.css';
 import { format } from 'date-fns';
 
 const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType, onSelectService, selectedPackage, selectedServices, setSelectedServices }) => {
@@ -21,8 +19,7 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
       <div className="modal-content-selection">
         <div className="modal-header-selection">
           <h2>Select Services</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
+    
         
         <div className="modal-tabs-selection">
           <button 
@@ -42,7 +39,12 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
             }}
           >
             Individual Services
-          </button>
+          </button >
+         
+          </div>
+     
+          <button className="close-btn-fill" onClick={onClose}>×</button>
+          {/* </div> */}
         </div>
 
         <div className="modal-body-selection">
@@ -113,7 +115,7 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
                           </div>
                         </div>
                       </div>
-                      <div className="service-price">
+                      <div className="service-price-fill">
                         <div className="price-info">
                           <span className="price-label">Price</span>
                           <span className="price-amount">₱{service[selectedPricingType].toLocaleString()}</span>
@@ -170,7 +172,7 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
                               {selectedPricingType === 'PHBenefit' && 'Total PhilHealth Benefits'}
                               {selectedPricingType === 'withPH' && 'Final Amount (With PhilHealth)'}
                             </span>
-                            <span className="total-amount" style={{ textAlign: 'right', paddingRight: '20px' }}>
+                            <span className="total-amount-fill" style={{ textAlign: 'right', paddingRight: '20px' }}>
                               ₱{service[selectedPricingType].toLocaleString()}
                             </span>
                           </div>
@@ -189,11 +191,9 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
             className="done-btn"
             onClick={() => {
               if (selectedServices.length === 0) {
-                toast.warning("Please select at least one service");
                 return;
               }
               onClose();
-              toast.success(`Selected ${selectedServices.length} service${selectedServices.length > 1 ? 's' : ''}`);
             }}
           >
             Done
@@ -439,8 +439,7 @@ const AppointmentFillUp = () => {
       const missingFields = Object.entries(validationResults)
         .filter(([_, value]) => !value)
         .map(([key]) => key);
-      
-      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+       {missingFields.join(', ')}
       return false;
     }
 
@@ -463,7 +462,6 @@ const AppointmentFillUp = () => {
     });
 
     if (hasOverlap) {
-      toast.error("You have another appointment scheduled within 90 minutes of this time. Please choose a different time.");
       return false;
     }
 
@@ -477,7 +475,6 @@ const AppointmentFillUp = () => {
     });
 
     if (appointmentsOnSelectedDate.length >= 3) {
-      toast.error("You can only have up to 3 pending appointments per day. Please choose another date.");
       return false;
     }
 
@@ -494,7 +491,6 @@ const AppointmentFillUp = () => {
     today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
 
     if (selectedDate < today) {
-        toast.error("You cannot select a past date for the appointment.");
         return;
     }
 
@@ -535,8 +531,6 @@ const AppointmentFillUp = () => {
         ...appointmentData,
         userId: userId
       });
-
-      toast.success("Appointment scheduled successfully!");
       
       history.replace({
         pathname: '/UserProfile',
@@ -545,7 +539,6 @@ const AppointmentFillUp = () => {
 
     } catch (error) {
       console.error("Error adding document: ", error);
-      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -555,9 +548,7 @@ const AppointmentFillUp = () => {
     setSelectedPriceType(newPricingType);
     setSelectedServices([]); // Clear selected services when pricing type changes
     setTouchedFields(prev => ({ ...prev, pricingType: true }));
-    
-    // Log the selection for debugging
-    console.log('Selected pricing type:', newPricingType);
+    setIsServiceModalOpen(true); // Automatically open service selection modal
   };
 
   useEffect(() => {
@@ -599,7 +590,6 @@ const AppointmentFillUp = () => {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-        toast.error("Error loading user data");
       }
     };
 
@@ -781,7 +771,6 @@ const AppointmentFillUp = () => {
     if (selectedService.isPackage) {
       // If a package is already selected, don't allow selecting another package
       if (selectedServices.some(s => s.isPackage)) {
-        toast.warning("You can only select one package at a time. Please remove the current package first.");
         return;
       }
       // When selecting a package, keep individual services
@@ -789,7 +778,6 @@ const AppointmentFillUp = () => {
     } else {
       // For individual services
       if (selectedServices.find(s => s.name === selectedService.name)) {
-        toast.info("This service is already selected");
         return;
       }
       // Add the new service while keeping existing services
@@ -799,7 +787,6 @@ const AppointmentFillUp = () => {
 
   const openServiceModal = () => {
     if (!selectedPricingType) {
-      toast.warning("Please select a pricing type first");
       return;
     }
     setIsServiceModalOpen(true);
@@ -843,22 +830,23 @@ const AppointmentFillUp = () => {
                     placeholder="Enter your email address"
                   />
                 </div>
+                <div className="form-group">
+                  <label htmlFor="age">Age</label>
+                  <input
+                    id="age"
+                    className="form-control"
+                    type="number"
+                    name="age"
+                    value={searchQuery.age}
+                    onChange={handleChange}
+                    readOnly
+                    autoComplete="age"
+                  />
+                </div>
               </div>
+              
               <div className="form-group">
-                <label htmlFor="age">Age</label>
-                <input
-                  id="age"
-                  className="form-control"
-                  type="number"
-                  name="age"
-                  value={searchQuery.age}
-                  onChange={handleChange}
-                  readOnly
-                  autoComplete="age"
-                />
-              </div>
-              <div className="form-group">
-                <label>Select Pricing Type</label>
+                <label>Select Pricing Type & Services</label>
                 <select
                   className={`form-control ${shouldShowError('pricingType', selectedPricingType) ? 'invalid-field' : ''}`}
                   value={selectedPricingType}
@@ -873,83 +861,36 @@ const AppointmentFillUp = () => {
                   <div className="error-message">Please select a pricing type</div>
                 }
               </div>
-              {selectedPricingType && (
-                <div className="form-group">
-                  <label>Services Selection</label>
-                  <button 
-                    type="button" 
-                    className="select-services-btn"
-                    onClick={openServiceModal}
-                    style={{ 
-                      background: 'linear-gradient(to right, #c557db, #8b2ba5)',
-                      border: 'none',
-                      color: 'white',
-                      padding: '10px 20px',
-                      borderRadius: '5px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                      width: 'fit-content'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-                    }}
-                  >
-                    <FaListAlt />
-                    Select Services
-                  </button>
-                  
-                  {selectedServices.length > 0 && (
-                    <div className="selected-services-summary">
-                      <h4>Selected Services:</h4>
-                      <div className="selected-services-list">
-                        {selectedServices.map((service, index) => (
-                          <div key={index} className="selected-service-item">
-                            <div className="service-info">
-                              <span className="service-name">{service.name}</span>
-                              <span className="service-price">
-                                ₱{service[selectedPricingType].toLocaleString()}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              className="remove-service-btn"
-                              onClick={() => handleRemoveService(service.name)}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                        <div className="total-amount">
-                          <strong>Total Amount:</strong>
-                          <span>₱{calculateTotals()[selectedPricingType].toLocaleString()}</span>
+
+              {selectedServices.length > 0 && (
+                <div className="selected-services-summary">
+                  <h4>Selected Services:</h4>
+                  <div className="selected-services-list">
+                    {selectedServices.map((service, index) => (
+                      <div key={index} className="selected-service-item">
+                        <div className="service-info">
+                          <span className="service-name">{service.name}</span>
+                          <span className="service-price-fill">
+                            ₱{service[selectedPricingType].toLocaleString()}
+                          </span>
                         </div>
+                        <button
+                          type="button"
+                          className="remove-service-btn"
+                          onClick={() => handleRemoveService(service.name)}
+                        >
+                          ×
+                        </button>
                       </div>
+                    ))}
+                    <div className="total-amount-fill">
+                      <strong>Total Amount:</strong>
+                      <span>₱{calculateTotals()[selectedPricingType].toLocaleString()}</span>
                     </div>
-                  )}
-                  
-                  <ServiceSelectionModal 
-                    isOpen={isServiceModalOpen}
-                    onClose={() => setIsServiceModalOpen(false)}
-                    services={services}
-                    selectedPricingType={selectedPricingType}
-                    onSelectService={(service) => {
-                      handleServiceSelection(service);
-                    }}
-                    selectedPackage={selectedPackage}
-                    selectedServices={selectedServices}
-                    setSelectedServices={setSelectedServices}
-                  />
+                  </div>
                 </div>
               )}
+
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="date">Date</label>
@@ -999,6 +940,7 @@ const AppointmentFillUp = () => {
                   }
                 </div>
               </div>
+
               <div className="form-group">
                 <label htmlFor="message">Reason for Appointment / Additional Message</label>
                 <textarea
@@ -1014,6 +956,7 @@ const AppointmentFillUp = () => {
                   <div className="error-message">Please provide a reason for the appointment</div>
                 }
               </div>
+
               <div className="form-group">
                 <button 
                   type="submit" 
@@ -1026,94 +969,27 @@ const AppointmentFillUp = () => {
                            !searchQuery.message || 
                            !selectedPricingType || 
                            selectedServices.length === 0}
-                  onClick={() => {
-                    console.log('Submit button clicked');
-                    console.log('Current form state:', {
-                      name: searchQuery.name,
-                      email: searchQuery.email,
-                      age: searchQuery.age,
-                      date: searchQuery.date,
-                      time: searchQuery.time,
-                      message: searchQuery.message,
-                      selectedPricingType,
-                      servicesCount: selectedServices.length
-                    });
-                  }}
                 >
                   {submitted ? 'Scheduling...' : 'Schedule Appointment'}
                 </button>
               </div>
-              {/* New section to display booked times */}
-              {/* {bookedTimes.length > 0 && (
-                <div className="booked-times">
-                  <h3>Already Booked Times</h3>
-                  <ul className="booked-times-list">
-                    {bookedTimes.map((time, index) => (
-                      <li 
-                        key={index} 
-                        onClick={() => handleBookedTimeClick(time)}
-                      >
-                        {time}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )} */}
-              {showTotals && (
-                <div className="totals-popup">
-                  <div className="totals-popup-content">
-                    <button className="close-totals-btn" onClick={() => setShowTotals(false)}>×</button>
-                    <h5>Total Breakdown</h5>
-                    <div className="totals-list">
-                      {selectedServices.map((service, index) => (
-                        <div key={index} className="total-item">
-                          <span>{service.name}</span>
-                          <strong>
-                            ₱{service[totalType].toLocaleString()}
-                          </strong>
-                        </div>
-                      ))}
-                      <div className="total-item grand-total">
-                        <span>Grand Total</span>
-                        <strong>
-                          ₱{calculateTotals()[totalType].toLocaleString()}
-                        </strong>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {showServiceBreakdown && (
-                <div className="service-breakdown-modal">
-                  <div className="modal-content">
-                    <div className="modal-header">
-                      <h5>Service Breakdown</h5>
-                      <button 
-                        type="button" 
-                        className="close-modal"
-                        onClick={() => setShowServiceBreakdown(null)}
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <div className="modal-body">
-                      {selectedServices.find(s => s.name === showServiceBreakdown)?.components?.map((component, idx) => (
-                        <div key={idx} className="component-item">
-                          <span>{component.name}</span>
-                          <div className="component-price">
-                            <span>₱{component[selectedPricingType].toLocaleString()}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+
+              <ServiceSelectionModal 
+                isOpen={isServiceModalOpen}
+                onClose={() => setIsServiceModalOpen(false)}
+                services={services}
+                selectedPricingType={selectedPricingType}
+                onSelectService={(service) => {
+                  handleServiceSelection(service);
+                }}
+                selectedPackage={selectedPackage}
+                selectedServices={selectedServices}
+                setSelectedServices={setSelectedServices}
+              />
             </form>
           </div>
         </div>
       </div>
-      <ToastContainer position="bottom-right" />
     </>
   );
 };

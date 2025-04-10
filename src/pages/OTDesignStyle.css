@@ -4,7 +4,8 @@
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
-  background: white;
+  background: linear-gradient(to bottom, #fff9fc, #ffffff);
+  font-family: 'Poppins', sans-serif;
 }
 
 .ot-background-wrapper {
@@ -62,9 +63,9 @@
 
 .ot-tracker-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -80,13 +81,37 @@
   font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+  letter-spacing: 0.5px;
+  width: 100%;
+}
+
+.ot-main-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #FB28CD, #ff8e8e);
+  border-radius: 4px;
 }
 
 .ot-subtitle {
   text-align: center;
   color: #666;
   margin-bottom: 3rem;
+  font-size: 1.2rem;
+  font-weight: 400;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
 }
 
 .ot-date-card,
@@ -108,6 +133,8 @@
   border: 1px solid rgba(251, 40, 205, 0.1);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(5px);
+  background: linear-gradient(145deg, #ffffff, #fff5f9);
 }
 
 .ot-date-card::before,
@@ -120,7 +147,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 6px;
+  /* height: 6px; */
   background: linear-gradient(90deg, #FB28CD, #ff8e8e);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -146,32 +173,82 @@
 }
 
 .ot-date-card {
-  background: #ffffff;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  margin-bottom: 20px;
-  /* border: 2px solid #FB28CD; */
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.ot-menstruation-details {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ot-health-indicators {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.ot-measurements {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.ot-bmi-display {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.ot-predict-button {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: center;
+  
 }
 
 .ot-date-circle {
   background: linear-gradient(135deg, #FB28CD, #ff8e8e);
   border-radius: 50%;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 16px rgba(251, 40, 205, 0.3);
   width: 180px;
   height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 4px solid #ffffff;
+  border: 6px solid #ffffff;
   margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.ot-date-circle::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
 .ot-date-circle:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 24px rgba(251, 40, 205, 0.4);
+}
+
+.ot-date-circle:hover::after {
+  opacity: 1;
+}
+
+.ot-date-circle.animate {
+  animation: pulse 1.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(251, 40, 205, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(251, 40, 205, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 40, 205, 0); }
 }
 
 .ot-date-content {
@@ -222,9 +299,16 @@
   border-radius: 12px;
   padding: 1rem;
   width: 100%;
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  color: #333;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  font-family: 'Poppins', sans-serif;
 }
 
 .ot-input-field input:focus,
@@ -232,7 +316,14 @@
 .ot-purple-select:focus {
   outline: none;
   border-color: #FB28CD;
-  box-shadow: 0 0 0 3px rgba(251, 40, 205, 0.1);
+  box-shadow: 0 0 0 3px rgba(251, 40, 205, 0.2);
+  transform: translateY(-2px);
+}
+
+.ot-input-field input:hover,
+.ot-pink-select:hover,
+.ot-purple-select:hover {
+  border-color: #ff8e8e;
 }
 
 .ot-pink-select {
@@ -250,10 +341,36 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 10px;
+  padding: 20px;
   background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(251, 40, 205, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.ot-measurement-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #FB28CD, #ff8e8e);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ot-measurement-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  background-color: #fff;
+}
+
+.ot-measurement-item:hover::before {
+  opacity: 1;
 }
 
 .ot-measurement-item label {
@@ -274,75 +391,173 @@
 .ot-measurement-input {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  width: 100%;
+  position: relative;
 }
 
 .ot-measurement-input input {
   flex: 1;
-  padding: 8px 0;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 12px 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
   font-size: 16px;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+}
+
+.ot-measurement-input input:focus {
+  border-color: #FB28CD;
+  box-shadow: 0 0 0 3px rgba(251, 40, 205, 0.1);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.ot-measurement-input input:hover {
+  border-color: #ff8e8e;
 }
 
 .ot-measurement-input span {
-  color: #666;
-  font-size: 14px;
+  color: #555;
+  font-size: 15px;
+  font-weight: 500;
+  background: rgba(251, 40, 205, 0.1);
+  padding: 5px 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.ot-measurement-input:focus-within {
-  border-color: #FB28CD;
-  box-shadow: 0 0 0 3px rgba(251, 40, 205, 0.1);
+.ot-measurement-input:focus-within span {
+  background: rgba(251, 40, 205, 0.2);
 }
 
 .ot-bmi-display {
   background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  padding: 1rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+  padding: 1.5rem;
   margin-top: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ot-bmi-display h3 {
+  color: #FB28CD;
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.ot-bmi-display h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #FB28CD, #ff8e8e);
+  border-radius: 3px;
 }
 
 .ot-bmi-result {
   text-align: center;
+  padding: 1rem;
+  background: rgba(251, 40, 205, 0.03);
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
 .ot-bmi-value {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   color: #FB28CD;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  padding: 5px 15px;
+  background: rgba(251, 40, 205, 0.1);
+  border-radius: 20px;
 }
 
 .ot-bmi-recommendation {
-  color: #666;
-  margin: 0;
+  color: #555;
+  margin: 0.5rem 0 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.ot-bmi-placeholder {
+  color: #888;
+  font-style: italic;
+  padding: 1.5rem;
+  background: rgba(0,0,0,0.02);
+  border-radius: 10px;
+  border: 1px dashed #ddd;
 }
 
 .ot-predict-button {
-  background: white; 
-  color: black; 
-  border: 1px solid rgba(251, 40, 205, 0.1); 
-  padding: 40px 10px ; 
-  text-align: center; 
-  text-decoration: none; 
-  display: inline-block; 
-  font-size: 16px; 
-  margin: 60px;
-  cursor: pointer; 
-  border-radius: 8px; 
-  transition: all 0.3s ease; 
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+  background: linear-gradient(135deg, #FB28CD, #ff8e8e);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 250px;
+  margin: 20px auto;
+  box-shadow: 0 8px 20px rgba(251, 40, 205, 0.25);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+.ot-predict-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  transition: all 0.6s ease;
+  z-index: -1;
 }
 
 .ot-predict-button:hover {
-  background-color: #FB28CD; 
-  color: white; 
-  transform: translateY(-5px); 
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); 
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(251, 40, 205, 0.4);
+  background: linear-gradient(135deg, #ff8e8e, #FB28CD);
+}
+
+.ot-predict-button:hover::before {
+  left: 100%;
 }
 
 .ot-predict-button:active {
-  transform: scale(0.95); 
+  transform: translateY(1px);
+  box-shadow: 0 5px 15px rgba(251, 40, 205, 0.3);
+}
+
+.ot-predict-button img {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.ot-predict-button:hover img {
+  transform: rotate(15deg);
 }
 
 .ot-disclaimer {
@@ -350,15 +565,20 @@
   bottom: 0;
   left: 0;
   display: flex;
-  justify-content: space-between;
-  text-align: center;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   width: 100%;
-  background: #FB28CD;
+  background: linear-gradient(90deg, #FB28CD, #ff8e8e);
   color: white;
-  padding: 1rem;
+  padding: 1.2rem;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   z-index: 2;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+  font-weight: 400;
+  letter-spacing: 0.3px;
 }
 
 .ot-credibility-link {
@@ -366,6 +586,16 @@
   text-decoration: underline;
   margin-left: 1rem;
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.ot-credibility-link:hover {
+  background: rgba(255,255,255,0.2);
+  text-decoration: none;
 }
 
 @media (max-width: 1400px) {
@@ -400,13 +630,21 @@
   
   .ot-tracker-grid {
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(6, auto);
+  }
+  
+  .ot-date-card,
+  .ot-menstruation-details,
+  .ot-health-indicators,
+  .ot-measurements,
+  .ot-bmi-display,
+  .ot-predict-button {
+    grid-column: 1;
   }
   
   .ot-date-card { grid-row: 1; }
   .ot-menstruation-details { grid-row: 2; }
-  .ot-measurements { grid-row: 3; }
-  .ot-health-indicators { grid-row: 4; }
+  .ot-health-indicators { grid-row: 3; }
+  .ot-measurements { grid-row: 4; }
   .ot-bmi-display { grid-row: 5; }
   .ot-predict-button { grid-row: 6; }
   
@@ -433,17 +671,36 @@
 .ot-indicator-card {
   flex: 1;
   margin: 10px;
-  padding: 20px;
-  /* border: 1px solid #ccc; */
-  border-radius: 12px;
+  padding: 25px;
+  border-radius: 15px;
   background-color: #f9f9f9;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(251, 40, 205, 0.05);
+}
+
+.ot-indicator-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #FB28CD, #ff8e8e);
+  opacity: 0.7;
+  transition: height 0.3s ease;
 }
 
 .ot-indicator-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  background-color: #fff;
+}
+
+.ot-indicator-card:hover::before {
+  height: 6px;
 }
 
 .indicator-title {
@@ -510,12 +767,12 @@
 
 /* Update the grid positions */
 .ot-date-card {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 1;
 }
 
 .ot-menstruation-details {
-  grid-column: 2;
+  grid-column: 1;
   grid-row: 1;
 }
 
@@ -529,16 +786,18 @@
   grid-column: 2;
   grid-row: 3;
   align-self: center;
+  width: 100%;
+  padding: 3.4rem;
 }
 
 .ot-bmi-display {
-  grid-column: 1;
-  grid-row: 3;
+  grid-column: 2;
+  grid-row: 2;
 }
 
 .ot-measurements {
-  grid-column: span 2;
-  grid-row: 2;
+  grid-column: 1;
+  grid-row: 3;
   background: #fff;
   border-radius: 15px;
   padding: 20px;
@@ -640,16 +899,58 @@
 .menstrual-input-card {
   background: white;
   border-radius: 15px;
-  padding: 1.25rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(251, 40, 205, 0.1);
   transition: all 0.3s ease;
+  margin-bottom: 1rem;
+  width: 100%;
   position: relative;
+  overflow: hidden;
+}
+
+.menstrual-input-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(to bottom, #FB28CD, #ff8e8e);
+  opacity: 0.7;
+  transition: width 0.3s ease;
 }
 
 .menstrual-input-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(251, 40, 205, 0.15);
+}
+
+.menstrual-input-card:hover::before {
+  width: 7px;
+}
+
+.menstrual-input-card label {
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 10px;
+  display: block;
+  font-size: 1rem;
+}
+
+.menstrual-input-card input {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.menstrual-input-card input:focus {
+  border-color: #FB28CD;
+  box-shadow: 0 0 0 3px rgba(251, 40, 205, 0.1);
+  outline: none;
 }
 
 .menstrual-input-card label {
@@ -813,39 +1114,103 @@
 
 .ot-date-range {
   display: flex;
-  justify-content: space-between; /* Space items evenly */
-  background-color: #f8f9fa; /* Light background for contrast */
-  border-radius: 10px; /* Rounded corners */
-  padding: 15px; /* Padding for spacing */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  margin-top: 20px; /* Space above the date range */
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 2rem;
+  gap: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .ot-range-item {
-  flex: 1; /* Allow items to grow equally */
-  text-align: center; /* Center text */
-  padding: 10px; /* Padding for each item */
-  transition: background-color 0.3s ease; /* Smooth background transition */
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+  position: relative;
 }
 
 .ot-range-item:hover {
-  background-color: rgba(251, 40, 205, 0.2); /* Light hover effect */
-  border-radius: 8px; /* Rounded corners on hover */
+  background-color: rgba(251, 40, 205, 0.2);
+  border-radius: 8px;
 }
 
 .ot-range-label {
-  font-weight: bold; /* Bold label for emphasis */
-  color: #FB28CD; /* Consistent color with the theme */
+  display: inline-block;
+  font-weight: bold;
+  color: #FB28CD;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  background: rgba(251, 40, 205, 0.1);
+  padding: 5px 15px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
 }
 
 .ot-date-display {
-  font-size: 1.2rem; /* Larger font size for dates */
-  color: #333; /* Darker color for better readability */
+  font-size: 1.2rem;
+  color: #333;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.ot-date-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 5px;
+  transition: all 0.3s ease;
+}
+
+.ot-date-display:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.ot-date-start {
+  border-left: none;
+}
+
+.ot-date-start::before {
+  background: linear-gradient(to bottom, #FB28CD, #ff8e8e);
+}
+
+.ot-date-end {
+  border-left: none;
+}
+
+.ot-date-end::before {
+  background: linear-gradient(to bottom, #ff8e8e, #FB28CD);
+}
+
+.ot-date-display.animate {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ot-pending-text {
-  color: #888; /* Color for pending text */
-  font-style: italic; /* Italic style for pending text */
+  color: #888;
+  font-style: italic;
 }
 
 @keyframes fadeIn {
@@ -900,7 +1265,7 @@
     }
 
     .ot-predict-button {
-        width: 100%; /* Full width for button */
+        width: 100%;
         padding: 15px; /* Increase padding for touch targets */
     }
 }

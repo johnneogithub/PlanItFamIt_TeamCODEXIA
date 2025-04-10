@@ -8,10 +8,7 @@ import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserProfileStyle.css';
 import defaultProfilePic from '.././Components/Assets/icon_you.png';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ToastContainer } from 'react-toastify';
 
 const getStatusIcon = (status) => {
   switch(status) {
@@ -162,6 +159,10 @@ function UserProfile() {
   const FETCH_COOLDOWN = 5 * 60 * 1000; // 5 minutes in milliseconds
   const [lastViewedRemark, setLastViewedRemark] = useState('');
   const [lastViewedStatus, setLastViewedStatus] = useState('');
+
+
+
+
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -334,7 +335,6 @@ function UserProfile() {
           setAppointmentHistory(sortedAppointments);
         } catch (error) {
           console.error("Error processing appointments:", error);
-          toast.error("Error loading appointments");
         }
       }
     });
@@ -405,7 +405,6 @@ function UserProfile() {
       await uploadFile(file);
     } catch (error) {
       console.error("Error handling file:", error);
-      toast.error("Failed to upload image. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -454,10 +453,8 @@ function UserProfile() {
 
       setProfilePic(url);
       setPreviewPic('');
-      toast.success("Profile picture updated successfully!");
     } catch (error) {
       console.error("Error updating profile picture URL:", error);
-      toast.error("Failed to update profile picture. Please try again.");
     }
   };
   
@@ -543,7 +540,7 @@ function UserProfile() {
       } catch (error) {
         console.error("Error fetching personal details:", error);
         if (error.code === 'permission-denied') {
-          toast.error("Access denied. Please check if you're logged in.");
+          alert("Access denied. Please check if you're logged in.");
         }
       } finally {
         setIsLoadingDetails(false);
@@ -711,13 +708,13 @@ function UserProfile() {
 
   return (
     <div className="user-profile-page">
-      <ToastContainer />
       <Navbar />
       <div className="container my-5">
         <div className="row">
           <div className="col-lg-4">
             <div className="card profile-card shadow">
               <div className="card-body text-center">
+            
                 <ProfilePicture
                   src={profilePic}
                   isLoading={isLoadingProfile}
@@ -756,7 +753,7 @@ function UserProfile() {
                   <div className="d-flex align-items-center">
                     <Link 
                       to={`/AppointmentHistory/${user?.uid}`}
-                      className="btn btn-view-all"
+                      className="btn-user btn-view-all"
                       state={{ 
                         appointments: appointmentHistory.map(appointment => ({
                           id: appointment.id || '',
@@ -858,7 +855,7 @@ function UserProfile() {
                         {!isEditing && (
                           <>
                             <button 
-                              className="btn btn-outline-primary btn-sm" 
+                              className="btn-user btn-outline-primary btn-sm" 
                               onClick={handleEdit} 
                               style={{ 
                                 color: 'rgb(197, 87, 219)', 
@@ -878,7 +875,7 @@ function UserProfile() {
                       {isEditing ? (
                         <>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item">
+                            <div className="detail-item-profile">
                               <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Name</h6>
@@ -887,7 +884,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item">
+                            <div className="detail-item-profile">
                               <FaEnvelope className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Email</h6>
@@ -896,7 +893,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item">
+                            <div className="detail-item-profile">
                               <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Location</h6>
@@ -912,7 +909,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item">
+                            <div className="detail-item-profile">
                               <FaPhone className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Phone</h6>
@@ -928,7 +925,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item">
+                            <div className="detail-item-profile">
                               <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Age</h6>
@@ -937,7 +934,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item">
+                            <div className="detail-item-profile">
                               <FaVenusMars className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Gender</h6>
@@ -959,7 +956,7 @@ function UserProfile() {
                       ) : (
                         <>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item d-flex align-items-center">
+                            <div className="detail-item-profile d-flex align-items-center">
                               <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Name</h6>
@@ -968,7 +965,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item d-flex align-items-center">
+                            <div className="detail-item-profile d-flex align-items-center">
                               <FaEnvelope className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Email</h6>
@@ -977,7 +974,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item d-flex align-items-center">
+                            <div className="detail-item-profile d-flex align-items-center">
                               <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Location</h6>
@@ -986,7 +983,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item d-flex align-items-center">
+                            <div className="detail-item-profile d-flex align-items-center">
                               <FaPhone className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Phone</h6>
@@ -995,7 +992,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item d-flex align-items-center">
+                            <div className="detail-item-profile d-flex align-items-center">
                               <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Age</h6>
@@ -1004,7 +1001,7 @@ function UserProfile() {
                             </div>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <div className="detail-item d-flex align-items-center">
+                            <div className="detail-item-profile d-flex align-items-center">
                               <FaVenusMars className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
                               <div className="ms-3">
                                 <h6 className="mb-0 text-muted">Gender</h6>
@@ -1016,9 +1013,9 @@ function UserProfile() {
                       )}
                     </div>
                     {isEditing && (
-                      <div className="mt-3">
-                        <button className="btn btn-primary me-2" onClick={handleSave}>Save</button>
-                        <button className="btn btn-secondary" onClick={handleCancel}>Cancel</button>
+                      <div className="mt-3 d-flex">
+                        <button className="btn-user btn-primary me-2" onClick={handleSave}>Save</button>
+                        <button className="btn-user btn-secondary" onClick={handleCancel}>Cancel</button>
                       </div>
                     )}
                   </>

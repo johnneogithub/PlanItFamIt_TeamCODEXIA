@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './OTDesignStyle.css';
-import Navbar from '../Components/Global/Navbar_Main';
+import "../../pages/ovulation-tracker-folder/OTDesignStyle.css";
+import Navbar from "../../Components/Global/Navbar_Main";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faWeight, faRulerVertical } from '@fortawesome/free-solid-svg-icons';
 
-import rightbgpic from '../Components/Assets/AskingOT.png';
-import leftbgpic from '../Components/Assets/smartOTpic.png';
-import btnpre from '../Components/Assets/Magicpen.png';
+import rightbgpic from '../../Components/Assets/AskingOT.png';
+import leftbgpic from '../../Components/Assets/smartOTpic.png';
+import btnpre from '../../Components/Assets/Magicpen.png';
 
 const OvulationTracker = ({ height, weight }) => {
   const [formData, setFormData] = useState({

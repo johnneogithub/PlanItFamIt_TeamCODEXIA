@@ -670,7 +670,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
       }}>
         <div className="content-wrapper" style={{
           padding: '2rem',
-          maxWidth: '1400px',
+          maxWidth: '1600px',
           margin: '0 auto'
         }}>
           <div className="page-header" style={{

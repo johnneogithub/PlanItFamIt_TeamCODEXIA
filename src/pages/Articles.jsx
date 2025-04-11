@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import Modal from 'react-modal';
 import './ArticlesStyle.css';
 import Nav from '../Components/Global/Navbar_Main';
 import Footer from '../Components/Global/Footer';
@@ -9,6 +8,7 @@ import WomenRH from '../Components/Assets/Reproductive_Women_img.jpg';
 import { db, storage } from '../Config/firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import ArticleModal from '../Components/Global/ArticleModal';
 
 const Articles = () => {
   const location = useLocation();
@@ -98,40 +98,16 @@ const Articles = () => {
             <button className="edit-button" onClick={openModal}>Add Articles</button>
           </div>
         )}
-        <Modal 
-          isOpen={modalIsOpen} 
-          onRequestClose={closeModal} 
-          contentLabel="Edit Article"
-          className="articles-modal"
-          overlayClassName="articles-modal-overlay"
-        >
-          <div className="modal-header">
-            <h2 className="modal-title">Edit Article</h2>
-            <button className="close-button" onClick={closeModal}>&times;</button>
-          </div>
-          <form onSubmit={handleSubmit} className="edit-article-form">
-            <label className="edit-article-label">
-              Image:
-              <input type="file" name="image" onChange={handleImageChange} className="edit-article-input" />
-            </label>
-            <label className="edit-article-label">
-              Category:
-              <input type="text" name="category" value={articleData.category} onChange={handleInputChange} className="edit-article-input" />
-            </label>
-            <label className="edit-article-label">
-              Title:
-              <input type="text" name="title" value={articleData.title} onChange={handleInputChange} className="edit-article-input" />
-            </label>
-            <label className="edit-article-label">
-              Link:
-              <input type="url" name="link" value={articleData.link} onChange={handleInputChange} className="edit-article-input" />
-            </label>
-            <div className="edit-article-buttons">
-              <button type="submit" className="edit-article-submit">Save</button>
-              <button type="button" onClick={closeModal} className="edit-article-cancel">Cancel</button>
-            </div>
-          </form>
-        </Modal>
+
+        <ArticleModal
+          isOpen={modalIsOpen}
+          onClose={closeModal}
+          onSubmit={handleSubmit}
+          articleData={articleData}
+          onInputChange={handleInputChange}
+          onImageChange={handleImageChange}
+        />
+
         <div className="card-grid">
           {articles.map((article) => (
             <ArticleCard 

@@ -10,8 +10,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const HistoricalAppointment = () => {
-  const [showFileModal, setShowFileModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
+
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasNewUpdates, setHasNewUpdates] = useState(false);

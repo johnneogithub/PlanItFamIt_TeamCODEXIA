@@ -9,7 +9,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getAuth } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import UserProfilePopup from './AdminLogin/UserProfilePopup';
+import UserProfilePopup from './UserProfilePopup';
+import './UserProfilePopupStyle.css';
 import MedicalPictureFiles from './MedicalPictureFiles/MedicalPictureFiles';
 
 function formatPricingType(type) {
@@ -582,45 +583,23 @@ function PatientsRecord() {
     }
   };
 
-  const handleViewProfile = async (event, appointment) => {
+  const handleViewProfile = async (event, records) => {
+    event.stopPropagation();
     try {
-        const firestore = getFirestore();
-        const userRef = doc(firestore, 'users', appointment.userId);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const userLocation = userData.location || 'N/A';
-            const userPhone = userData.phone || 'N/A';
-            const userProfilePicture = userData.profilePicture || 'defaultProfilePicUrl';
-            const appointmentRemark = appointment.remark || 'No remark available';
-            
-            setSelectedUser({
-                id: userSnap.id,
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                email: userData.email,
-                age: userData.age,
-                gender: userData.gender,
-                phone: userPhone,
-                location: userLocation,
-                profilePicture: userProfilePicture,
-                appointment: {
-                    remark: appointmentRemark,
-                    status: appointment.status,
-                    appointmentType: appointment.appointmentType ,
-                    date: appointment.date,
-                    time: appointment.time,
-                    selectedPricingType: appointment.selectedPricingType,
-                    selectedServices: appointment.selectedServices,
-                }
-            });
-            setShowUserProfilePopup(true);
-        } else {
-            console.error('User not found');
-        }
+      const firestore = getFirestore();
+      const userRef = doc(firestore, 'users', records[0].userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        setSelectedUser({
+          id: userSnap.id,
+          ...userData
+        });
+        setShowUserProfilePopup(true);
+      }
     } catch (error) {
-        console.error('Error fetching user data:', error);
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -733,6 +712,7 @@ function PatientsRecord() {
     );
   }
   const closeUserProfilePopup = () => {
+    setShowUserProfilePopup(false);
     setSelectedUser(null);
   };
   return (
@@ -794,10 +774,7 @@ function PatientsRecord() {
                           <div className="record-count">{records.length} records</div>
                           <button 
                             className="btn btn-icon" 
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent folder click
-                              handleViewProfile(e, records[0]); // Pass the event and the first record
-                            }}
+                            onClick={(e) => handleViewProfile(e, records)}
                             title="View Profile"
                           >
                             <FaUserCircle />
@@ -950,25 +927,29 @@ function PatientsRecord() {
               </button>
             </div>
 
-            <div className="modal-body">
+            <div className="modal-body-admin">
               <div className="info-card full-width">
                 <div className="info-card-header">
                   <h4>Basic Information</h4>
                 </div>
                 <div className="info-card-content info-grid">
-                  <div className="info-item">
+                  <div className="info-item-rec">
                     <label>Full Name</label>
                     <span>{selectedFile.name}</span>
                   </div>
-                  <div className="info-item">
+                  <div className="info-item-rec">
                     <label>Email</label>
                     <span>{selectedFile.email}</span>
                   </div>
-                  <div className="info-item">
+                  <div className="info-item-rec">
                     <label>Age</label>
                     <span>{selectedFile.age}</span>
                   </div>
-                  <div className="info-item">
+                  <div className="info-item-rec">
+                    <label>Date</label>
+                    <span>{new Date(selectedFile.date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="iinfo-item-rec">
                     <label>Time</label>
                     <span>{selectedFile.time}</span>
                   </div>
@@ -980,31 +961,70 @@ function PatientsRecord() {
                   <h4>Appointment Details</h4>
                 </div>
                 <div className="info-card-content">
-                  <div className="info-item">
-                    <label>Pricing Type</label>
-                    <span>{formatPricingType(selectedFile.selectedPricingType)}</span>
-                  </div>
-                  <div className="info-item">
+              
+                  <div className="info-item-rec">
                     <label>Selected Services</label>
                     <div className="services-list">
                       {Array.isArray(selectedFile.selectedServices) ? (
-                        selectedFile.selectedServices.map((service, index) => (
-                          <span key={index} className="service-tag">
-                            {typeof service === 'object' ? service.name : service}
-                          </span>
-                        ))
+                        <>
+                          <div className="pricing-summary mb-3">
+                            <h6>Pricing Type: <span className="pricing-badge">{formatPricingType(selectedFile.selectedPricingType)}</span></h6>
+                            {selectedFile.totalAmount && (
+                              <div className="pricing-details mt-2">
+                                <div className="row">
+                                  <div className="col-md-4">
+                                    <small className="text-muted">Without PhilHealth:</small>
+                                    <div>₱{selectedFile.totalAmount.withoutPH?.toLocaleString()}</div>
+                                  </div>
+                                  <div className="col-md-4">
+                                    <small className="text-muted">PhilHealth Benefit:</small>
+                                    <div>₱{selectedFile.totalAmount.PHBenefit?.toLocaleString()}</div>
+                                  </div>
+                                  <div className="col-md-4">
+                                    <small className="text-muted">With PhilHealth:</small>
+                                    <div>₱{selectedFile.totalAmount.withPH?.toLocaleString()}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          {selectedFile.selectedServices.map((service, index) => (
+                            <div key={index} className="service-item-rec p-3 border rounded mb-2">
+                              <div className="d-flex justify-content-between align-items-center">
+                                <h6 className="mb-0">{service.name}</h6>
+                                <span className="badge ">
+                                  ₱{service[selectedFile.selectedPricingType]?.toLocaleString()}
+                                </span>
+                              </div>
+                              {service.isPackage && service.components && (
+                                <div className="mt-2">
+                                  <small className="text-muted">Package Components:</small>
+                                  <ul className="list-unstyled ms-3">
+                                    {service.components.map((component, idx) => (
+                                      <li key={idx} className="d-flex justify-content-between">
+                                        <span>{component.name}</span>
+                                        <span>₱{component[selectedFile.selectedPricingType]?.toLocaleString()}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          <div className="total-amount  bg-light rounded">
+                            <strong>Total Amount: </strong>
+                            <span>₱{calculateTotal(
+                              selectedFile.selectedServices,
+                              selectedFile.selectedPricingType
+                            )}</span>
+                          </div>
+                        </>
                       ) : (
                         <span className="no-services">No services selected</span>
                       )}
                     </div>
                   </div>
-                  {selectedFile.message && (
-                    <div className="info-item">
-                      <label>Message</label>
-                      <p className="message-text">{selectedFile.message}</p>
-                    </div>
-                  )}
-                  <div className="info-item">
+                  <div className="info-item-rec">
                     <label>Status</label>
                     <span className={`status-badge ${selectedFile.status || 'pending'}`}>
                       {capitalizeFirstLetter(selectedFile.status || 'pending')}
@@ -1145,6 +1165,15 @@ function getStatusBadgeClass(status) {
     case 'remarked': return 'bg-info';
     default: return 'bg-warning';
   }
+}
+
+function calculateTotal(services, pricingType) {
+  if (!services || !Array.isArray(services)) return 0;
+  
+  return services.reduce((total, service) => {
+    const servicePrice = service[pricingType] || 0;
+    return total + servicePrice;
+  }, 0);
 }
 
 export default PatientsRecord;

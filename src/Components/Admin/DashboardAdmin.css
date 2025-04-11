@@ -89,6 +89,7 @@
 
 .card-body {
   padding: 30px;
+  
 }
 
 .font-weight-normal {
@@ -417,4 +418,7 @@
 .pagination .page-link:hover {
   background-color: #f6f9fc;
   color: #5e72e4;
+}
+.modal.content.dash{
+
 }

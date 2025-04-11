@@ -16,7 +16,7 @@ const AppointmentModal = ({
   return (
     <div className="appointment-modal">
       <div className="modal-backdrop" onClick={onClose}></div>
-      <div className="modal-content">
+      <div className="modal-content-modal">
         <div className="modal-header-history">
           <h2>Appointment Details</h2>
           <button className="close-button" onClick={onClose}>

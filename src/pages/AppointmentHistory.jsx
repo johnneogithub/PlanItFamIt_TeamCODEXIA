@@ -5,8 +5,8 @@ import Navbar from '../Components/Global/Navbar_Main';
 import { doc, getDoc, onSnapshot, updateDoc, arrayRemove } from 'firebase/firestore';
 import { crud } from '../Config/firebase';
 import './AppointmentHistoryStyle.css';
-import './AppointmentHistoryTable.css'; // Add this new import
-import { auth } from '../Config/firebase';
+import './AppointmentHistoryTable.css'; 
+
 import AppointmentCard from '../Components/Appointments/AppointmentCard';
 import AppointmentModal from '../Components/Appointments/AppointmentModal';
 import AppointmentFilters from '../Components/Appointments/AppointmentFilters';
@@ -105,20 +105,43 @@ const AppointmentHistory = () => {
 
           // Update appointments
           let allAppointments = [];
+          
+          // Only add current appointment if it exists and isn't already in history
           if (userData.appointmentData) {
-            allAppointments.push({
+            const currentAppointment = {
               ...userData.appointmentData,
               isCurrent: true,
               id: `current_${userData.appointmentData.date}_${userData.appointmentData.time}`
-            });
+            };
+            
+            // Check if this appointment is already in history
+            const isInHistory = userData.appointmentHistory?.some(histApp => 
+              histApp.date === currentAppointment.date && 
+              histApp.time === currentAppointment.time &&
+              histApp.status === currentAppointment.status
+            );
+            
+            if (!isInHistory) {
+              allAppointments.push(currentAppointment);
+            }
           }
           
+          // Add appointment history
           if (userData.appointmentHistory) {
             allAppointments = [...allAppointments, ...userData.appointmentHistory];
           }
           
-          setAppointments(allAppointments);
-          setFilteredAppointments(allAppointments);
+          // Remove any duplicates based on date, time, and status
+          const uniqueAppointments = allAppointments.filter((app, index, self) =>
+            index === self.findIndex((a) => 
+              a.date === app.date && 
+              a.time === app.time && 
+              a.status === app.status
+            )
+          );
+          
+          setAppointments(uniqueAppointments);
+          setFilteredAppointments(uniqueAppointments);
         }
       });
 

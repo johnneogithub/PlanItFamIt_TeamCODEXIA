@@ -8,6 +8,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import backgroudappointmentF from '../Components/Assets/FamilyPlanning_img2.jpg';
 import { FaCalendarAlt, FaClock, FaListAlt } from 'react-icons/fa';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType, onSelectService, selectedPackage, selectedServices, setSelectedServices }) => {
   const [activeTab, setActiveTab] = useState('packages');
@@ -485,17 +487,18 @@ const AppointmentFillUp = () => {
     e.preventDefault();
     setSubmitted(true);
 
-    // Check if the selected date is in the past
     const selectedDate = new Date(searchQuery.date);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+    today.setHours(0, 0, 0, 0);
 
     if (selectedDate < today) {
-        return;
+      toast.error('Please select a future date for your appointment');
+      return;
     }
 
     if (!validateForm()) {
-        return;
+      toast.error('Please fill in all required fields and select at least one service');
+      return;
     }
 
     try {
@@ -513,24 +516,21 @@ const AppointmentFillUp = () => {
       const docSnap = await getDoc(userRef);
       const userData = docSnap.exists() ? docSnap.data() : {};
 
-      // Create or update appointments array
       const currentAppointments = userData.appointments || [];
-      
-      // Add new appointment to the array
       const updatedAppointments = [...currentAppointments, appointmentData];
 
-      // Update user document
       await updateDoc(userRef, {
         appointments: updatedAppointments,
         latestAppointment: appointmentData
       });
 
-      // Add to pending appointments collection
       const appointmentsRef = collection(firestore, 'pendingAppointments');
       await addDoc(appointmentsRef, {
         ...appointmentData,
         userId: userId
       });
+      
+      toast.success('Appointment scheduled successfully!');
       
       history.replace({
         pathname: '/UserProfile',
@@ -539,16 +539,41 @@ const AppointmentFillUp = () => {
 
     } catch (error) {
       console.error("Error adding document: ", error);
+      toast.error('Failed to schedule appointment. Please try again.');
     }
+  };
+
+  const handleServiceSelection = (selectedService) => {
+    if (selectedService.isPackage) {
+      if (selectedServices.some(s => s.isPackage)) {
+        toast.warning('You can only select one package at a time');
+        return;
+      }
+      setSelectedServices(prev => [...prev, selectedService]);
+      toast.success(`${selectedService.name} package added to your selection`);
+    } else {
+      if (selectedServices.find(s => s.name === selectedService.name)) {
+        toast.warning('This service is already selected');
+        return;
+      }
+      setSelectedServices(prev => [...prev, selectedService]);
+      toast.success(`${selectedService.name} service added to your selection`);
+    }
+  };
+
+  const handleRemoveService = (serviceName) => {
+    setSelectedServices(selectedServices.filter(s => s.name !== serviceName));
+    toast.info(`${serviceName} removed from your selection`);
   };
 
   const handlePricingTypeChange = (e) => {
     const newPricingType = e.target.value;
     setSelectedPricingType(newPricingType);
     setSelectedPriceType(newPricingType);
-    setSelectedServices([]); // Clear selected services when pricing type changes
+    setSelectedServices([]);
     setTouchedFields(prev => ({ ...prev, pricingType: true }));
-    setIsServiceModalOpen(true); // Automatically open service selection modal
+    setIsServiceModalOpen(true);
+    toast.info('Please select your services for the chosen pricing type');
   };
 
   useEffect(() => {
@@ -722,10 +747,6 @@ const AppointmentFillUp = () => {
     }), { withoutPH: 0, PHBenefit: 0, withPH: 0 });
   };
 
-  const handleRemoveService = (serviceName) => {
-    setSelectedServices(selectedServices.filter(s => s.name !== serviceName));
-  };
-
   const handlePriceItemClick = (type) => {
     setSelectedPriceType(type === selectedPriceType ? null : type);
     setTotalType(type);
@@ -765,24 +786,6 @@ const AppointmentFillUp = () => {
         ))}
       </div>
     );
-  };
-
-  const handleServiceSelection = (selectedService) => {
-    if (selectedService.isPackage) {
-      // If a package is already selected, don't allow selecting another package
-      if (selectedServices.some(s => s.isPackage)) {
-        return;
-      }
-      // When selecting a package, keep individual services
-      setSelectedServices(prev => [...prev, selectedService]);
-    } else {
-      // For individual services
-      if (selectedServices.find(s => s.name === selectedService.name)) {
-        return;
-      }
-      // Add the new service while keeping existing services
-      setSelectedServices(prev => [...prev, selectedService]);
-    }
   };
 
   const openServiceModal = () => {

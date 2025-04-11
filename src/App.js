@@ -6,6 +6,8 @@ import ProtectedRoute from './ProtectedRoute'; // Admin protected route
 import UserProtectedRoute from './UserProtectedRoute'; // User protected route
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 // Import Components
@@ -36,6 +38,18 @@ function App() {
     <AuthProvider>
       <Router>
         <GoogleAnalyticsHandler />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Switch>
           <Route path='/' component={WelcomeLanding} exact />
           <Route path='/Welcome' component={WelcomeLanding} exact />

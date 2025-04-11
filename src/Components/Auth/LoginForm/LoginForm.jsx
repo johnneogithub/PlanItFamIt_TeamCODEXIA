@@ -1,4 +1,3 @@
-// LoginForm.jsx
 import "../LoginForm/LoginFormStyle.css";
 import { FaFacebookF, FaEnvelope } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
@@ -8,6 +7,8 @@ import { useAuth } from '../../../AuthContext';
 import { checkUserProfileCompletion } from "../../../Config/firebase";
 import background1 from '../../Assets/landing_page_bkg1.png';
 import logo from '../../../Components/Assets/PlantItFamIt_Logo_v2.png';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -33,7 +34,11 @@ function LoginForm() {
         const user = userCredential.user;
   
         if (!user.emailVerified) {
-          alert("Please verify your email before logging in.");
+          toast.warning("Please verify your email before logging in", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false
+          });
           return;
         }
   
@@ -45,28 +50,47 @@ function LoginForm() {
           localStorage.removeItem("rememberedEmail");
         }
   
-        // Ensure that user.uid is passed and defined
         if (!user.uid) {
           console.error("User ID is undefined after login.");
           return;
         }
   
-        // Redirect to /home regardless of profile completeness
-        history.push("/home");
+        toast.success("Login successful! Redirecting...", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: true
+        });
+  
+        setTimeout(() => {
+          history.push("/home");
+        }, 2000);
       })
       .catch((error) => {
         if (error.code === 'auth/user-not-found') {
-          alert("No account found. Please register or verify your email.");
+          toast.error("No account found. Please register or verify your email.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false
+          });
         } else if (error.code === 'auth/wrong-password') {
-          alert("Incorrect password. Please try again.");
+          toast.error("Incorrect password. Please try again.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false
+          });
         } else {
-          alert(`Login failed: ${error.message}`);
+          toast.error(`Login failed: ${error.message}`, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false
+          });
         }
       });
   };
   
   return (
     <div className="login-container">
+      <ToastContainer />
       <section className="login-content">
         <div className="container-fluid h-custom">
           <div className="row d-flex justify-content-center align-items-center h-100">

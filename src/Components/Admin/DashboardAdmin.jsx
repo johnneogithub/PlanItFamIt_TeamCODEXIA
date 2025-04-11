@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc, onSnapshot, getDoc as fetchDoc, arrayUnion } from 'firebase/firestore';
 import Sidebar from '../Global/Sidebar';
-import { Link } from 'react-router-dom';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import ReactPaginate from 'react-paginate';
 import { getAuth } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Clinic from '../Assets/stmargaretlogo.png'
-import logomini from '../Assets/logo-mini.svg'
 import Circle from '../Assets/circle.png'
 
 import './DashboardAdmin.css';
@@ -19,46 +16,60 @@ import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 import UserProfilePopup from './AdminLogin/UserProfilePopup';
-import Articles from '../../pages/Articles';
+
 
 const tableStyles = {
   card: {
     borderRadius: '15px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    marginBottom: '2rem'
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+    marginBottom: '2rem',
+    background: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    '&:hover': {
+      transform: 'translateY(-5px)',
+      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)'
+    }
   },
   cardHeader: {
-    backgroundColor: '#f8f9fa',
-    borderBottom: '1px solid #e9ecef',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
     padding: '1.5rem',
     borderTopLeftRadius: '15px',
-    borderTopRightRadius: '15px'
+    borderTopRightRadius: '15px',
+    backdropFilter: 'blur(10px)'
   },
   cardTitle: {
     fontSize: '1.25rem',
     fontWeight: '600',
     margin: 0,
-    color: '#344767'
+    color: '#344767',
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
   },
   table: {
     borderCollapse: 'separate',
-    borderSpacing: '0 8px'
+    borderSpacing: '0 8px',
+    width: '100%'
   },
   tableHeader: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(248, 249, 250, 0.8)',
     color: '#344767',
     fontWeight: '600',
     textTransform: 'uppercase',
     fontSize: '0.75rem',
-    letterSpacing: '0.5px'
+    letterSpacing: '0.5px',
+    padding: '1rem',
+    backdropFilter: 'blur(10px)'
   },
   tableRow: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-    transition: 'transform 0.2s',
+    transition: 'all 0.3s ease',
     '&:hover': {
       transform: 'translateY(-2px)',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      backgroundColor: 'rgba(255, 255, 255, 1)'
     }
   },
   actionButton: {
@@ -66,13 +77,17 @@ const tableStyles = {
     padding: '0.375rem 1rem',
     fontSize: '0.875rem',
     textTransform: 'none',
-    fontWeight: '500'
+    fontWeight: '500',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+    }
   }
 };
 
 function DashboardAdmin() {
-  const location = useLocation();
-  const history = useHistory();
+
 
   const [pendingAppointments, setPendingAppointments] = useState([]);
   const [approvedAppointments, setApprovedAppointments] = useState([]);
@@ -619,7 +634,23 @@ const paginatedPendingAppointments = pendingAppointments.slice(
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      minHeight: '100vh',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.1) 1px, transparent 0)',
+        backgroundSize: '40px 40px',
+        opacity: 0.5,
+        pointerEvents: 'none'
+      }} />
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -633,68 +664,173 @@ const paginatedPendingAppointments = pendingAppointments.slice(
         theme="light"
       />
       <Sidebar isAdmin={true} />
-      <div className="main-content">
-        <div className="content-wrapper">
-          <div className="page-header">
-            <h3 className="page-title-nav">
-              <span className="page-title-icon bg-gradient-primary text-white me-2">
-                <i className="bi bi-house-fill menu-icon"></i>
-              </span>{" "}
+      <div className="main-content" style={{
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div className="content-wrapper" style={{
+          padding: '2rem',
+          maxWidth: '1400px',
+          margin: '0 auto'
+        }}>
+          <div className="page-header" style={{
+            marginBottom: '2rem',
+            padding: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: '15px',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <h3 className="page-title-nav" style={{
+              color: '#344767',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem'
+            }}>
+              <span className="page-title-icon" style={{
+                background: 'linear-gradient(45deg, rgb(99, 44, 110),rgb(177, 67, 199))',
+                padding: '0.5rem',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(33, 203, 243, 0.3)'
+              }}>
+                <i className="bi bi-house-fill menu-icon" style={{ color: 'white' }}></i>
+              </span>
               Dashboard
             </h3>
-            <nav aria-label="breadcrumb">
-              <ul className="breadcrumb">
+            <nav aria-label="breadcrumb" style={{ marginTop: '1rem' }}>
+              <ul className="breadcrumb" style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                gap: '0.5rem'
+              }}>
                 <li className="breadcrumb-item active" aria-current="page">
-                  <span />
-                  Overview{" "}
-                  <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle" />
+                  <span style={{
+                    color: '#344767',
+                    fontWeight: '500'
+                  }} />
+                  Overview
+                  <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle" style={{
+                    marginLeft: '0.5rem',
+                    color: '#2196F3'
+                  }} />
                 </li>
               </ul>
             </nav>
           </div>
           <div className="row">
             <div className="col-md-4 stretch-card grid-margin unique-card">
-              <div className="card bg-gradient-danger card-img-holder text-white">
-                <div className="card-body">
-                <img src={Circle} class="card-img-absolute" alt="circle-image" />
-                  <h4 className="font-weight-normal mb-3">
-                    Medical Staff{" "}
-                    <i class="bi bi-person mdi-24px float-end"></i>
+              <div className="card" style={{
+                background: 'linear-gradient(45deg, #FF416C, #FF4B2B)',
+                borderRadius: '15px',
+                boxShadow: '0 4px 20px rgba(255, 75, 43, 0.3)',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 8px 25px rgba(255, 75, 43, 0.4)'
+                }
+              }}>
+                <div className="card-body" style={{ position: 'relative', zIndex: 1 }}>
+                  <img src={Circle} className="card-img-absolute" alt="circle-image" style={{
+                    position: 'absolute',
+                    right: '-20px',
+                    bottom: '-20px',
+                    opacity: 0.2,
+                    transform: 'rotate(180deg)'
+                  }} />
+                  <h4 className="font-weight-normal mb-3" style={{
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    Medical Staff
+                    <i className="bi bi-person" style={{ fontSize: '1.5rem' }}></i>
                   </h4>
-                  <h2 className="mb-5">10</h2>
+                  <h2 className="mb-5" style={{ color: 'white', fontSize: '2.5rem' }}>10</h2>
                 </div>
               </div>
             </div>
             <div className="col-md-4 stretch-card grid-margin unique-card">
-              <div className="card bg-gradient-info card-img-holder text-white">
-                <div className="card-body">
-                  <img src={Circle} className="card-img-absolute" alt="circle-image" />
-                  <h4 className="font-weight-normal mb-3">
-                    Registered Users on the System{" "}
-                    <i className="bi bi-postcard-heart-fill mdi-24px float-end"></i>
+              <div className="card" style={{
+                background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
+                borderRadius: '15px',
+                boxShadow: '0 4px 20px rgba(33, 203, 243, 0.3)',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 8px 25px rgba(33, 203, 243, 0.4)'
+                }
+              }}>
+                <div className="card-body" style={{ position: 'relative', zIndex: 1 }}>
+                  <img src={Circle} className="card-img-absolute" alt="circle-image" style={{
+                    position: 'absolute',
+                    right: '-20px',
+                    bottom: '-20px',
+                    opacity: 0.2,
+                    transform: 'rotate(180deg)'
+                  }} />
+                  <h4 className="font-weight-normal mb-3" style={{
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    Registered Users
+                    <i className="bi bi-postcard-heart-fill" style={{ fontSize: '1.5rem' }}></i>
                   </h4>
-                  <h2 className="mb-5">{registeredUsersCount}</h2>
+                  <h2 className="mb-5" style={{ color: 'white', fontSize: '2.5rem' }}>{registeredUsersCount}</h2>
                 </div>
               </div>
             </div>
-
             <div className="col-md-4 stretch-card grid-margin unique-card">
-              <div className="card bg-gradient-success card-img-holder text-white">
-                <div className="card-body">
-                <img src={Circle} className="card-img-absolute" alt="circle-image" />
-                  <h4 className="font-weight-normal mb-3">
-                    Total Appointments{" "}
-                    <i className="bi bi-clipboard2-check mdi-24px float-end"></i>
+              <div className="card" style={{
+                background: 'linear-gradient(45deg, #2dce89, #2dcecc)',
+                borderRadius: '15px',
+                boxShadow: '0 4px 20px rgba(45, 206, 137, 0.3)',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 8px 25px rgba(45, 206, 137, 0.4)'
+                }
+              }}>
+                <div className="card-body" style={{ position: 'relative', zIndex: 1 }}>
+                  <img src={Circle} className="card-img-absolute" alt="circle-image" style={{
+                    position: 'absolute',
+                    right: '-20px',
+                    bottom: '-20px',
+                    opacity: 0.2,
+                    transform: 'rotate(180deg)'
+                  }} />
+                  <h4 className="font-weight-normal mb-3" style={{
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    Total Appointments
+                    <i className="bi bi-clipboard2-check" style={{ fontSize: '1.5rem' }}></i>
                   </h4>
                   {loading ? (
-                    <p>Loading...</p>
+                    <div style={{ color: 'white' }}>Loading...</div>
                   ) : error ? (
-                    <p>{error}</p>
+                    <div style={{ color: 'white' }}>{error}</div>
                   ) : (
                     <>
-                      <h2 className="mb-5">{totalAppointmentsCount}</h2>
-                      <h6 className="card-text">Pending: {pendingAppointmentsCount}</h6>
-                      <h6 className="card-text">Approved: {approvedAppointmentsCount}</h6>
+                      <h2 className="mb-3" style={{ color: 'white', fontSize: '2.5rem' }}>{totalAppointmentsCount}</h2>
+                      <div style={{ display: 'flex', gap: '1rem', color: 'white' }}>
+                        <div>
+                          <small>Pending: {pendingAppointmentsCount}</small>
+                        </div>
+                        <div>
+                          <small>Approved: {approvedAppointmentsCount}</small>
+                        </div>
+                      </div>
                     </>
                   )}
                 </div>
@@ -847,9 +983,11 @@ const paginatedPendingAppointments = pendingAppointments.slice(
 
           <div className="row">
             <div className="col-12 grid-margin">
-              <div className="card">
+            <div className="card" style={tableStyles.card}>
                 <div className="card-body">
-                  <h4 className="card-title">For Approval of Appointment</h4>
+                <div style={tableStyles.cardHeader}>
+                  <h4 style={tableStyles.cardTitle}>For Approval of Appointment</h4>
+                </div>
                   <div className="table-responsive">
                     <table className="table">
                       <thead>
@@ -985,11 +1123,60 @@ const paginatedPendingAppointments = pendingAppointments.slice(
           </div>
 
           {selectedMessage && (
-            <div className="message-popup">
-              <div className="message-popup-content">
-                <h5>Message</h5>
-                <p>{selectedMessage}</p>
-                <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+            <div className="message-popup" style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              backdropFilter: 'blur(5px)'
+            }}>
+              <div className="message-popup-content" style={{
+                background: 'white',
+                padding: '2rem',
+                borderRadius: '15px',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+                maxWidth: '500px',
+                width: '90%',
+                animation: 'popIn 0.3s ease-out'
+              }}>
+                <h5 style={{
+                  color: '#344767',
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <i className="bi bi-chat-dots" style={{ color: '#2196F3' }}></i>
+                  Message
+                </h5>
+                <p style={{
+                  color: '#666',
+                  lineHeight: '1.6',
+                  marginBottom: '1.5rem'
+                }}>{selectedMessage}</p>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={closeMessagePopup}
+                  style={{
+                    background: 'linear-gradient(45deg, rgb(99, 44, 110),rgb(177, 67, 199))',
+                    border: 'none',
+                    padding: '0.5rem 1.5rem',
+                    borderRadius: '25px',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 8px rgba(33, 203, 243, 0.3)'
+                    }
+                  }}
+                >
+                  Close
+                </button>
               </div>
             </div>
           )}
@@ -998,70 +1185,175 @@ const paginatedPendingAppointments = pendingAppointments.slice(
             <UserProfilePopup
               user={selectedUser}
               onClose={closeUserProfilePopup}
+              style={{
+                animation: 'slideIn 0.3s ease-out'
+              }}
             />
           )}
 
           {selectedServicesForView && (
-            <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
-              <div className="modal-dialog modal-lg">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Selected Services</h5>
-                    <div className="pricing-type-label">
-                      <div className="selected-type">
-                        Selected Pricing Type: 
-                        <span className="pricing-badge selected ms-2">
-                          <i className="bi bi-check-circle-fill me-1"></i>
-                          {selectedServicesForView.selectedPricingType === 'withoutPH' && 'Without PhilHealth'}
-                          {selectedServicesForView.selectedPricingType === 'PHBenefit' && 'PhilHealth Benefit'}
-                          {selectedServicesForView.selectedPricingType === 'withPH' && 'With PhilHealth'}
-                        </span>
-                      </div>
+            <div className="modal fade show" style={{ 
+              display: 'block',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(5px)'
+            }} tabIndex="-1">
+              <div className="modal-dialog modal-lg" style={{
+                margin: '1.75rem auto',
+                maxWidth: '800px'
+              }}>
+                <div className="modal-content" style={{
+                  borderRadius: '15px',
+                  border: 'none',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+                  animation: 'slideIn 0.3s ease-out'
+                }}>
+                  <div className="modal-header" style={{
+                    background: 'linear-gradient(45deg, rgb(99, 44, 110),rgb(177, 67, 199))',
+                    color: 'white',
+                    borderTopLeftRadius: '15px',
+                    borderTopRightRadius: '15px',
+                    padding: '1.5rem'
+                  }}>
+                    <h5 className="modal-title" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      color: 'white'
+                    }}>
+                      <i className="bi bi-list-check"></i>
+                      Selected Services
+                    </h5>
+                    <div className="pricing-type-label" style={{
+                      marginLeft: 'auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+      
                     </div>
                     <button 
                       type="button" 
                       className="btn-close" 
                       onClick={() => setSelectedServicesForView(null)}
+                      style={{
+                        filter: 'brightness(0) invert(1)',
+                        opacity: '0.8',
+                        transition: 'opacity 0.3s ease',
+                        '&:hover': {
+                          opacity: '1'
+                        }
+                      }}
                     ></button>
                   </div>
-                  <div className="modal-body">
-                    <div className="pricing-summary mb-3">
-                      <h6>Pricing Type: <span className="pricing-badge">{formatPricingType(selectedServicesForView.selectedPricingType)}</span></h6>
+                  <div className="modal-body-dash" style={{
+                    padding: '1.5rem',
+                    maxHeight: '70vh',
+                    overflowY: 'auto'
+                  }}>
+                    <div className="pricing-summary mb-4" style={{
+                      background: 'rgba(33, 150, 243, 0.1)',
+                      padding: '1rem',
+                      borderRadius: '10px'
+                    }}>
+                      <h6 style={{
+                        color: '#344767',
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <i className="bi bi-currency-dollar"></i>
+                        Pricing Summary
+                      </h6>
                       {selectedServicesForView.totalAmount && (
-                        <div className="pricing-details mt-2">
-                          <div className="row">
-                            <div className="col-md-4">
-                              <small className="text-muted">Without PhilHealth:</small>
-                              <div>₱{selectedServicesForView.totalAmount.withoutPH?.toLocaleString()}</div>
+                        <div className="pricing-details" style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                          gap: '1rem'
+                        }}>
+                          <div style={{
+                            background: 'white',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                          }}>
+                            <small style={{ color: '#666' }}>Without PhilHealth:</small>
+                            <div style={{ color: 'rgb(177, 67, 199)', fontWeight: '600' }}>
+                              ₱{selectedServicesForView.totalAmount.withoutPH?.toLocaleString()}
                             </div>
-                            <div className="col-md-4">
-                              <small className="text-muted">PhilHealth Benefit:</small>
-                              <div>₱{selectedServicesForView.totalAmount.PHBenefit?.toLocaleString()}</div>
+                          </div>
+                          <div style={{
+                            background: 'white',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                          }}>
+                            <small style={{ color: '#666' }}>PhilHealth Benefit:</small>
+                            <div style={{ color: 'rgb(177, 67, 199)', fontWeight: '600' }}>
+                              ₱{selectedServicesForView.totalAmount.PHBenefit?.toLocaleString()}
                             </div>
-                            <div className="col-md-4">
-                              <small className="text-muted">With PhilHealth:</small>
-                              <div>₱{selectedServicesForView.totalAmount.withPH?.toLocaleString()}</div>
+                          </div>
+                          <div style={{
+                            background: 'white',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                          }}>
+                            <small style={{ color: '#666' }}>With PhilHealth:</small>
+                            <div style={{ color: 'rgb(177, 67, 199)', fontWeight: '600' }}>
+                              ₱{selectedServicesForView.totalAmount.withPH?.toLocaleString()}
                             </div>
                           </div>
                         </div>
                       )}
                     </div>
                     {selectedServicesForView.selectedServices?.map((service, index) => (
-                      <div key={index} className="service-item p-3 border rounded mb-2">
+                      <div key={index} className="service-item" style={{
+                        background: 'white',
+                        padding: '1rem',
+                        borderRadius: '10px',
+                        marginBottom: '1rem',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                        }
+                      }}>
                         <div className="d-flex justify-content-between align-items-center">
-                          <h6 className="mb-0">{service.name}</h6>
-                          <span className="badge bg-primary">
+                          <h6 className="mb-0" style={{ color: '#344767' }}>{service.name}</h6>
+                          <span className="badge" style={{
+                                background: 'linear-gradient(45deg, rgb(99, 44, 110),rgb(177, 67, 199))',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '15px',
+                            color: 'white',
+                            fontWeight: '500'
+                          }}>
                             ₱{service[selectedServicesForView.selectedPricingType]?.toLocaleString()}
                           </span>
                         </div>
                         {service.isPackage && service.components && (
-                          <div className="mt-2">
-                            <small className="text-muted">Package Components:</small>
-                            <ul className="list-unstyled ms-3">
+                          <div style={{ marginTop: '1rem' }}>
+                            <small style={{ color: '#666' }}>Package Components:</small>
+                            <ul style={{
+                              listStyle: 'none',
+                              padding: 0,
+                              margin: '0.5rem 0 0 0'
+                            }}>
                               {service.components.map((component, idx) => (
-                                <li key={idx} className="d-flex justify-content-between">
-                                  <span>{component.name}</span>
-                                  <span>₱{component[selectedServicesForView.selectedPricingType]?.toLocaleString()}</span>
+                                <li key={idx} style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  padding: '0.5rem 0',
+                                  borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+                                  '&:last-child': {
+                                    borderBottom: 'none'
+                                  }
+                                }}>
+                                  <span style={{ color: '#666' }}>{component.name}</span>
+                                  <span style={{ color: 'rgb(177, 67, 199)', fontWeight: '500' }}>
+                                    ₱{component[selectedServicesForView.selectedPricingType]?.toLocaleString()}
+                                  </span>
                                 </li>
                               ))}
                             </ul>
@@ -1069,19 +1361,45 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                         )}
                       </div>
                     ))}
-                    <div className="total-amount p-2 bg-light rounded">
-                      <strong>Total Amount: </strong>
-                      <span>₱{calculateTotal(
-                        selectedServicesForView.selectedServices,
-                        selectedServicesForView.selectedPricingType
-                      )}</span>
+                    <div className="total-amount-dash" style={{
+                      background: 'linear-gradient(45deg, rgb(99, 44, 110),rgb(177, 67, 199))',
+                      padding: '1rem',
+                      borderRadius: '10px',
+                      color: 'white',
+                      marginTop: '1rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <strong>Total Amount:</strong>
+                      <span style={{ fontSize: '1.25rem', fontWeight: '600' }}>
+                        ₱{calculateTotal(
+                          selectedServicesForView.selectedServices,
+                          selectedServicesForView.selectedPricingType
+                        )}
+                      </span>
                     </div>
                   </div>
-                  <div className="modal-footer">
+                  <div className="modal-footer" style={{
+                    padding: '1rem 1.5rem',
+                    borderTop: '1px solid rgba(0, 0, 0, 0.1)'
+                  }}>
                     <button 
                       type="button" 
                       className="btn btn-secondary" 
                       onClick={() => setSelectedServicesForView(null)}
+                      style={{
+                        background: 'linear-gradient(45deg, #6c757d, #495057)',
+                        border: 'none',
+                        padding: '0.5rem 1.5rem',
+                        borderRadius: '25px',
+                        color: 'white',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(108, 117, 125, 0.3)'
+                        }
+                      }}
                     >
                       Close
                     </button>
@@ -1092,67 +1410,162 @@ const paginatedPendingAppointments = pendingAppointments.slice(
           )}
 
           {showApproveModal && (
-            <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
-              <div className="modal-dialog">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Approve Appointment</h5>
+            <div className="ST-modal-overlay modal fade show" style={{ 
+              display: 'flex',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(5px)'
+            }} tabIndex="-1">
+              <div className="ST-modal-dialog" style={{
+                margin: '1.75rem auto',
+                maxWidth: '500px'
+              }}>
+                <div className="ST-modal-content" style={{
+                  borderRadius: '15px',
+                  border: 'none',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+                  animation: 'slideIn 0.3s ease-out'
+                }}>
+                  <div className="ST-modal-header" style={{
+                    background: 'linear-gradient(45deg, #2dce89, #2dcecc)',
+                    color: 'white',
+                    borderTopLeftRadius: '15px',
+                    borderTopRightRadius: '15px',
+                    padding: '1.5rem'
+                  }}>
+                    <h5 className="ST-modal-title" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      margin: 0
+                    }}>
+                      <i className="bi bi-check-circle-fill"></i>
+                      Approve Appointment
+                    </h5>
                     <button 
                       type="button" 
-                      className="btn-close" 
+                      className="ST-modal-close btn-close" 
                       onClick={() => {
                         setShowApproveModal(false);
                         setPendingApprovalId(null);
                         setApprovalRemark('');
                         setIncludeRemark(false);
                       }}
+                      style={{
+                        filter: 'brightness(0) invert(1)',
+                        opacity: '0.8',
+                        transition: 'opacity 0.3s ease'
+                      }}
                     ></button>
                   </div>
-                  <div className="modal-body">
-                    <p>Would you like to include a remark with this approval?</p>
-                    <div className="form-check mb-3">
+                  <div className="ST-modal-body" style={{
+                    padding: '1.5rem',
+                    background: 'rgba(255, 255, 255, 0.95)'
+                  }}>
+                    <p className="ST-modal-text" style={{
+                      color: '#344767',
+                      marginBottom: '1.5rem',
+                      fontSize: '1.1rem'
+                    }}>
+                      Would you like to include a remark with this approval?
+                    </p>
+                    <div className="ST-form-check mb-4">
                       <input
                         type="checkbox"
-                        className="form-check-input"
+                        className="ST-form-check-input"
                         id="includeRemark"
                         checked={includeRemark}
                         onChange={(e) => setIncludeRemark(e.target.checked)}
+                        style={{
+                          width: '1.2rem',
+                          height: '1.2rem',
+                          cursor: 'pointer'
+                        }}
                       />
-                      <label className="form-check-label" htmlFor="includeRemark">
+                      <label className="ST-form-check-label" htmlFor="includeRemark" style={{
+                        marginLeft: '0.5rem',
+                        color: '#344767',
+                        cursor: 'pointer'
+                      }}>
                         Include Remark
                       </label>
                     </div>
                     {includeRemark && (
-                      <div className="mb-3">
-                        <label className="form-label">Remark:</label>
+                      <div className="ST-remark-container">
+                        <label className="ST-remark-label" style={{
+                          color: '#344767',
+                          fontWeight: '500',
+                          marginBottom: '0.5rem'
+                        }}>
+                          Remark:
+                        </label>
                         <textarea
-                          className="form-control"
-                          rows="3"
+                          className="ST-remark-textarea form-control"
+                          rows="4"
                           value={approvalRemark}
                           onChange={(e) => setApprovalRemark(e.target.value)}
                           placeholder="Enter your remark here..."
+                          style={{
+                            borderRadius: '10px',
+                            border: '1px solid rgba(0, 0, 0, 0.1)',
+                            padding: '0.75rem',
+                            fontSize: '0.95rem',
+                            transition: 'all 0.3s ease',
+                            '&:focus': {
+                              borderColor: '#2dce89',
+                              boxShadow: '0 0 0 0.2rem rgba(45, 206, 137, 0.25)'
+                            }
+                          }}
                         />
                       </div>
                     )}
                   </div>
-                  <div className="modal-footer">
+                  <div className="ST-modal-footer" style={{
+                    padding: '1rem 1.5rem',
+                    borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+                    background: 'rgba(255, 255, 255, 0.95)'
+                  }}>
                     <button 
                       type="button" 
-                      className="btn btn-secondary" 
+                      className="ST-cancel-btn btn" 
                       onClick={() => {
                         setShowApproveModal(false);
                         setPendingApprovalId(null);
                         setApprovalRemark('');
                         setIncludeRemark(false);
+                      }}
+                      style={{
+                        background: 'linear-gradient(45deg, #6c757d, #495057)',
+                        border: 'none',
+                        padding: '0.5rem 1.5rem',
+                        borderRadius: '25px',
+                        color: 'white',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(108, 117, 125, 0.3)'
+                        }
                       }}
                     >
                       Cancel
                     </button>
                     <button 
                       type="button" 
-                      className="btn btn-success" 
+                      className="ST-approve-btn btn" 
                       onClick={handleFinalApprove}
+                      style={{
+                        background: 'linear-gradient(45deg, #2dce89, #2dcecc)',
+                        border: 'none',
+                        padding: '0.5rem 1.5rem',
+                        borderRadius: '25px',
+                        color: 'white',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(45, 206, 137, 0.3)'
+                        }
+                      }}
                     >
+                      <i className="bi bi-check-circle me-2"></i>
                       Approve
                     </button>
                   </div>
@@ -1162,52 +1575,136 @@ const paginatedPendingAppointments = pendingAppointments.slice(
           )}
 
           {showRejectModal && (
-            <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
-              <div className="modal-dialog">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Reject Appointment</h5>
+            <div className="unique-reject-modal modal fade show" style={{ 
+              display: 'block',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(5px)'
+            }} tabIndex="-1">
+              <div className="modal-dialog unique-modal-dialog" style={{
+                margin: '1.75rem auto',
+                maxWidth: '500px'
+              }}>
+                <div className="modal-content unique-modal-content" style={{
+                  borderRadius: '15px',
+                  border: 'none',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+                  animation: 'slideIn 0.3s ease-out'
+                }}>
+                  <div className="modal-header unique-modal-header" style={{
+                    background: 'linear-gradient(45deg,rgb(204, 86, 98), #c82333)',
+                    color: 'white',
+                    borderTopLeftRadius: '15px',
+                    borderTopRightRadius: '15px',
+                    padding: '1.5rem'
+                  }}>
+                    <h5 className="modal-title unique-modal-title" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      margin: 0
+                    }}>
+                      <i className="bi bi-x-circle-fill"></i>
+                      Reject Appointment
+                    </h5>
                     <button 
                       type="button" 
-                      className="btn-close" 
+                      className="btn-close unique-modal-close" 
                       onClick={() => {
                         setShowRejectModal(false);
                         setPendingRejectId(null);
                         setRejectRemark('');
                       }}
+                      style={{
+                        filter: 'brightness(0) invert(1)',
+                        opacity: '0.8',
+                        transition: 'opacity 0.3s ease'
+                      }}
                     ></button>
                   </div>
-                  <div className="modal-body">
-                    <div className="mb-3">
-                      <label className="form-label">Please provide a reason for rejection:</label>
+                  <div className="modal-body unique-modal-body" style={{
+                    padding: '1.5rem',
+                    background: 'rgba(255, 255, 255, 0.95)'
+                  }}>
+                    <div className="unique-reject-form">
+                      <label className="form-label unique-form-label" style={{
+                        color: '#344767',
+                        fontWeight: '500',
+                        marginBottom: '1rem'
+                      }}>
+                        Please provide a reason for rejection:
+                      </label>
                       <textarea
-                        className="form-control"
-                        rows="3"
+                        className="form-control unique-textarea"
+                        rows="4"
                         value={rejectRemark}
                         onChange={(e) => setRejectRemark(e.target.value)}
                         placeholder="Enter rejection reason here..."
                         required
+                        style={{
+                          borderRadius: '10px',
+                          border: '1px solid rgba(0, 0, 0, 0.1)',
+                          padding: '0.75rem',
+                          fontSize: '0.95rem',
+                          transition: 'all 0.3s ease',
+                          '&:focus': {
+                            borderColor: '#dc3545',
+                            boxShadow: '0 0 0 0.2rem rgba(220, 53, 69, 0.25)'
+                          }
+                        }}
                       />
                     </div>
                   </div>
-                  <div className="modal-footer">
+                  <div className="modal-footer unique-modal-footer" style={{
+                    padding: '1rem 1.5rem',
+                    borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+                    background: 'rgba(255, 255, 255, 0.95)'
+                  }}>
                     <button 
                       type="button" 
-                      className="btn btn-secondary" 
+                      className="btn unique-cancel-btn" 
                       onClick={() => {
                         setShowRejectModal(false);
                         setPendingRejectId(null);
                         setRejectRemark('');
+                      }}
+                      style={{
+                        background: 'linear-gradient(45deg, #6c757d, #495057)',
+                        border: 'none',
+                        padding: '0.5rem 1.5rem',
+                        borderRadius: '25px',
+                        color: 'white',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(108, 117, 125, 0.3)'
+                        }
                       }}
                     >
                       Cancel
                     </button>
                     <button 
                       type="button" 
-                      className="btn btn-danger" 
+                      className="btn unique-reject-btn" 
                       onClick={handleFinalReject}
                       disabled={!rejectRemark.trim()}
+                      style={{
+                        background: 'linear-gradient(45deg, #dc3545, #c82333)',
+                        border: 'none',
+                        padding: '0.5rem 1.5rem',
+                        borderRadius: '25px',
+                        color: 'white',
+                        transition: 'all 0.3s ease',
+                        '&:hover:not(:disabled)': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(220, 53, 69, 0.3)'
+                        },
+                        '&:disabled': {
+                          opacity: 0.6,
+                          cursor: 'not-allowed'
+                        }
+                      }}
                     >
+                      <i className="bi bi-x-circle me-2"></i>
                       Reject
                     </button>
                   </div>

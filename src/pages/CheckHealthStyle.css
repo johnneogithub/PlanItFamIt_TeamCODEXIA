@@ -231,7 +231,7 @@ input[type=tel]:focus {
 }
 
 .bg-primary {
-  background: #655E7A !important;
+  background: rgb(197, 87, 219); 
 }
 
 .bg-primary-dark {

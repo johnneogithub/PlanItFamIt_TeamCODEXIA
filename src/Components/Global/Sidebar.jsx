@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Clinic from '../Assets/stmargaretlogo.png';
-import { FaHome, FaUserFriends, FaCalendarAlt, FaUser, FaBars, FaFile } from 'react-icons/fa';
+import { FaHome, FaUserFriends, FaCalendarAlt, FaUser, FaBars, FaFile, FaTimes } from 'react-icons/fa';
 import './SidebarStyle.css';
 
 const Sidebar = ({ isAdmin }) => {
@@ -30,7 +30,7 @@ const Sidebar = ({ isAdmin }) => {
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); 
+    handleResize();
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -40,8 +40,9 @@ const Sidebar = ({ isAdmin }) => {
   return (
     <>
       <button className="sidebar-toggle" onClick={toggleSidebar}>
-        <FaBars />
+        {isSidebarOpen ? <FaTimes /> : <FaBars />}
       </button>
+      <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={toggleSidebar} />
       <nav className={`sidebar-admin ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <img src={Clinic} alt="St. Margaret Clinic" className="clinic-logo" />
@@ -49,8 +50,15 @@ const Sidebar = ({ isAdmin }) => {
         </div>
         <ul className="nav-menu-admin">
           {menuItems.map((item) => (
-            <li className={`nav-item ${location.pathname === item.path ? 'active' : ''}`} key={item.path}>
-              <Link className="nav-link" to={item.path === '/articles' ? { pathname: item.path, state: { isAdmin: true } } : item.path} onClick={() => window.innerWidth <= 991 && setIsSidebarOpen(false)}>
+            <li 
+              className={`nav-item ${location.pathname === item.path ? 'active' : ''}`} 
+              key={item.path}
+            >
+              <Link 
+                className="nav-link" 
+                to={item.path === '/articles' ? { pathname: item.path, state: { isAdmin: true } } : item.path} 
+                onClick={() => window.innerWidth <= 991 && setIsSidebarOpen(false)}
+              >
                 <span className="menu-icon">{item.icon}</span>
                 <span className="menu-title">{item.name}</span>
               </Link>

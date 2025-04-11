@@ -1,101 +1,149 @@
 .sidebar-admin {
-    width: 260px;
-    height: 100vh;
-    background: #fff;
-    position: fixed;
-    left: 0;
-    top: 0;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
-    z-index: 1000;
-    padding-top: 70px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  transform: translateX(-100%);
+}
+
+.sidebar-admin.open {
+  transform: translateX(0);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar-header {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clinic-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.nav-menu-admin {
+  list-style: none;
+  padding: 20px 0;
+  margin: 0;
+}
+
+.nav-item {
+  margin: 5px 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.nav-item.active .nav-link {
+  background: #4a90e2;
+  color: #fff;
+}
+
+.menu-icon {
+  margin-right: 15px;
+  font-size: 1.2rem;
+  width: 20px;
+  text-align: center;
+}
+
+.menu-title {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #357abd;
+  transform: scale(1.1);
+}
+
+@media (max-width: 991px) {
+  .sidebar-admin {
+    width: 250px;
+  }
+  
+  .sidebar-toggle {
+    display: flex;
+  }
+}
+
+@media (min-width: 992px) {
+  .sidebar-admin {
+    transform: translateX(0);
   }
   
   .sidebar-toggle {
     display: none;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 1001;
-    background-color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
   
-  .sidebar-header {
-    padding: 20px;
-    text-align: center;
-    border-bottom: 1px solid #f1f1f1;
+  .sidebar-overlay {
+    display: none;
   }
-  
-  .clinic-logo {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-  }
-  
-  .sidebar-header h3 {
-    color: #333;
-    font-size: 1.2rem;
-    margin: 0;
-  }
-  
-  .nav-menu-admin {
-    list-style: none;
-    padding: 20px;
-    margin: 20px 0;
-    border-top: 1px solid #f1f1f1;
-  }
-  
-  .nav-item {
-    margin-bottom: 10px;
-  }
-  
-  .nav-link {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    color: #6c757d;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-radius: 5px;
-  }
-  
-  .nav-link:hover {
-    background-color: #e9ecef;
-    color: #0056b3;
-  }
-  
-  .nav-item.active .nav-link {
-    background-color: rgb(197, 87, 219);
-    color: #fff;
-  }
-  
-  .menu-icon {
-    margin-right: 15px;
-    font-size: 1.5rem;
-  }
-  
-  .menu-title {
-    font-size: 1rem;
-    font-weight: 500;
-  }
-  
-  @media (max-width: 991px) {
-    .sidebar-admin {
-      left: -260px;
-    }
-  
-    .sidebar-admin.open {
-      left: 0;
-    }
-  
-    .sidebar-toggle {
-      display: block;
-    }
-  }
+}
   

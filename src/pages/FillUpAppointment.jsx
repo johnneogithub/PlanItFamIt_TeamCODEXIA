@@ -245,165 +245,8 @@ const AppointmentFillUp = () => {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
   const [appointmentHistory, setAppointmentHistory] = useState([]);
+  const [services, setServices] = useState([]);
   const crud = firestore;
-
-  const services = [
-    { 
-      name: "Maternity Care Package (OB-MANAGE)",
-      withoutPH: 6500,
-      PHBenefit: 4500,
-      withPH: 2000,
-      description: "Complete maternity care package including all services",
-      isPackage: true,
-      components: [
-        {
-          name: "Delivery Room",
-          withoutPH: 2000,
-          PHBenefit: 1500,
-          withPH: 500
-        },
-        {
-          name: "Room Rate",
-          withoutPH: 1500,
-          PHBenefit: 1000,
-          withPH: 500
-        },
-        {
-          name: "Drugs, Meds & Supplies",
-          withoutPH: 1500,
-          PHBenefit: 1000,
-          withPH: 500
-        },
-        {
-          name: "Assist Fee",
-          withoutPH: 1000,
-          PHBenefit: 700,
-          withPH: 300
-        },
-        {
-          name: "Professional Fee",
-          withoutPH: 500,
-          PHBenefit: 300,
-          withPH: 200
-        }
-      ]
-    },
-    { 
-      name: "Newborn Care Package (OB-MANAGE)",
-      withoutPH: 5800,
-      PHBenefit: 4000,
-      withPH: 1800,
-      description: "Complete newborn care package including monitoring and essential care services",
-      isPackage: true,
-      components: [
-        {
-          name: "Newborn Screening",
-          withoutPH: 1800,
-          PHBenefit: 1200,
-          withPH: 600
-        },
-        {
-          name: "Hearing Test",
-          withoutPH: 1000,
-          PHBenefit: 700,
-          withPH: 300
-        },
-        {
-          name: "BCG Vaccine",
-          withoutPH: 1000,
-          PHBenefit: 800,
-          withPH: 200
-        },
-        {
-          name: "Newborn Care Supplies",
-          withoutPH: 1200,
-          PHBenefit: 800,
-          withPH: 400
-        },
-        {
-          name: "Professional Fee",
-          withoutPH: 800,
-          PHBenefit: 500,
-          withPH: 300
-        }
-      ]
-    },
-    { 
-      name: "Normal Spontaneous Delivery (OB-MANAGE)",
-      withoutPH: 24550,
-      PHBenefit: 8450,
-      withPH: 16100,
-      description: "Complete normal delivery package including all essential services",
-      isPackage: true,
-      components: [
-        {
-          name: "Delivery Room",
-          withoutPH: 2000,
-          PHBenefit: 1500,
-          withPH: 500
-        },
-        {
-          name: "Room Rate",
-          withoutPH: 2000,
-          PHBenefit: 1500,
-          withPH: 500
-        },
-        {
-          name: "Drugs, Meds & Supplies",
-          withoutPH: 2050,
-          PHBenefit: 1570,
-          withPH: 480
-        },
-        {
-          name: "Assist Fee",
-          withoutPH: 500,
-          PHBenefit: 500,
-          withPH: 0
-        },
-        {
-          name: "Professional Fee",
-          withoutPH: 18000,
-          PHBenefit: 3380,
-          withPH: 14620
-        }
-      ]
-    },
-    { 
-      name: "Delivery Room",
-      withoutPH: 2000,
-      PHBenefit: 1500,
-      withPH: 500,
-      description: "Standard delivery room services"
-    },
-    { 
-      name: "Room Rate",
-      withoutPH: 1500,
-      PHBenefit: 1000,
-      withPH: 500,
-      description: "Hospital room accommodation"
-    },
-    { 
-      name: "Drugs, Meds & Supplies",
-      withoutPH: 1500,
-      PHBenefit: 1000,
-      withPH: 500,
-      description: "Essential medications and medical supplies"
-    },
-    { 
-      name: "Assist Fee",
-      withoutPH: 1000,
-      PHBenefit: 700,
-      withPH: 300,
-      description: "Medical assistance services"
-    },
-    { 
-      name: "Professional Fee",
-      withoutPH: 500,
-      PHBenefit: 300,
-      withPH: 200,
-      description: "Medical professional services"
-    }
-  ];
 
   const getFieldValidationClass = (fieldValue) => {
     return submitted && !fieldValue ? 'invalid-field' : '';
@@ -652,6 +495,25 @@ const AppointmentFillUp = () => {
 
     fetchAppointmentHistory();
   }, [auth.currentUser]);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const servicesRef = collection(firestore, 'services');
+        const snapshot = await getDocs(servicesRef);
+        const servicesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setServices(servicesData);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        toast.error('Failed to fetch services');
+      }
+    };
+
+    fetchServices();
+  }, [firestore]);
 
   const fetchAvailableTimes = async (date) => {
     try {

@@ -13,6 +13,7 @@ const Sidebar = ({ isAdmin }) => {
     { path: '/PatientsRecord', name: 'Patients Record', icon: <FaUserFriends /> },
     { path: '/PregnancyWheel', name: 'Pregnancy Wheel', icon: <FaCalendarAlt /> },
     { path: '/articles', name: 'Manage Articles', icon: <FaFile /> },
+    { path: '/ManagePackage', name: 'Pricing Management', icon: <FaUser /> },
     { path: '/AdminLogin', name: 'Log Out', icon: <FaUser /> },
   ];
 

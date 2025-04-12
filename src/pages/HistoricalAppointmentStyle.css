@@ -61,13 +61,16 @@
   height: 50px;
   border: 5px solid rgba(197, 87, 219, 0.2);
   border-radius: 50%;
-  border-top-color: rgb(197, 87, 219);
+  border-top: 5px solid rgb(197, 87, 219);
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  to {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
     transform: rotate(360deg);
   }
 }

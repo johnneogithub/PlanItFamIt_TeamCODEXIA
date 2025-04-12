@@ -12,47 +12,56 @@ const ProfileWarningModal = ({ show, onClose }) => {
 
   useEffect(() => {
     const checkProfileStatus = async () => {
-      if (!currentUser) return;
+      if (!currentUser || !currentUser.uid) {
+        console.error("No current user or user ID available");
+        return;
+      }
       
-      const userRef = doc(db, 'users', currentUser.uid);
-      
-      const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const data = docSnapshot.data();
-          
-          if (data.isProfileComplete === true) {
-            setIsProfileComplete(true);
-            onClose();
-            return;
-          }
-          
-          const profileComplete = Boolean(
-            data.firstName?.trim() && 
-            data.lastName?.trim() &&
-            data.phone?.trim() && 
-            data.age && 
-            data.gender?.trim() && 
-            data.location?.trim()
-          );
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        
+        const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
+          if (docSnapshot.exists()) {
+            const data = docSnapshot.data();
+            
+            if (data.isProfileComplete === true) {
+              setIsProfileComplete(true);
+              onClose();
+              return;
+            }
+            
+            const profileComplete = Boolean(
+              data.firstName?.trim() && 
+              data.lastName?.trim() &&
+              data.phone?.trim() && 
+              data.age && 
+              data.gender?.trim() && 
+              data.location?.trim()
+            );
 
-          setIsProfileComplete(profileComplete);
-          
-          if (profileComplete) {
-            updateDoc(userRef, {
-              isProfileComplete: true
-            }).catch(console.error);
-            onClose();
-          } else if (data.registrationDate && typeof data.registrationDate.toDate === 'function') {
-            const registrationDate = data.registrationDate.toDate();
-            const currentDate = new Date();
-            const diffTime = Math.abs(currentDate - registrationDate);
-            const diffDays = 14 - Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            setDaysLeft(Math.max(0, diffDays));
+            setIsProfileComplete(profileComplete);
+            
+            if (profileComplete) {
+              updateDoc(userRef, {
+                isProfileComplete: true
+              }).catch(error => {
+                console.error("Error updating profile completion status:", error);
+              });
+              onClose();
+            } else if (data.registrationDate && typeof data.registrationDate.toDate === 'function') {
+              const registrationDate = data.registrationDate.toDate();
+              const currentDate = new Date();
+              const diffTime = Math.abs(currentDate - registrationDate);
+              const diffDays = 14 - Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              setDaysLeft(Math.max(0, diffDays));
+            }
           }
-        }
-      });
+        });
 
-      return () => unsubscribe();
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error in checkProfileStatus:", error);
+      }
     };
 
     if (currentUser) {

@@ -64,6 +64,11 @@ export { auth, crud, storage, functions };
 export const checkUserProfileCompletion = async (userId) => {
   try {
     console.log("Checking profile completion for user:", userId);
+    if (!userId) {
+      console.error("No user ID provided");
+      return false;
+    }
+
     const userDocRef = doc(crud, "users", userId);
     const userDoc = await getDoc(userDocRef);
     
@@ -98,10 +103,8 @@ export const checkUserProfileCompletion = async (userId) => {
     const updateData = {
       isProfileComplete: Boolean(isComplete)
     };
-    console.log("Updating document with:", updateData);
 
     await updateDoc(userDocRef, updateData);
-
     return isComplete;
   } catch (error) {
     console.error("Error checking profile completion:", error);

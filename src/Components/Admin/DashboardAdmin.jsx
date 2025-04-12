@@ -15,8 +15,8 @@ import 'bootstrap/dist/js/bootstrap.js';
 import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-import UserProfilePopup from './AdminLogin/UserProfilePopup';
-
+// import UserProfilePopup from './AdminLogin/UserProfilePopup';
+import UserProfilePopup from './UserProfilePopup'
 
 const tableStyles = {
   card: {
@@ -541,7 +541,7 @@ const handleImport = (appointment) => {
 
         await updateAppointment(appointment, fileData);
         
-        alert('File uploaded successfully!');
+       toast.success('File uploaded successfully!');
       } catch (error) {
         console.error('Error uploading file:', error);
         alert(`Error: ${error.message}`);
@@ -1426,7 +1426,9 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                   animation: 'slideIn 0.3s ease-out'
                 }}>
                   <div className="ST-modal-header" style={{
-                    background: 'linear-gradient(45deg, #2dce89, #2dcecc)',
+                    display: 'flex',
+                    justifyContent:'space-between',
+                    background: 'linear-gradient(45deg, #2dce89,#d81b9a)',
                     color: 'white',
                     borderTopLeftRadius: '15px',
                     borderTopRightRadius: '15px',
@@ -1520,6 +1522,9 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                     )}
                   </div>
                   <div className="ST-modal-footer" style={{
+                    display: 'flex',
+                    justifyContent:'space-between',
+                    alignItems: 'center',
                     padding: '1rem 1.5rem',
                     borderTop: '1px solid rgba(0, 0, 0, 0.1)',
                     background: 'rgba(255, 255, 255, 0.95)'
@@ -1553,7 +1558,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                       className="ST-approve-btn btn" 
                       onClick={handleFinalApprove}
                       style={{
-                        background: 'linear-gradient(45deg, #2dce89, #2dcecc)',
+                        background: 'linear-gradient(45deg, #2dce89,#d81b9a)',
                         border: 'none',
                         padding: '0.5rem 1.5rem',
                         borderRadius: '25px',

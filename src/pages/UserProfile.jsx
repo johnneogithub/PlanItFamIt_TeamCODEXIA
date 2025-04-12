@@ -859,7 +859,7 @@ function UserProfile() {
                               onClick={handleEdit} 
                               style={{ 
                                 color: 'rgb(197, 87, 219)', 
-                                borderImage: 'linear-gradient(145deg, rgb(197, 87, 219), rgb(177, 77, 199))',
+                                // borderImage: 'linear-gradient(145deg, rgb(197, 87, 219), rgb(177, 77, 199))',
                                 borderImageSlice: 1,
                                 borderWidth: '1px',
                                 borderStyle: 'solid'
@@ -945,9 +945,9 @@ function UserProfile() {
                                   onChange={handleChange}
                                 >
                                   <option value="">Select gender</option>
-                                  <option value="male">Male</option>
-                                  <option value="female">Female</option>
-                                  <option value="other">Other</option>
+                                  <option value="Male">Male</option>
+                                  <option value="Female">Female</option>
+                                  <option value="Other">Other</option>
                                 </select>
                               </div>
                             </div>

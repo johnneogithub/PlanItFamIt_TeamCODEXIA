@@ -84,8 +84,9 @@
 }
 
 .nav-item.active .nav-link {
-  background: #4a90e2;
+  background: rgb(197, 87, 219);
   color: #fff;
+  padding: 12px 20px;
 }
 
 .menu-icon {

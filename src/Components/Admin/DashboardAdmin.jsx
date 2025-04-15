@@ -17,6 +17,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 // import UserProfilePopup from './AdminLogin/UserProfilePopup';
 import UserProfilePopup from './UserProfilePopup'
+import RegisteredUsersCount from './RegisteredUsersCount';
 
 const tableStyles = {
   card: {
@@ -94,7 +95,6 @@ function DashboardAdmin() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [currentApprovedPage, setCurrentApprovedPage] = useState(0);
   const [currentPendingPage, setCurrentPendingPage] = useState(0);
-  const [registeredUsersCount, setRegisteredUsersCount] = useState(0);
   const [appointmentCount, setAppointmentCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -142,25 +142,6 @@ function DashboardAdmin() {
         setError("Failed to load appointments");
       } finally {
         setLoading(false);
-      }
-
-      try {
-        const usersSnapshot = await getDocs(collection(firestore, 'users'));
-        const existingUsersCount = usersSnapshot.size;
-        
-        const userCountRef = doc(firestore, 'statistics', 'userCount');
-        const unsubscribe = onSnapshot(userCountRef, (doc) => {
-          if (doc.exists()) {
-            const totalCount = (doc.data().count || 0) + existingUsersCount;
-            setRegisteredUsersCount(totalCount);
-          } else {
-            setRegisteredUsersCount(existingUsersCount);
-          }
-        });
-
-        return () => unsubscribe();
-      } catch (error) {
-        console.error("Error fetching user count:", error);
       }
 
       const appointmentsRef = collection(firestore, 'pendingAppointments');
@@ -314,33 +295,36 @@ function DashboardAdmin() {
 
         if (appointmentData.userId) {
           const userRef = doc(firestore, 'users', appointmentData.userId);
-          
           const userDoc = await getDoc(userRef);
-          const userData = userDoc.exists() ? userDoc.data() : {};
           
-          const notification = {
-            type: 'rejection',
-            message: `Your appointment for ${appointmentData.date} at ${appointmentData.time} has been rejected. Reason: ${rejectRemark}`,
-            timestamp: new Date().toISOString(),
-            read: false,
-            notificationType: 'appointment_rejection',
-            appointmentId: pendingRejectId,
-            appointmentDetails: {
-              date: appointmentData.date,
-              time: appointmentData.time,
-              services: appointmentData.selectedServices,
-              status: 'rejected',
-              rejectionReason: rejectRemark
-            }
-          };
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const notification = {
+              type: 'rejection',
+              message: `Your appointment for ${appointmentData.date} at ${appointmentData.time} has been rejected. Reason: ${rejectRemark}`,
+              timestamp: new Date().toISOString(),
+              read: false,
+              notificationType: 'appointment_rejection',
+              appointmentId: pendingRejectId,
+              appointmentDetails: {
+                date: appointmentData.date,
+                time: appointmentData.time,
+                services: appointmentData.selectedServices,
+                status: 'rejected',
+                rejectionReason: rejectRemark
+              }
+            };
 
-          await updateDoc(userRef, {
-            appointmentData: updatedAppointmentData,
-            appointments: [...(userData.appointments || []), updatedAppointmentData],
-            appointmentHistory: [...(userData.appointmentHistory || []), updatedAppointmentData],
-            lastUpdated: new Date().toISOString(),
-            notifications: arrayUnion(notification)
-          });
+            await updateDoc(userRef, {
+              appointmentData: updatedAppointmentData,
+              appointments: [...(userData.appointments || []), updatedAppointmentData],
+              appointmentHistory: [...(userData.appointmentHistory || []), updatedAppointmentData],
+              lastUpdated: new Date().toISOString(),
+              notifications: arrayUnion(notification)
+            });
+          } else {
+            console.warn('User document not found:', appointmentData.userId);
+          }
         }
 
         await deleteDoc(pendingDocRef);
@@ -756,38 +740,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                 </div>
               </div>
             </div>
-            <div className="col-md-4 stretch-card grid-margin unique-card">
-              <div className="card" style={{
-                background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
-                borderRadius: '15px',
-                boxShadow: '0 4px 20px rgba(33, 203, 243, 0.3)',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 8px 25px rgba(33, 203, 243, 0.4)'
-                }
-              }}>
-                <div className="card-body" style={{ position: 'relative', zIndex: 1 }}>
-                  <img src={Circle} className="card-img-absolute" alt="circle-image" style={{
-                    position: 'absolute',
-                    right: '-20px',
-                    bottom: '-20px',
-                    opacity: 0.2,
-                    transform: 'rotate(180deg)'
-                  }} />
-                  <h4 className="font-weight-normal mb-3" style={{
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}>
-                    Registered Users
-                    <i className="bi bi-postcard-heart-fill" style={{ fontSize: '1.5rem' }}></i>
-                  </h4>
-                  <h2 className="mb-5" style={{ color: 'white', fontSize: '2.5rem' }}>{registeredUsersCount}</h2>
-                </div>
-              </div>
-            </div>
+            <RegisteredUsersCount />
             <div className="col-md-4 stretch-card grid-margin unique-card">
               <div className="card" style={{
                 background: 'linear-gradient(45deg, #2dce89, #2dcecc)',

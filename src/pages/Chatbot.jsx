@@ -3,7 +3,7 @@ import '../pages/ChatbotStyle.css';
 import { FaRobot, FaPaperPlane, FaUser, FaArrowLeft } from "react-icons/fa";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = "AIzaSyBuFKyNIr5d7AecVfupZbzrHoIoJRzp7vg"; // Add your Google API key here
+const API_KEY = "AIzaSyBPkjTSxe-zWtpwYeze0SNK0HMQZ60--Hg"; // Add your Google API key here
 const MODEL_NAME = "gemini-2.0-flash-exp";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: MODEL_NAME });

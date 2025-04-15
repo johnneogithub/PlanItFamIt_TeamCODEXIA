@@ -1,92 +1,28 @@
-import "../LoginForm/LoginFormStyle.css";
-import { FaFacebookF, FaEnvelope } from "react-icons/fa";
-import React, { useState, useEffect } from "react";
-import { useHistory, Link } from 'react-router-dom';
-import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
-import { useAuth } from '../../../AuthContext';
-import { checkUserProfileCompletion } from "../../../Config/firebase";
+import { 
+  FaFacebookF, 
+  FaEnvelope, 
+  FaEye, 
+  FaEyeSlash  
+} from "react-icons/fa";
+
+import { Link } from 'react-router-dom';
+
+import useLoginForm from "./Hooks/useLoginForm";
 import background1 from '../../Assets/landing_page_bkg1.png';
 import logo from '../../../Components/Assets/PlantItFamIt_Logo_v2.png';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
+
 import 'react-toastify/dist/ReactToastify.css';
+import "../LoginForm/LoginFormStyle.css";
 
 function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const history = useHistory();
-  const auth = getAuth();
-  const { loginAsUser } = useAuth();
-
-  useEffect(() => {
-    const storedEmail = localStorage.getItem("rememberedEmail");
-    if (storedEmail) {
-      setEmail(storedEmail);
-      setRememberMe(true);
-    }
-  }, []);
-
-  const SignIn = async (e) => {
-    e.preventDefault();
-  
-    signInWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-  
-        if (!user.emailVerified) {
-          toast.warning("Please verify your email before logging in", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false
-          });
-          return;
-        }
-  
-        loginAsUser(user);
-  
-        if (rememberMe) {
-          localStorage.setItem("rememberedEmail", email);
-        } else {
-          localStorage.removeItem("rememberedEmail");
-        }
-  
-        if (!user.uid) {
-          console.error("User ID is undefined after login.");
-          return;
-        }
-  
-        toast.success("Login successful! Redirecting...", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: true
-        });
-  
-        setTimeout(() => {
-          history.push("/home");
-        }, 2000);
-      })
-      .catch((error) => {
-        if (error.code === 'auth/user-not-found') {
-          toast.error("No account found. Please register or verify your email.", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false
-          });
-        } else if (error.code === 'auth/wrong-password') {
-          toast.error("Incorrect password. Please try again.", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false
-          });
-        } else {
-          toast.error(`Login failed: ${error.message}`, {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false
-          });
-        }
-      });
-  };
+  const {
+    email, setEmail,
+    password, setPassword,
+    rememberMe, setRememberMe,
+    showPassword, toggleShowPassword,
+    SignIn
+  } = useLoginForm();
   
   return (
     <div className="login-container">
@@ -123,17 +59,33 @@ function LoginForm() {
                   />
                 </div>
 
-                <div className="form-outline mb-3">
-                  <label className="form-label fw-semibold" htmlFor="form3Example4">Password</label>
+                <div className="form-outline mb-3 position-relative">
+                  <label className="form-label fw-semibold" htmlFor="form3Example4">
+                    Password
+                  </label>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     id="form3Example4"
                     className="form-control form-control-lg"
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                  <span
+                    onClick={toggleShowPassword}
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      right: "15px",
+                      transform: "translateY(15%)",
+                      cursor: "pointer",
+                      color: "#888"
+                    }}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
                 </div>
+
 
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div className="form-check mb-0">

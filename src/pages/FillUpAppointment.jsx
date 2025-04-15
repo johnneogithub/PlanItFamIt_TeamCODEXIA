@@ -40,7 +40,7 @@ const ServiceSelectionModal = ({ isOpen, onClose, services, selectedPricingType,
               setActiveTab('individual');
             }}
           >
-            Individual Services
+            Others
           </button >
          
           </div>

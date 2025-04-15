@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../../Config/firebase"; // Make sure the path is correct
+import { db } from "../../Config/firebase"; 
 import './RegisterUsersStyle.css';
+// import Sidebar from '../Global/Sidebar'
+import Sidebar from '../Global/Sidebar'
 import { FaTrash } from 'react-icons/fa';
 
 const RegisterUsers = () => {
@@ -46,7 +48,6 @@ const RegisterUsers = () => {
         const userRef = doc(db, "users", userId);
         await deleteDoc(userRef);
         
-        // Update the local state to remove the deleted user
         setUsers(users.filter(user => user.id !== userId));
         
         console.log(`User with ID ${userId} deleted successfully`);
@@ -59,6 +60,7 @@ const RegisterUsers = () => {
 
   return (
     <div className="USR-container">
+      <Sidebar  isAdmin={true} />
       <div className="USR-header">
         <h2>Registered Users</h2>
         <p>View and manage all registered users in the system</p>

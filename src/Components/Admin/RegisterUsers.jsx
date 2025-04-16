@@ -5,10 +5,13 @@ import './RegisterUsersStyle.css';
 // import Sidebar from '../Global/Sidebar'
 import Sidebar from '../Global/Sidebar'
 import { FaTrash } from 'react-icons/fa';
+import UserProfilePopup from './UserProfilePopup';
 
 const RegisterUsers = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerms, setSearchTerm] = useState('');
+  const [showPopup, setShowPopup] = useState(null);
 
   const fetchUsers = async () => {
     try {
@@ -58,18 +61,37 @@ const RegisterUsers = () => {
     }
   };
 
+  const filteredUsers = users.filter((user) =>
+    `${user.name} ${user.email} ${user.phone}`
+      .toLowerCase()
+      .includes(searchTerms.toLowerCase())
+  );
+  const handleClosePopup = () => {
+    setShowPopup(false); 
+  }
   return (
     <div className="USR-container">
       <Sidebar  isAdmin={true} />
+
       <div className="USR-header">
-        <h2>Registered Users</h2>
-        <p>View and manage all registered users in the system</p>
+        <h2>Registered Users {users.length}</h2>
+        <p>View all registered users in the system</p>
       </div>
 
+      <div className="USR-search">
+        <input
+        type="text"
+        placeholder="Search Name or Email" 
+        value={searchTerms}       
+        onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+      
       {isLoading ? (
         <div className="USR-no-data">Loading users...</div>
       ) : (
-        <table className="USR-table">
+        <table className="USR-table"
+        >
           <thead>
             <tr>
               <th>Name</th>
@@ -82,15 +104,22 @@ const RegisterUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {users.length === 0 ? (
+            {filteredUsers.length === 0 ? (
               <tr>
                 <td colSpan="7" className="USR-no-data">
                   No registered users found.
                 </td>
               </tr>
             ) : (
-              users.map((user) => (
-                <tr key={user.id}>
+              filteredUsers.map((user) => (
+                <tr key={user.id}      onClick={() => setShowPopup(user)} >
+                  {showPopup && (
+                    
+                    <UserProfilePopup
+                      user={showPopup}
+                      onClose={handleClosePopup}
+                    />
+                  ) }
                   <td>{user.name}</td>
                   <td>{user.location}</td>
                   <td>{user.phone}</td>
@@ -111,6 +140,12 @@ const RegisterUsers = () => {
             )}
           </tbody>
         </table>
+      )}
+      {showPopup &&(
+        <UserProfilePopup
+          user={showPopup}
+          onClose={handleClosePopup}
+        />
       )}
     </div>
   );

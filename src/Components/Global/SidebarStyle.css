@@ -7,7 +7,7 @@
   /* background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); */
   color: #000000;
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 5;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
   transform: translateX(-100%);
 }
@@ -84,7 +84,7 @@
 }
 
 .nav-item.active .nav-link {
-  background: rgb(197, 87, 219);
+  background: linear-gradient(45deg, #7F55B1, #F49BAB);
   color: #fff;
   padding: 12px 20px;
 }

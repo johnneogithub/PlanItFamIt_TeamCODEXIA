@@ -26,38 +26,38 @@ function ManagePackage() {
     PHBenefit: 0,
     withPH: 0
   });
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('packages');
 
   const defaultComponents = [
     {
       name: "Delivery Room",
-      withoutPH: 2000,
-      PHBenefit: 1500,
-      withPH: 500
+      withoutPH: 0,
+      PHBenefit: 0,
+      withPH: 0
     },
     {
       name: "Room Rate",
-      withoutPH: 1500,
-      PHBenefit: 1000,
-      withPH: 500
+      withoutPH: 0,
+      PHBenefit: 0,
+      withPH: 0
     },
     {
       name: "Drugs, Meds & Supplies",
-      withoutPH: 1500,
-      PHBenefit: 1000,
-      withPH: 500
+      withoutPH: 0,
+      PHBenefit: 0,
+      withPH:0
     },
     {
       name: "Assist Fee",
-      withoutPH: 1000,
-      PHBenefit: 700,
-      withPH: 300
+      withoutPH: 0,
+      PHBenefit: 0,
+      withPH: 0
     },
     {
       name: "Professional Fee",
-      withoutPH: 500,
-      PHBenefit: 300,
-      withPH: 200
+      withoutPH: 0,
+      PHBenefit: 0,
+      withPH: 0
     }
   ];
 
@@ -91,7 +91,7 @@ function ManagePackage() {
   const handleDelete = async (service) => {
     const isPackage = service.isPackage;
     const message = isPackage 
-      ? `Are you sure you want to delete the package "${service.name}" and all its components? This action cannot be undone.`
+      ? `Are you sure you want to delete the package "${service.name}"`
       : `Are you sure you want to delete the service "${service.name}"? This action cannot be undone.`;
 
     if (window.confirm(message)) {
@@ -204,12 +204,12 @@ function ManagePackage() {
     }));
   };
 
-  const filteredServices = services.filter(service => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'packages') return service.isPackage;
-    if (activeTab === 'services') return !service.isPackage;
-    return true;
-  });
+const filteredServices = services.filter(service => {
+  if (activeTab === 'packages') return service.isPackage;
+  if (activeTab === 'services') return !service.isPackage;
+  return false;
+});
+
 
   return (
     <div className="add-manage-package-container">
@@ -220,12 +220,6 @@ function ManagePackage() {
       </div>
 
       <div className="add-package-tabs">
-        <button 
-          className={`add-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveTab('all')}
-        >
-          All
-        </button>
         <button 
           className={`add-tab-btn ${activeTab === 'packages' ? 'active' : ''}`}
           onClick={() => setActiveTab('packages')}

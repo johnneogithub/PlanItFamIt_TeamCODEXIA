@@ -24,7 +24,7 @@ const tableStyles = {
     borderRadius: '15px',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
     marginBottom: '2rem',
-    background: 'rgba(255, 255, 255, 0.95)',
+    // background: 'rgba(255, 255, 255, 0.95)',
     backdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
@@ -34,7 +34,7 @@ const tableStyles = {
     }
   },
   cardHeader: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    // backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
     padding: '1.5rem',
     borderTopLeftRadius: '15px',
@@ -54,7 +54,7 @@ const tableStyles = {
     width: '100%'
   },
   tableHeader: {
-    backgroundColor: 'rgba(248, 249, 250, 0.8)',
+    // backgroundColor: 'rgba(248, 249, 250, 0.8)',
     color: '#344767',
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -64,13 +64,13 @@ const tableStyles = {
     backdropFilter: 'blur(10px)'
   },
   tableRow: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    // backgroundColor: 'rgba(255, 255, 255, 0.9)',
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
     transition: 'all 0.3s ease',
     '&:hover': {
       transform: 'translateY(-2px)',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-      backgroundColor: 'rgba(255, 255, 255, 1)'
+      // backgroundColor: 'rgba(255, 255, 255, 1)'
     }
   },
   actionButton: {
@@ -619,7 +619,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
 
   return (
     <div className="dashboard-container" style={{
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      // background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
       minHeight: '100vh',
       position: 'relative',
       overflow: 'hidden'
@@ -660,7 +660,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
           <div className="page-header" style={{
             marginBottom: '2rem',
             padding: '1.5rem',
-            background: 'rgba(255, 255, 255, 0.9)',
+            // background: 'rgba(255, 255, 255, 0.9)',
             borderRadius: '15px',
             boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
             backdropFilter: 'blur(10px)'
@@ -673,13 +673,13 @@ const paginatedPendingAppointments = pendingAppointments.slice(
               gap: '1rem'
             }}>
               <span className="page-title-icon" style={{
-                background: 'linear-gradient(45deg, rgb(99, 44, 110),rgb(177, 67, 199))',
+                background: 'linear-gradient(45deg, #7F55B1 ,#7F55B1 )',
                 padding: '0.5rem',
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(33, 203, 243, 0.3)'
+                boxShadow: '0 4px 10px #FFE1E0'
               }}>
                 <i className="bi bi-house-fill menu-icon" style={{ color: 'white' }}></i>
               </span>
@@ -710,13 +710,13 @@ const paginatedPendingAppointments = pendingAppointments.slice(
           <div className="row">
             <div className="col-md-4 stretch-card grid-margin unique-card">
               <div className="card" style={{
-                background: 'linear-gradient(45deg, #FF416C, #FF4B2B)',
+                background: 'linear-gradient(90deg, #F49BAB, #F49BAB)',
                 borderRadius: '15px',
-                boxShadow: '0 4px 20px rgba(255, 75, 43, 0.3)',
+                // boxShadow: '0 4px 20px rgba(133, 34, 179, 0.3)',
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-5px)',
-                  boxShadow: '0 8px 25px rgba(255, 75, 43, 0.4)'
+                  boxShadow: '0 4px 20px rgba(133, 34, 179, 0.3)'
                 }
               }}>
                 <div className="card-body" style={{ position: 'relative', zIndex: 1 }}>
@@ -743,13 +743,13 @@ const paginatedPendingAppointments = pendingAppointments.slice(
             <RegisteredUsersCount />
             <div className="col-md-4 stretch-card grid-margin unique-card">
               <div className="card" style={{
-                background: 'linear-gradient(45deg, #2dce89, #2dcecc)',
+                background: 'linear-gradient(45deg, #7F55B1, #7F55B1)',
                 borderRadius: '15px',
-                boxShadow: '0 4px 20px rgba(45, 206, 137, 0.3)',
+                // boxShadow: '0 4px 20px #FFE1E0',
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-5px)',
-                  boxShadow: '0 8px 25px rgba(45, 206, 137, 0.4)'
+                  boxShadow: '0 8px 25px #FFE1E0'
                 }
               }}>
                 <div className="card-body" style={{ position: 'relative', zIndex: 1 }}>
@@ -760,7 +760,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                     opacity: 0.2,
                     transform: 'rotate(180deg)'
                   }} />
-                  <h4 className="font-weight-normal mb-3" style={{
+                  <h4 className="font-weight-normal mt-2" style={{
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
@@ -821,7 +821,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                             <td 
                               className="appointment-name" 
                               onClick={(e) => handleAppointmentClick(e, appointment)}
-                              style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}}
+                              style={{cursor: 'pointer'}}
                             >
                               {appointment.name || 'N/A'}
                             </td>
@@ -964,7 +964,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                             <td 
                               className="appointment-name" 
                               onClick={(e) => handleAppointmentClick(e, appointment)}
-                              style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}}
+                              style={{cursor: 'pointer'}}
                             >
                               {appointment.name || 'N/A'}
                             </td>
@@ -1511,7 +1511,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                       className="ST-approve-btn btn" 
                       onClick={handleFinalApprove}
                       style={{
-                        background: 'linear-gradient(45deg, #2dce89,#d81b9a)',
+                        background: 'linear-gradient(45deg, #7F55B1,#9B7EBD)',
                         border: 'none',
                         padding: '0.5rem 1.5rem',
                         borderRadius: '25px',

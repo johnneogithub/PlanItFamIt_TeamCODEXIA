@@ -4,93 +4,22 @@ import Navbar from '../Components/Global/Navbar_Main';
 import { auth, storage, crud } from '../Config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt, FaEdit, FaCamera, FaUserCircle, FaFileDownload, FaHistory, FaCheckCircle, FaTimesCircle, FaCommentDots, FaClock, FaThLarge, FaList, FaFolder, FaComment, FaEye, FaImage, FaFile, FaSync } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt, FaEdit, FaCamera, FaUserCircle, FaFileDownload, FaHistory, FaCheckCircle, FaTimesCircle, FaCommentDots, FaClock, FaThLarge, FaList, FaFolder, FaComment, FaEye, FaImage, FaFile, FaSync, FaTimes } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './UserProfileStyle.css';
-import defaultProfilePic from '.././Components/Assets/icon_you.png';
+import './JRGUserProfileStyle.css';
+import defaultProfilePic from '../Components/Assets/icon_you.png';
 import { motion, AnimatePresence } from 'framer-motion';
+
+import { ProfilePicture, PersonalDetails } from "../Components/UserProfile/UserProfileComponents"
+import AppointmentStatus from '../Components/UserProfile/AppointmentStatus';
 
 const getStatusIcon = (status) => {
   switch(status) {
     case 'completed': return <FaCheckCircle color="#0066ff" />;
     case 'rejected': return <FaTimesCircle color="#dc3545" />;
-    case 'remarked': return <FaCommentDots color="#17a2b8" />;
+    case 'approved': return <FaCheckCircle color="#28a745" />;
     default: return <FaClock color="#ffc107" />;
   }
-};
-
-const ProfilePicture = ({ src, isLoading, isUploading, onFileChange }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleLocalFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      onFileChange(file);
-    }
-  };
-
-  return (
-    <motion.div 
-      className="profile-picture-container"
-      initial={false}
-      animate={{ scale: isHovered ? 1.02 : 1 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-    >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="profile-image-wrapper"
-      >
-        {isLoading ? (
-          <div className="profile-loading-skeleton">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        ) : (
-          <img
-            src={src}
-            alt="Profile"
-            className="profile-image"
-            onError={(e) => {
-              e.target.src = defaultProfilePic;
-              e.target.onerror = null;
-            }}
-          />
-        )}
-        
-        <motion.div 
-          className="profile-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <label htmlFor="profile-upload" className="upload-button">
-            {isUploading ? (
-              <div className="spinner-border spinner-border-sm text-light" role="status">
-                <span className="visually-hidden">Uploading...</span>
-              </div>
-            ) : (
-              <>
-                <FaCamera className="camera-icon" />
-                <span>Change Photo</span>
-              </>
-            )}
-          </label>
-        </motion.div>
-      </motion.div>
-      
-      <input
-        type="file"
-        id="profile-upload"
-        accept="image/*"
-        onChange={handleLocalFileChange}
-        style={{ display: 'none' }}
-      />
-    </motion.div>
-  );
 };
 
 const useLocalStorage = (key, initialValue) => {
@@ -159,10 +88,8 @@ function UserProfile() {
   const FETCH_COOLDOWN = 5 * 60 * 1000; // 5 minutes in milliseconds
   const [lastViewedRemark, setLastViewedRemark] = useState('');
   const [lastViewedStatus, setLastViewedStatus] = useState('');
-
-
-
-
+  const [showRemarkModal, setShowRemarkModal] = useState(false);
+  const [selectedRemark, setSelectedRemark] = useState('');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -259,7 +186,6 @@ function UserProfile() {
       const data = docSnapshot.data();
       if (data) {
         try {
-          // Handle appointments array
           const appointments = Array.isArray(data.appointments) ? data.appointments : [];
           const latestAppointment = appointments[appointments.length - 1];
           
@@ -281,7 +207,6 @@ function UserProfile() {
             setMessage(String(latestAppointment.message || ''));
           }
 
-          // Process all appointments
           let allAppointments = [];
           if (appointments.length > 0) {
             allAppointments = appointments.map(appointment => ({
@@ -301,7 +226,6 @@ function UserProfile() {
             }));
           }
 
-          // Add appointment history with proper string conversion
           if (Array.isArray(data.appointmentHistory)) {
             const historyAppointments = data.appointmentHistory.map(hist => ({
               id: String(hist.id || ''),
@@ -321,7 +245,6 @@ function UserProfile() {
             allAppointments = [...allAppointments, ...historyAppointments];
           }
 
-          // Sort appointments
           const sortedAppointments = allAppointments.sort((a, b) => {
             if (a.status === 'completed' && b.status !== 'completed') return -1;
             if (b.status === 'completed' && a.status !== 'completed') return 1;
@@ -388,10 +311,6 @@ function UserProfile() {
     }
   };
   
-  
-  
-  
-
   const handleFileChange = async (file) => {
     if (!file) {
       console.error("No file selected");
@@ -419,10 +338,7 @@ function UserProfile() {
     const fileRef = ref(storage, `profile_pictures/${user.uid}/${file.name}`);
     try {
       await uploadBytes(fileRef, file);
-      console.log("File uploaded successfully");
-  
       const downloadURL = await getDownloadURL(fileRef);
-      console.log("Download URL:", downloadURL);
       await updateProfilePicture(downloadURL);
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -458,7 +374,6 @@ function UserProfile() {
     }
   };
   
-
   const fetchProfilePicture = async (userId) => {
     if (!userId) return;
 
@@ -546,7 +461,6 @@ function UserProfile() {
         setIsLoadingDetails(false);
       }
     } else {
-      // Use cached data
       setPersonalDetails(localPersonalDetails);
       setIsLoadingDetails(false);
     }
@@ -674,22 +588,6 @@ function UserProfile() {
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      const userRef = doc(crud, 'users', user.uid);
-      const unsubscribe = onSnapshot(userRef, (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          if (data.profilePicture) {
-            setProfilePic(data.profilePicture);
-          }
-        }
-      });
-
-      return () => unsubscribe();
-    }
-  }, [user]);
-
   const handleRemarkClick = () => {
     if (user && remark) {
       localStorage.setItem(`lastViewedRemark_${user.uid}`, remark);
@@ -706,454 +604,88 @@ function UserProfile() {
     }
   };
 
+  const handleViewRemark = (remark) => {
+    if (remark) {
+      setSelectedRemark(remark);
+      setShowRemarkModal(true);
+    }
+  };
+
   return (
-    <div className="user-profile-page">
+    <div className="jrg-user-profile-page">
       <Navbar />
-      <div className="container my-5">
+      <div className="container-fluid my-5">
         <div className="row">
           <div className="col-lg-4">
-            <div className="card profile-card shadow">
-              <div className="card-body text-center">
-            
-                <ProfilePicture
-                  src={profilePic}
-                  isLoading={isLoadingProfile}
-                  isUploading={isUploading}
-                  onFileChange={handleFileChange}
-                />
-                <h3 className="mt-3 mb-2">{personalDetails.name || 'User'}</h3>
-                <p className="text-muted">{personalDetails.email}</p>
-              </div>
-            </div>
-            
-            <div className="card mt-4 remark-card shadow">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h4 className="card-title m-0">Appointment Remark</h4>
-                </div>
-                {remark ? (
-                  <div>
-                    <p>{remark}</p>
-                    {remarkTimestamp && (
-                      <small className="text-muted">
-                        Added on: {new Date(remarkTimestamp).toLocaleString()}
-                      </small>
-                    )}
-                  </div>
-                ) : (
-                  <p>No remark available</p>
-                )}
-              </div>
-            </div>
-            
-            <div className="card mt-4 history-card shadow">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h4 className="card-title m-0">Appointment History</h4>
-                  <div className="d-flex align-items-center">
-                    <Link 
-                      to={`/AppointmentHistory/${user?.uid}`}
-                      className="btn-user btn-view-all"
-                      state={{ 
-                        appointments: appointmentHistory.map(appointment => ({
-                          id: appointment.id || '',
-                          name: appointment.name || '',
-                          date: appointment.date || '',
-                          time: appointment.time || '',
-                          status: appointment.status || 'pending',
-                          message: appointment.message || '',
-                          remark: appointment.remark || '',
-                          selectedPricingType: appointment.selectedPricingType || '',
-                          selectedServices: Array.isArray(appointment.selectedServices) ? appointment.selectedServices : [],
-                          totalAmount: typeof appointment.totalAmount === 'number' ? appointment.totalAmount : 0,
-                          completedAt: appointment.completedAt || null,
-                          isCurrent: !!appointment.isCurrent
-                        })),
-                        userInfo: {
-                          name: personalDetails.name || '',
-                          email: personalDetails.email || '',
-                          profilePic: profilePic || defaultProfilePic,
-                          userId: user?.uid || ''
-                        }
-                      }}
-                    >
-                      <FaThLarge className="me-2" />
-                      <span>View All</span>
-                    </Link>
-                  </div>
-                </div>
-                
-                {appointmentHistory.length > 0 ? (
-                  <div className="appointment-history-list">
-                    {appointmentHistory.filter(appointment => appointment.status !== 'pending').slice(0, 1).map((appointment, index) => {
-                      const appointmentDate = appointment.completedAt ? new Date(appointment.completedAt) : new Date();
-                      const formattedDate = appointmentDate.toLocaleDateString();
-                      const formattedTime = appointmentDate.toLocaleTimeString();
-
-                      return (
-                        <div 
-                          key={index} 
-                          className={`appointment-history-item mb-3 p-3 border rounded ${appointment.isCurrent ? 'current-appointment' : ''}`}
-                        >
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                              <span className="fw-bold">{appointment.appointmentType || 'General Appointment'}</span>
-                              {appointment.isCurrent && (
-                                <span className="badge bg-info ms-2">Current</span>
-                              )}
-                            </div>
-                            <span className={`badge ${getStatusBadgeClass(appointment.status)}`}>
-                              {capitalizeFirstLetter(appointment.status || 'pending')}
-                            </span>
-                          </div>
-                          <div className="text-muted small">
-                            <div><strong>Date:</strong> {appointment.date || 'N/A'}</div>
-                            <div><strong>Time:</strong> {appointment.time || 'N/A'}</div>
-                            {appointment.message && (
-                              <div><strong>Message:</strong> {appointment.message}</div>
-                            )}
-                            {appointment.remark && (
-                              <div className="mt-2">
-                                <strong>Remark:</strong> {appointment.remark}
-                              </div>
-                            )}
-                            <div className="mt-1 text-end">
-                              <small className="text-muted">
-                                {appointment.isCurrent ? 'Current Appointment' : 
-                                  `Updated: ${formattedDate} at ${formattedTime}`
-                                }
-                              </small>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center text-muted">
-                    <p>No appointment history available</p>
-                  </div>
-                )}
-              </div>
+            <div className="sticky-sidebar">
+              {/* Remove this duplicate profile card */}
+              
+              <PersonalDetails
+                personalDetails={personalDetails}
+                isEditing={isEditing}
+                editedDetails={editedDetails}
+                handleEdit={handleEdit}
+                handleChange={handleChange}
+                handleSave={handleSave}
+                handleCancel={handleCancel}
+                profilePic={profilePic}
+                isLoadingProfile={isLoadingProfile}
+                isUploading={isUploading}
+                onFileChange={handleFileChange}
+                email={user?.email}
+              />
             </div>
           </div>
           <div className="col-lg-8">
-            <div className="card details-card shadow">
-              <div className="card-body">
-                {isLoadingDetails ? (
-                  <div className="text-center p-4">
-                    <div className="spinner-border" role="status">
-                      <span className="visually-hidden">Loading details...</span>
-                    </div>
-                    <p className="mt-2">Loading personal details...</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h4 className="card-title m-0">Personal Details</h4>
-                      <div>
-                        {!isEditing && (
-                          <>
-                            <button 
-                              className="btn-user btn-outline-primary btn-sm" 
-                              onClick={handleEdit} 
-                              style={{ 
-                                color: 'rgb(197, 87, 219)', 
-                                // borderImage: 'linear-gradient(145deg, rgb(197, 87, 219), rgb(177, 77, 199))',
-                                borderImageSlice: 1,
-                                borderWidth: '1px',
-                                borderStyle: 'solid'
-                              }}
-                            >
-                              <FaEdit /> Edit
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="row">
-                      {isEditing ? (
-                        <>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile">
-                              <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Name</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.name || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile">
-                              <FaEnvelope className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Email</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.email || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile">
-                              <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Location</h6>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  name="location"
-                                  value={editedDetails.location || ''}
-                                  onChange={handleChange}
-                                  placeholder="Enter location"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile">
-                              <FaPhone className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Phone</h6>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  name="phone"
-                                  value={editedDetails.phone || ''}
-                                  onChange={handleChange}
-                                  placeholder="Enter phone number"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile">
-                              <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Age</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile">
-                              <FaVenusMars className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Gender</h6>
-                                <select
-                                  className="form-control"
-                                  name="gender"
-                                  value={editedDetails.gender || ''}
-                                  onChange={handleChange}
-                                >
-                                  <option value="">Select gender</option>
-                                  <option value="Male">Male</option>
-                                  <option value="Female">Female</option>
-                                  <option value="Other">Other</option>
-                                </select>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile d-flex align-items-center">
-                              <FaUser className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Name</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.name || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile d-flex align-items-center">
-                              <FaEnvelope className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Email</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.email || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile d-flex align-items-center">
-                              <FaMapMarkerAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Location</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.location || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile d-flex align-items-center">
-                              <FaPhone className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Phone</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.phone || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile d-flex align-items-center">
-                              <FaCalendarAlt className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Age</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 mb-3">
-                            <div className="detail-item-profile d-flex align-items-center">
-                              <FaVenusMars className="detail-icon" style={{ color: 'rgb(197, 87, 219)' }} />
-                              <div className="ms-3">
-                                <h6 className="mb-0 text-muted">Gender</h6>
-                                <p className="mb-0 fw-bold">{personalDetails.gender || 'Not provided'}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    {isEditing && (
-                      <div className="mt-3 d-flex">
-                        <button className="btn-user btn-primary me-2" onClick={handleSave}>Save</button>
-                        <button className="btn-user btn-secondary" onClick={handleCancel}>Cancel</button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-            
-            <div className="card mt-4 appointment-card shadow">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h4 className="card-title">Appointment Status</h4>
-                </div>
-                <div className="table-responsive">
-                  <table className="table table-hover">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Pricing Type</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {appointmentData ? (
-                        <tr>
-                          <td>{appointmentData.name || 'N/A'}</td>
-                          <td>{appointmentData.date || 'N/A'}</td>
-                          <td>{appointmentData.time || 'N/A'}</td>
-                          <td>{formatPricingType(appointmentData.selectedPricingType) || 'N/A'}</td>
-                          <td>
-                            <span className={`badge ${getStatusBadgeClass(appointmentData.status)}`}>
-                              {capitalizeFirstLetter(appointmentData.status || 'pending')}
-                            </span>
-                          </td>
-                        </tr>
-                      ) : (
-                        <tr>
-                          <td colSpan="5" className="text-center">No appointment data available</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                
-                {appointmentData?.selectedServices && appointmentData.selectedServices.length > 0 && (
-                  <div className="mt-4">
-                    <h5>Selected Services</h5>
-                    <div className="selected-services-list">
-                      {appointmentData.selectedServices.map((service, index) => (
-                        <div key={index} className="service-item-user p-3 border rounded mb-2">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <h6 className="mb-0">{service.name || 'Unnamed Service'}</h6>
-                            <span className="badge bg-primary">
-                              ₱{(service[appointmentData.selectedPricingType] || 0).toLocaleString()}
-                            </span>
-                          </div>
-                          {service.isPackage && service.components && (
-                            <div className="mt-2">
-                              <small className="text-muted">Package Components:</small>
-                              <ul className="list-unstyled ms-3">
-                                {service.components.map((component, idx) => (
-                                  <li key={idx} className="d-flex justify-content-between">
-                                    <span>{component.name || 'Unnamed Component'}</span>
-                                    <span>₱{(component[appointmentData.selectedPricingType] || 0).toLocaleString()}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      <div className="total-amount p-2 bg-light rounded">
-                        <strong>Total Amount: </strong>
-                        <span>₱{calculateTotal(appointmentData.selectedServices, appointmentData.selectedPricingType)}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {message && (
-                  <div className="mt-3">
-                    <h5>Additional Message:</h5>
-                    <p>{message}</p>
-                  </div>
-                )}
+            <div className="row">
+              <div className="col-lg-12">
+                <AppointmentStatus 
+                  appointmentData={appointmentData}
+                  remark={remark}
+                  remarkTimestamp={remarkTimestamp}
+                  showRemark={showRemark}
+                  onRemarkClick={handleRemarkClick}
+                  user={user}
+                  personalDetails={personalDetails}
+                  profilePic={profilePic}
+                  appointmentHistory={appointmentHistory}
+                  onViewRemark={handleViewRemark}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Global Remark Modal */}
+      {showRemarkModal && (
+        <div className="jrg-modal-overlay" onClick={() => setShowRemarkModal(false)}>
+          <div className="jrg-modal" onClick={e => e.stopPropagation()}>
+            <div className="jrg-modal-header">
+              <h3>Appointment Remark</h3>
+              <button 
+                className="jrg-modal-close"
+                onClick={() => setShowRemarkModal(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="jrg-modal-body">
+              <p>{selectedRemark}</p>
+            </div>
+            <div className="jrg-modal-footer">
+              <button 
+                className="jrg-btn-primary"
+                onClick={() => setShowRemarkModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function getIcon(key) {
-  const iconStyle = { 
-    color: 'rgb(197, 87, 219)',
-    background: 'linear-gradient(145deg, rgb(197, 87, 219), rgb(177, 77, 199))',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
-  };
-  switch (key) {
-    case 'name': return <FaUser className="detail-icon" style={iconStyle} />;
-    case 'email': return <FaEnvelope className="detail-icon" style={iconStyle} />;
-    case 'age': return <FaCalendarAlt className="detail-icon" style={iconStyle} />;
-    case 'gender': return <FaVenusMars className="detail-icon" style={iconStyle} />;
-    case 'phone': return <FaPhone className="detail-icon" style={iconStyle} />;
-    case 'location': return <FaMapMarkerAlt className="detail-icon" style={iconStyle} />;
-    default: return null;
-  }
-}
-
-function getStatusBadgeClass(status) {
-  switch (status) {
-    case 'completed': return 'bg-blue';
-    case 'rejected': return 'bg-danger';
-    case 'remarked': return 'bg-info';
-    default: return 'bg-warning';
-  }
-}
-
-function formatPricingType(type) {
-  switch (type) {
-    case 'withoutPH':
-      return 'Without PhilHealth';
-    case 'PHBenefit':
-      return 'PhilHealth Benefit';
-    case 'withPH':
-      return 'With PhilHealth';
-    default:
-      return type;
-  }
-}
-
-function calculateTotal(services, pricingType) {
-  if (!services || !pricingType) return 0;
-  return services.reduce((total, service) => total + (service[pricingType] || 0), 0).toLocaleString();
 }
 
 export default UserProfile;

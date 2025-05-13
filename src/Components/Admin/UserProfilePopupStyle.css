@@ -12,9 +12,31 @@
   overflow-y: auto;
   padding: 20px;
 }
-.close-popup{
-  z-index: 5;
+.close-popup {
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #555;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+  z-index: 10;
 }
+
+.close-popup:hover {
+  color: #e74c3c; /* red tone for warning/close */
+  transform: scale(1.2);
+}
+
+.close-popup:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #e74c3c55;
+  border-radius: 50%;
+}
+
 
 .popup-content {
   background-color: white;

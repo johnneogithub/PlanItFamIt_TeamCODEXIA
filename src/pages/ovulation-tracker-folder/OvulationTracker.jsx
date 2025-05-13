@@ -71,12 +71,12 @@ const OvulationTracker = ({ height, weight }) => {
         </div>
 
         <div className="ot-container">
-          <h1 className="ot-main-title">Know your next Ovulation Day!</h1>
-          <p className="ot-subtitle">Be protected and secured, let us track your next ovulation date.</p>
+          <h1 className="ot-main-title">Know your Ovulation Phase!</h1>
+          <p className="ot-subtitle">Ensure your health and safety by accurately tracking your ovulation phase.</p>
 
           <div className="ot-tracker-grid">
             <div className="ot-date-card">
-              <h2>Your next ovulation date</h2>
+              <h2>Ovulation Date</h2>
               <div className={`ot-date-circle ${results?.peakOvulationDay ? 'animate' : ''}`}>
                 <div className="ot-date-content">
                   {results?.peakOvulationDay ? (
@@ -226,7 +226,7 @@ const OvulationTracker = ({ height, weight }) => {
 
             <button className="ot-predict-button" onClick={() => predictOvulation()}>
               <img src={btnpre} alt="Predict Icon" className="icon" />
-              <span>Predict my next ovulation</span>
+              <span>Predict Ovulation</span>
             </button>
           </div>
         </div>

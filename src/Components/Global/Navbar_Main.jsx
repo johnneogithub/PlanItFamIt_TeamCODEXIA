@@ -221,23 +221,23 @@ function Nav({ isAdmin = false }) {
 
         <ul className={menuOpen ? 'open' : ''}>
           <li>
-            <Link to="/OvulationTracker" className="OvulationTracker">
-              <a className="active">Ovulation Tracker</a>
+            <Link to="/OvulationTracker" className="OvulationTracker active">
+              Ovulation Tracker
             </Link>
           </li>
           <li>
             <Link to="/StMargaretLyingInClinic" className="st-mar-style-font">
-              <a>St. Margaret Lying In Clinic</a>
+              St. Margaret Lying In Clinic
             </Link>
           </li>
           <li>
             <Link to="/PregnancyCalculator" className="pregnancy-calculator-style-font">
-              <a>Pregnancy Calculator</a>
+              Pregnancy Calculator
             </Link>
           </li>
           <li>
             <Link to="/Aboutus" className="aboutus-style-font">
-              <a>About Us</a>
+              About Us
             </Link>
           </li>
  

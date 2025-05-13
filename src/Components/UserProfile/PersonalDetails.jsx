@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
+import './JRGUserProfileStyle.css';
 
 const PersonalDetails = ({ 
   personalDetails, 
@@ -21,7 +22,7 @@ const PersonalDetails = ({
                 className="jrg-btn-outline-primary btn-sm" 
                 onClick={handleEdit}
               >
-                <FaEdit className="me-2" /> Edit Profile
+                <FaEdit className="me-2" /> Edit
               </button>
             )}
           </div>
@@ -30,7 +31,7 @@ const PersonalDetails = ({
           {isEditing ? (
             <>
               <div className="col-md-6">
-                <DetailItem icon={<FaUser />} label="Name" value={personalDetails.name} />
+                <DetailItem  icon={<FaUser/>} label="Name" value={personalDetails.name} />
               </div>
               <div className="col-md-6">
                 <DetailItem icon={<FaEnvelope />} label="Email" value={personalDetails.email} />

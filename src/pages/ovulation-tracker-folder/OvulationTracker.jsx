@@ -76,7 +76,7 @@ const OvulationTracker = ({ height, weight }) => {
 
           <div className="ot-tracker-grid">
             <div className="ot-date-card">
-              <h2>Your next ovulation date</h2>
+              <h2>Ovulation Date</h2>
               <div className={`ot-date-circle ${results?.peakOvulationDay ? 'animate' : ''}`}>
                 <div className="ot-date-content">
                   {results?.peakOvulationDay ? (
@@ -226,7 +226,7 @@ const OvulationTracker = ({ height, weight }) => {
 
             <button className="ot-predict-button" onClick={() => predictOvulation()}>
               <img src={btnpre} alt="Predict Icon" className="icon" />
-              <span>Predict my next ovulation</span>
+              <span>Predict Ovulation</span>
             </button>
           </div>
         </div>

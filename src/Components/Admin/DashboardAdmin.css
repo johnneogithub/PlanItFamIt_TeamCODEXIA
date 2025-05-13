@@ -1,6 +1,6 @@
 .dashboard-container {
   display: flex;
-  background-color: #f4f7fa;
+  /* background-color: #f4f7fa; */
   min-height: 100vh;
   font-family: 'Roboto', sans-serif;
 }
@@ -21,7 +21,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
-  background-color: #ffffff;
+  /* background-color: #ffffff; */
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -76,15 +76,15 @@
 }
 
 .bg-gradient-danger {
-  background: linear-gradient(45deg, #ff5e62, #ff9966);
+  background: linear-gradient(45deg, #7F55B1, #7F55B1);
 }
 
 .bg-gradient-info {
-  background: linear-gradient(45deg, #4e54c8, #8f94fb);
+  background: linear-gradient(45deg, #7F55B1, #7F55B1);
 }
 
 .bg-gradient-success {
-  background: linear-gradient(45deg, #2ecc71, #1abc9c);
+  background: linear-gradient(45deg, #7F55B1, #7F55B1);
 }
 
 .card-body {

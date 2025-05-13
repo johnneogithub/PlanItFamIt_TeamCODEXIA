@@ -22,8 +22,8 @@ export const ProfilePicture = ({ src, isLoading, isUploading, onFileChange }) =>
       onHoverEnd={() => setIsHovered(false)}
       style={{
         position: 'relative',
-        width: '150px',
-        height: '150px',
+        width: '125px',
+        height: '125px',
         margin: '0 auto',
         borderRadius: '50%',
         overflow: 'hidden',
@@ -154,7 +154,7 @@ export const PersonalDetails = ({
                 className="jrg-btn-outline-primary btn-sm" 
                 onClick={handleEdit}
               >
-                <FaEdit className="me-2" /> Edit Profile
+                <FaEdit className="me-2" /> Edit
               </button>
             )}
           </div>

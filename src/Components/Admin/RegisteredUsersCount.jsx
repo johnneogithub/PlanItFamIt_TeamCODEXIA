@@ -28,13 +28,13 @@ const RegisteredUsersCount = () => {
   return (
     <div className="col-md-4 stretch-card grid-margin unique-card">
       <div className="card" style={{
-        background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
+        background: 'linear-gradient(75deg,  #7F55B1, #F49BAB)',
         borderRadius: '15px',
-        boxShadow: '0 4px 20px rgba(33, 203, 243, 0.3)',
+        // boxShadow: '0 4px 20px #F49BAB',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         '&:hover': {
           transform: 'translateY(-5px)',
-          boxShadow: '0 8px 25px rgba(33, 203, 243, 0.4)'
+          boxShadow: '0 8px 25px #F49BAB'
         }
       }}>
         <div className="card-body" style={{ position: 'relative', zIndex: 1 }}>

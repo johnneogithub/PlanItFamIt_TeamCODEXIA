@@ -367,7 +367,7 @@
   transform: scale(1.1);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
-
+/* 
 .jrg-spinner {
   display: flex;
   justify-content: center;
@@ -377,7 +377,7 @@
   border: 3px solid rgba(197, 87, 219, 0.2);
   border-top: 3px solid rgb(197, 87, 219);
   border-radius: 50%;
-}
+} */
 
 .jrg-service-item {
   background: rgba(248, 249, 250, 0.8);

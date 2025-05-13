@@ -7,6 +7,7 @@ import ProfileWarningModal from '../Components/Global/ProfileWarningModal';
 import React, { useEffect, useState } from 'react';
 import { checkUserProfileCompletion } from '../Config/firebase';
 import { getAuth } from "firebase/auth"; 
+import planitLogo from '../Components/Assets/PlanItFamItLogo_180x180px.png';
 
 function Home() {
   const [showModal, setShowModal] = useState(false);
@@ -44,7 +45,14 @@ function Home() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>; 
+    return (
+      <div className="custom-loading-container">
+        <div className="custom-loading-spinner">
+          <img src={planitLogo} alt="PlanItFamIt Logo" className="custom-loading-logo" />
+          <div className="custom-loading-border"></div>
+        </div>
+      </div>
+    );
   }
 
   return (

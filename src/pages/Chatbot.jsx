@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../pages/ChatbotStyle.css';
-import { FaRobot, FaPaperPlane, FaUser, FaArrowLeft } from "react-icons/fa";
+import { FaPaperPlane,  FaArrowLeft } from "react-icons/fa";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import planItFamItLogo from "../Components/Assets/PlanItFamItLogo_180x180px.png"
 
 const API_KEY = "AIzaSyBPkjTSxe-zWtpwYeze0SNK0HMQZ60--Hg"; // Add your Google API key here
 const MODEL_NAME = "gemini-2.0-flash-exp";
@@ -112,7 +113,9 @@ const Chatbot = () => {
                 </div>
               ) : (
                 <div className="message-content assistant-message">
-                  <span className="bot-icon"><FaRobot /></span>
+                  <span className="bot-icon">
+                    <img src={planItFamItLogo} alt="PlanItFamIt Logo" style={{ width: 45, height: 45, borderRadius: '50%' }} />
+                  </span>
                   <p>
                     {chat.message.split(/(\*\*.*?\*\*)/).map((part, i) => 
                       part.startsWith('**') && part.endsWith('**') ? 

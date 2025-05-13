@@ -653,7 +653,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
         zIndex: 1
       }}>
         <div className="content-wrapper" style={{
-          padding: '2rem',
+          // padding: '2rem',
           maxWidth: '1600px',
           margin: '0 auto'
         }}>
@@ -1024,7 +1024,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                                   className='btn btn-sm me-2'
                                   style={{
                                     ...tableStyles.actionButton,
-                                    backgroundColor: '#2dce89',
+                                    backgroundColor: '#1a9e6a',
                                     color: 'white',
                                     border: 'none'
                                   }}
@@ -1036,7 +1036,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                                   className='btn btn-sm'
                                   style={{
                                     ...tableStyles.actionButton,
-                                    backgroundColor: '#dc3545',
+                                    backgroundColor: '#a71d2a',
                                     color: 'white',
                                     border: 'none'
                                   }}
@@ -1381,7 +1381,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                   <div className="ST-modal-header" style={{
                     display: 'flex',
                     justifyContent:'space-between',
-                    background: 'linear-gradient(45deg, #2dce89,#d81b9a)',
+                    background: 'linear-gradient(45deg,rgb(64, 147, 114),rgb(49, 151, 107))',
                     color: 'white',
                     borderTopLeftRadius: '15px',
                     borderTopRightRadius: '15px',
@@ -1391,9 +1391,11 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.5rem',
-                      margin: 0
+                      margin: 0,
+                      fontSize: '1.25rem',
+                      fontWeight: '600'
                     }}>
-                      <i className="bi bi-check-circle-fill"></i>
+                      <i className="bi"></i>
                       Approve Appointment
                     </h5>
                     <button 
@@ -1511,7 +1513,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                       className="ST-approve-btn btn" 
                       onClick={handleFinalApprove}
                       style={{
-                        background: 'linear-gradient(45deg, #7F55B1,#9B7EBD)',
+                        background: 'linear-gradient(45deg,rgb(40, 160, 112),rgb(57, 179, 126))',
                         border: 'none',
                         padding: '0.5rem 1.5rem',
                         borderRadius: '25px',
@@ -1519,7 +1521,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                         transition: 'all 0.3s ease',
                         '&:hover': {
                           transform: 'translateY(-2px)',
-                          boxShadow: '0 4px 8px rgba(45, 206, 137, 0.3)'
+                          boxShadow: '0 4px 8px rgba(26, 158, 106, 0.3)'
                         }
                       }}
                     >

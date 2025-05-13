@@ -71,8 +71,8 @@ const OvulationTracker = ({ height, weight }) => {
         </div>
 
         <div className="ot-container">
-          <h1 className="ot-main-title">Know your next Ovulation Day!</h1>
-          <p className="ot-subtitle">Be protected and secured, let us track your next ovulation date.</p>
+          <h1 className="ot-main-title">Know your Ovulation Phase!</h1>
+          <p className="ot-subtitle">Ensure your health and safety by accurately tracking your ovulation phase.</p>
 
           <div className="ot-tracker-grid">
             <div className="ot-date-card">

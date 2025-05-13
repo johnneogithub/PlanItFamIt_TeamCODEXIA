@@ -6,6 +6,7 @@ import {
 } from "react-icons/fa";
 
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 import useLoginForm from "./Hooks/useLoginForm";
 import background1 from '../../Assets/landing_page_bkg1.png';
@@ -16,6 +17,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import "../LoginForm/LoginFormStyle.css";
 
 function LoginForm() {
+  const [showModal, setShowModal] = useState(false);
   const {
     email, setEmail,
     password, setPassword,
@@ -24,9 +26,75 @@ function LoginForm() {
     SignIn
   } = useLoginForm();
   
+  const handleRegisterClick = (e) => {
+    e.preventDefault();
+    setShowModal(true);
+  };
+
   return (
     <div className="login-container">
       <ToastContainer />
+      {/* Modal */}
+      {showModal && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            backgroundColor: 'white',
+            padding: '2rem',
+            borderRadius: '10px',
+            maxWidth: '500px',
+            width: '90%',
+            textAlign: 'center',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ color: '#8e44ad', marginBottom: '1rem' }}>Important Notice</h3>
+            <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
+              This application is exclusively designed for female users. We appreciate your interest, but we want to ensure you're aware of this requirement before proceeding with registration.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+              <button
+                onClick={() => setShowModal(false)}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  borderRadius: '20px',
+                  border: '1px solid #8e44ad',
+                  backgroundColor: 'white',
+                  color: '#8e44ad',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Close
+              </button>
+              <Link
+                to="/Register"
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  borderRadius: '20px',
+                  border: 'none',
+                  backgroundColor: '#8e44ad',
+                  color: 'white',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Continue to Register
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
       <section className="login-content">
         <div className="container-fluid h-custom">
           <div className="row d-flex justify-content-center align-items-center h-100">
@@ -115,7 +183,7 @@ function LoginForm() {
                     Login
                   </button>
                   <p className="fw-bold mt-3 mb-0">
-                    Don't have an account? <Link to="/Register" className="link-danger" style={{ color: '#8e44ad' }}>Register</Link>
+                    Don't have an account? <a href="#" onClick={handleRegisterClick} className="link-danger" style={{ color: '#8e44ad' }}>Register</a>
                   </p>
                 </div>
               </form>

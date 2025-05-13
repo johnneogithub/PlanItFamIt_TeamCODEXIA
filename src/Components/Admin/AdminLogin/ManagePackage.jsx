@@ -26,7 +26,7 @@ function ManagePackage() {
     PHBenefit: 0,
     withPH: 0
   });
-  const [activeTab, setActiveTab] = useState('package');
+  const [activeTab, setActiveTab] = useState('packages');
 
   const defaultComponents = [
     {

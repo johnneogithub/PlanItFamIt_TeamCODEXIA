@@ -72,6 +72,7 @@
   padding: 0.5rem;
   border-radius: 4px;
   transition: all 0.2s ease;
+  z-index: 100;
 }
 
 .USR-delete-btn:hover {
@@ -82,8 +83,16 @@
 .USR-delete-btn:active {
   transform: scale(0.95);
 }
-
-/* Responsive design */
+.USR-search{
+  display: flex;
+  justify-content: end;
+  margin-bottom: 2rem;
+}
+.USR-search input {
+  width: 30%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da; 
+}
 @media (max-width: 768px) {
   .USR-container {
     padding: 1rem;

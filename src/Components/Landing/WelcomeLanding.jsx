@@ -1,13 +1,82 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BkgVideo from '../../Components/Assets/Happy_family2.mp4';
 import '../../Components/Landing/WelcomeLandingStyle.css';
 import { FaFacebook } from 'react-icons/fa';
 import Logo from '../../Components/Assets/PlantItFamIt_Logo.png';
 import PageViewsCounter from '../Global/PageViewsCounter';
+import { Link } from 'react-router-dom';
 
 const WelcomeLanding = () => {
+  const [showModal, setShowModal] = useState(false);
+
+  const handleRegisterClick = (e) => {
+    e.preventDefault();
+    setShowModal(true);
+  };
+
   return (
     <>
+      {showModal && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            backgroundColor: 'white',
+            padding: '2rem',
+            borderRadius: '10px',
+            maxWidth: '500px',
+            width: '90%',
+            textAlign: 'center',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ color: '#8e44ad', marginBottom: '1rem' }}>Important Notice</h3>
+            <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
+              This application is exclusively designed for female users. We appreciate your interest, but we want to ensure you're aware of this requirement before proceeding with registration.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+              <button
+                onClick={() => setShowModal(false)}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  borderRadius: '20px',
+                  border: '1px solid #8e44ad',
+                  backgroundColor: 'white',
+                  color: '#8e44ad',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Close
+              </button>
+              <Link
+                to="/Register"
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  borderRadius: '20px',
+                  border: 'none',
+                  backgroundColor: '#8e44ad',
+                  color: 'white',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Continue to Register
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className='nav-container-WL'>
         <div className="Wlogo">
           <img className="WPlanitfamitlogo" src={Logo} alt="PlanItFamIt Logo" />
@@ -15,7 +84,7 @@ const WelcomeLanding = () => {
         </div>
         <div className="nav-items desktop-nav">
           <li className='login-style-css-WL'><a href="/Login">Login</a></li>
-          <li className='register-style-css-WL'><a href="/Register">Register</a></li>
+          <li className='register-style-css-WL'><a href="#" onClick={handleRegisterClick}>Register</a></li>
           <li>
             <a href="https://www.facebook.com/share/RhhfyxArwqdyi5cW/?mibextid=LQQJ4d" target="_blank" rel="noopener noreferrer">
               <FaFacebook size={30} />
@@ -56,7 +125,7 @@ const WelcomeLanding = () => {
         </div>
         <div className="mobile-nav">
           <a href="/Login" className="mobile-nav-button">Login</a>
-          <a href="/Register" className="mobile-nav-button">Register</a>
+          <a href="#" onClick={handleRegisterClick} className="mobile-nav-button">Register</a>
         </div>
       </main>
 

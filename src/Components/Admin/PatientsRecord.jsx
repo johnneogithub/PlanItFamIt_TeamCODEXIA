@@ -1123,7 +1123,7 @@ const Pagination = ({ recordsPerPage, totalRecords, paginate, currentPage }) => 
             className="page-link"
             disabled={currentPage === 1}
           >
-            Previous
+            {'<'}
           </button>
         </li>
         
@@ -1144,7 +1144,7 @@ const Pagination = ({ recordsPerPage, totalRecords, paginate, currentPage }) => 
             className="page-link"
             disabled={currentPage === totalPages}
           >
-            Next
+                     {'>'}
           </button>
         </li>
       </ul>

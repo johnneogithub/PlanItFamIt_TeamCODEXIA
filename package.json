@@ -47,6 +47,7 @@
     "react-calendar": "^4.8.0",
     "react-datepicker": "^6.9.0",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^6.0.0",
     "react-ga": "^3.3.1",
     "react-helmet-async": "^2.0.4",
     "react-horizontal-datepicker": "^2.0.3",

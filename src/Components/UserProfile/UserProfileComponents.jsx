@@ -27,25 +27,36 @@ export const ProfilePicture = ({ src, isLoading, isUploading, onFileChange }) =>
         margin: '0 auto',
         borderRadius: '50%',
         overflow: 'hidden',
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}
     >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="profile-image-wrapper"
-        style={{
-          width: '100%',
-          height: '100%',
-          position: 'relative'
-        }}
-      >
-        {isLoading ? (
-          <div className="jrg-spinner" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        ) : (
+      {isLoading ? (
+        <div 
+          style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid rgb(197, 87, 219)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            position: 'absolute',
+            zIndex: 2
+          }}
+        />
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'relative'
+          }}
+        >
           <img
             src={src}
             alt="Profile"
@@ -61,51 +72,58 @@ export const ProfilePicture = ({ src, isLoading, isUploading, onFileChange }) =>
               e.target.onerror = null;
             }}
           />
-        )}
-        
-        <motion.div 
-          className="jrg-profile-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.2 }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%'
-          }}
-        >
-          <label 
-            htmlFor="profile-upload" 
-            className="jrg-upload-button"
+          
+          <motion.div 
+            className="jrg-profile-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
             style={{
-              cursor: 'pointer',
-              color: 'white',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '8px'
+              justifyContent: 'center',
+              borderRadius: '50%'
             }}
           >
-            {isUploading ? (
-              <div className="jrg-spinner" role="status">
-                <span className="visually-hidden">Uploading...</span>
-              </div>
-            ) : (
-              <>
-                <FaCamera className="camera-icon" style={{ fontSize: '1.5rem' }} />
-                <span style={{ fontSize: '0.9rem' }}>Change Photo</span>
-              </>
-            )}
-          </label>
+            <label 
+              htmlFor="profile-upload" 
+              className="jrg-upload-button"
+              style={{
+                cursor: 'pointer',
+                color: 'white',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              {isUploading ? (
+                <div 
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    border: '3px solid #f3f3f3',
+                    borderTop: '3px solid rgb(197, 87, 219)',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}
+                />
+              ) : (
+                <>
+                  <FaCamera className="camera-icon" style={{ fontSize: '1.5rem' }} />
+                  <span style={{ fontSize: '0.9rem' }}>Change Photo</span>
+                </>
+              )}
+            </label>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
       
       <input
         type="file"

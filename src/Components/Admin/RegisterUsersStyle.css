@@ -1,0 +1,101 @@
+.USR-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.USR-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.USR-header h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.USR-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.USR-table thead {
+  background-color: rgb(197, 87, 219);
+  color: white;
+}
+
+.USR-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+}
+
+.USR-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.USR-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.USR-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  color: #495057;
+}
+
+.USR-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.USR-no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.USR-delete-btn {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.USR-delete-btn:hover {
+  background-color: #fdf2f2;
+  color: #c0392b;
+}
+
+.USR-delete-btn:active {
+  transform: scale(0.95);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .USR-container {
+    padding: 1rem;
+  }
+
+  .USR-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .USR-table th,
+  .USR-table td {
+    padding: 0.75rem;
+  }
+} 

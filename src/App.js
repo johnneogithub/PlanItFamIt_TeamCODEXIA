@@ -32,7 +32,8 @@ import AppointmentHistory from './pages/AppointmentHistory';
 import HistoricalAppointment from './pages/HistoricalAppointment';
 import PregnancyCalculator from './Components/User/PregnancyCalculator.jsx';
 import ImagePreview from './pages/ImagePreview';
-
+import ManagePackage from './Components/Admin/AdminLogin/ManagePackage.jsx';
+import RegisterUsers from './Components/Admin/RegisterUsers.jsx'
 function App() {
   return (
     <AuthProvider>
@@ -77,6 +78,8 @@ function App() {
           <ProtectedRoute path='/PregnancyWheel' component={PregnancyWheel} exact />
           <ProtectedRoute path='/Dashboard' component={Dashboard} exact />
           <ProtectedRoute path='/PatientsRecord' component={PatientsRecord} exact />
+          <ProtectedRoute path='/ManagePackage' component={ManagePackage} exact />
+          <ProtectedRoute path='/RegisterUsers' component={RegisterUsers} exact />
           <Route path='/AdminLogin' component={AdminLogin} exact />
 
           {/* 404 Error Route */}

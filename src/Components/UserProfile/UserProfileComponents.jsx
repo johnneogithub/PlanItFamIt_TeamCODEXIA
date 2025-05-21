@@ -184,7 +184,13 @@ export const PersonalDetails = ({
                 <DetailItem icon={<FaUser />} label="Name" value={personalDetails.name} />
               </div>
               <div className="col-md-6">
-                <DetailItem icon={<FaEnvelope />} label="Email" value={personalDetails.email} />
+                <DetailItem icon={<FaEnvelope />}
+                 label="Email"
+                  value={personalDetails.email.length > 25
+                    ? personalDetails.email.slice(0, 15) + '...'
+                    :personalDetails.email
+                  }
+                   />
               </div>
               <div className="col-md-6">
                 <DetailItem 
@@ -209,7 +215,7 @@ export const PersonalDetails = ({
               <div className="col-md-6">
                 <DetailItem icon={<FaCalendarAlt />} label="Age" value={personalDetails.age} />
               </div>
-              <div className="col-md-6">
+              {/* <div className="col-md-6">
                 <DetailItem 
                   icon={<FaVenusMars />} 
                   label="Gender" 
@@ -218,15 +224,21 @@ export const PersonalDetails = ({
                   value={editedDetails.gender}
                   onChange={handleChange}
                 />
-              </div>
+              </div> */}
             </>
           ) : (
             <>
               <div className="col-md-6">
                 <DetailItem icon={<FaUser />} label="Name" value={personalDetails.name} />
               </div>
-              <div className="col-md-6">
-                <DetailItem icon={<FaEnvelope />} label="Email" value={personalDetails.email} />
+              <div className="col-md-1">
+                <DetailItem 
+                icon={<FaEnvelope />}
+                 label="Email"
+                  value={personalDetails.email.length >25
+                    ? personalDetails.email.slice(0, 17) + '..'
+                    : personalDetails.email
+                  } />
               </div>
               <div className="col-md-6">
                 <DetailItem icon={<FaMapMarkerAlt />} label="Location" value={personalDetails.location} />
@@ -237,11 +249,14 @@ export const PersonalDetails = ({
               <div className="col-md-6">
                 <DetailItem icon={<FaCalendarAlt />} label="Age" value={personalDetails.age} />
               </div>
-              <div className="col-md-6">
+              {/* <div className="col-md-6">
                 <DetailItem icon={<FaVenusMars />} label="Gender" value={personalDetails.gender || 'Not provided'} />
-              </div>
+              </div> */}
             </>
           )}
+          <div className="col-md-6">
+                          <DetailItem icon={<FaVenusMars />} label="Gender" value="Female" />
+                        </div>
         </div>
         {isEditing && (
           <div className="mt-4 d-flex gap-2">

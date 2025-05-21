@@ -27,7 +27,7 @@ const PersonalDetails = ({
             )}
           </div>
         </div>
-        <div className="row g-3">
+        <div className="row">
           {isEditing ? (
             <>
               <div className="col-md-6">
@@ -59,9 +59,9 @@ const PersonalDetails = ({
               <div className="col-md-6">
                 <DetailItem icon={<FaCalendarAlt />} label="Age" value={personalDetails.age} />
               </div>
-              <div className="col-md-6">
+              {/* <div className="col-md-6">
                 <DetailItem icon={<FaVenusMars />} label="Gender" value="Female" />
-              </div>
+              </div> */}
             </>
           ) : (
             <>
@@ -80,11 +80,14 @@ const PersonalDetails = ({
               <div className="col-md-6">
                 <DetailItem icon={<FaCalendarAlt />} label="Age" value={personalDetails.age} />
               </div>
-              <div className="col-md-6">
+              {/* <div className="col-md-6">
                 <DetailItem icon={<FaVenusMars />} label="Gender" value="Female" />
-              </div>
+              </div> */}
             </>
           )}
+          {/* <div className="col-md-6">
+                <DetailItem icon={<FaVenusMars />} label="Gender" value="Female" />
+              </div> */}
         </div>
         {isEditing && (
           <div className="mt-4 d-flex gap-2">

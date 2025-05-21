@@ -68,6 +68,31 @@ function ManagePackage() {
     fetchServices();
   }, []);
 
+  useEffect(() => {
+  if (newService.isPackage && newService.components.length > 0) {
+    const totalWithoutPH = newService.components.reduce((sum, comp) => sum + Number(comp.withoutPH), 0);
+    const totalPHBenefit = newService.components.reduce((sum, comp) => sum + Number(comp.PHBenefit), 0);
+    const totalWithPH = newService.components.reduce((sum, comp) => sum + Number(comp.withPH), 0);
+
+    setNewService(prev => ({
+      ...prev,
+      withoutPH: totalWithoutPH,
+      PHBenefit: totalPHBenefit,
+      withPH: totalWithPH
+    }));
+  } else if (newService.isPackage) {
+    // If no components, reset to zero
+    setNewService(prev => ({
+      ...prev,
+      withoutPH: 0,
+      PHBenefit: 0,
+      withPH: 0
+    }));
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [newService.components]);
+
+
   const fetchServices = async () => {
     try {
       const servicesRef = collection(firestore, 'services');
@@ -289,12 +314,13 @@ const filteredServices = services.filter(service => {
                 <div className="add-form-group">
                   <label>Without PhilHealth Price</label>
                   <input
-                    type="number"
-                    className="add-form-control"
-                    value={newService.withoutPH}
-                    onChange={(e) => setNewService({ ...newService, withoutPH: Number(e.target.value) })}
-                    required
-                  />
+  type="number"
+  className="add-form-control"
+  value={newService.withoutPH}
+  disabled
+  required
+/>
+
                 </div>
 
                 <div className="add-form-group">
@@ -303,8 +329,8 @@ const filteredServices = services.filter(service => {
                     type="number"
                     className="add-form-control"
                     value={newService.PHBenefit}
-                    onChange={(e) => setNewService({ ...newService, PHBenefit: Number(e.target.value) })}
-                    required
+                     disabled
+  required
                   />
                 </div>
 
@@ -314,7 +340,7 @@ const filteredServices = services.filter(service => {
                     type="number"
                     className="add-form-control"
                     value={newService.withPH}
-                    onChange={(e) => setNewService({ ...newService, withPH: Number(e.target.value) })}
+                    disabled
                     required
                   />
                 </div>

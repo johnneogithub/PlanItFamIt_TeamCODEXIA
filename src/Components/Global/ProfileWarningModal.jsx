@@ -35,7 +35,7 @@ const ProfileWarningModal = ({ show, onClose }) => {
               data.lastName?.trim() &&
               data.phone?.trim() && 
               data.age && 
-              data.gender?.trim() && 
+              // data.gender?.trim() && 
               data.location?.trim()
             );
 
